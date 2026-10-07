@@ -4,13 +4,222 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CHTLManager.WPF.Views"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Quản Lý Cửa Hàng" Height="450" Width="800">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="49*"/>
-            <ColumnDefinition Width="351*"/>
-        </Grid.ColumnDefinitions>
+        Title="CHTL Manager - Quản lý cửa hàng tiện lợi"
+        Width="1080"
+        Height="720"
+        MinWidth="840"
+        MinHeight="540"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource AppBackgroundBrush}"
+        FontFamily="Segoe UI"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+    <Window.Resources>
+        <Style x:Key="MainTabItemStyle" TargetType="TabItem">
+            <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource AppTextSecondaryBrush}" />
+            <Setter Property="Padding" Value="22,12" />
+            <Setter Property="MinHeight" Value="48" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="TabHeaderBorder"
+                                Padding="{TemplateBinding Padding}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="Transparent"
+                                BorderThickness="0,0,0,3">
+                            <ContentPresenter ContentSource="Header"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabHeaderBorder"
+                                        Property="Background"
+                                        Value="{StaticResource AppPrimaryLightBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource AppPrimaryBrush}" />
+                                <Setter TargetName="TabHeaderBorder"
+                                        Property="BorderBrush"
+                                        Value="{StaticResource AppPrimaryBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
 
+    <Grid Background="{StaticResource AppBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Padding="{StaticResource AppSpacingLarge}"
+                Background="{StaticResource AppSurfaceBrush}"
+                BorderBrush="{StaticResource AppBorderBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="48"
+                            Height="48"
+                            Background="{StaticResource AppPrimaryBrush}"
+                            CornerRadius="{StaticResource AppControlCornerRadius}">
+                        <materialDesign:PackIcon Width="28"
+                                                 Height="28"
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center"
+                                                 Foreground="{StaticResource AppWhiteBrush}"
+                                                 Kind="Store" />
+                    </Border>
+
+                    <StackPanel Margin="{StaticResource AppSpacingMedium}"
+                                VerticalAlignment="Center">
+                        <TextBlock Margin="0"
+                                   FontSize="22"
+                                   Style="{StaticResource PageTitleStyle}"
+                                   Text="CHTL MANAGER" />
+                        <TextBlock Foreground="{StaticResource AppTextSecondaryBrush}"
+                                   FontSize="12"
+                                   Text="Quản lý cửa hàng tiện lợi" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <materialDesign:PackIcon Width="32"
+                                             Height="32"
+                                             Margin="0,0,12,0"
+                                             VerticalAlignment="Center"
+                                             Foreground="{StaticResource AppTextSecondaryBrush}"
+                                             Kind="AccountCircleOutline" />
+
+                    <StackPanel Margin="0,0,20,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="CurrentUserTextBlock"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource AppTextPrimaryBrush}"
+                                   Text="Tên người dùng" />
+                        <TextBlock x:Name="CurrentRoleTextBlock"
+                                   Foreground="{StaticResource AppTextSecondaryBrush}"
+                                   FontSize="12"
+                                   Text="Vai trò" />
+                    </StackPanel>
+
+                    <Button x:Name="LogoutButton"
+                            VerticalAlignment="Center"
+                            Content="Đăng xuất"
+                            Style="{StaticResource SecondaryButtonStyle}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <TabControl x:Name="MainTabControl"
+                    Grid.Row="1"
+                    Margin="{StaticResource AppSpacingLarge}"
+                    Background="{StaticResource AppBackgroundBrush}"
+                    BorderThickness="0">
+            <TabItem x:Name="PosTabItem" Style="{StaticResource MainTabItemStyle}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Width="20"
+                                                 Height="20"
+                                                 Margin="0,0,8,0"
+                                                 Kind="CartOutline" />
+                        <TextBlock FontSize="15"
+                                   FontWeight="SemiBold"
+                                   Text="Bán hàng" />
+                    </StackPanel>
+                </TabItem.Header>
+                <Grid Background="{StaticResource AppBackgroundBrush}">
+                    <Border Width="560"
+                            Padding="32"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource AppCardStyle}">
+                        <StackPanel HorizontalAlignment="Center">
+                            <Border Width="72"
+                                    Height="72"
+                                    HorizontalAlignment="Center"
+                                    Background="{StaticResource AppPrimaryLightBrush}"
+                                    CornerRadius="36">
+                                <materialDesign:PackIcon Width="38"
+                                                         Height="38"
+                                                         HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center"
+                                                         Foreground="{StaticResource AppPrimaryBrush}"
+                                                         Kind="CartOutline" />
+                            </Border>
+                            <TextBlock Margin="0,20,0,8"
+                                       HorizontalAlignment="Center"
+                                       Style="{StaticResource SectionTitleStyle}"
+                                       Text="Bán hàng" />
+                            <TextBlock Foreground="{StaticResource AppTextSecondaryBrush}"
+                                       FontSize="14"
+                                       Text="Giao diện bán hàng sẽ được triển khai ở bước tiếp theo."
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="ProductTabItem" Style="{StaticResource MainTabItemStyle}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Width="20"
+                                                 Height="20"
+                                                 Margin="0,0,8,0"
+                                                 Kind="PackageVariantClosed" />
+                        <TextBlock FontSize="15"
+                                   FontWeight="SemiBold"
+                                   Text="Quản lý Kho" />
+                    </StackPanel>
+                </TabItem.Header>
+                <Grid Background="{StaticResource AppBackgroundBrush}">
+                    <Border Width="560"
+                            Padding="32"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource AppCardStyle}">
+                        <StackPanel HorizontalAlignment="Center">
+                            <Border Width="72"
+                                    Height="72"
+                                    HorizontalAlignment="Center"
+                                    Background="{StaticResource AppPrimaryLightBrush}"
+                                    CornerRadius="36">
+                                <materialDesign:PackIcon Width="38"
+                                                         Height="38"
+                                                         HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center"
+                                                         Foreground="{StaticResource AppPrimaryBrush}"
+                                                         Kind="PackageVariantClosed" />
+                            </Border>
+                            <TextBlock Margin="0,20,0,8"
+                                       HorizontalAlignment="Center"
+                                       Style="{StaticResource SectionTitleStyle}"
+                                       Text="Quản lý Kho" />
+                            <TextBlock Foreground="{StaticResource AppTextSecondaryBrush}"
+                                       FontSize="14"
+                                       Text="Giao diện quản lý sản phẩm sẽ được triển khai ở bước tiếp theo."
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

@@ -4,9 +4,97 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CHTLManager.WPF.Views"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="LoginWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="Đăng nhập - CHTL Manager"
+        Width="760"
+        Height="620"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="{StaticResource AppBackgroundBrush}"
+        FontFamily="Segoe UI"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+    <Grid Background="{StaticResource AppBackgroundBrush}">
+        <Border Width="430"
+                Padding="36"
+                Margin="{StaticResource AppSpacingLarge}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Style="{StaticResource AppCardStyle}">
+            <StackPanel>
+                <Border Width="68"
+                        Height="68"
+                        HorizontalAlignment="Center"
+                        Background="{StaticResource AppPrimaryBrush}"
+                        CornerRadius="34">
+                    <materialDesign:PackIcon Width="34"
+                                             Height="34"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"
+                                             Foreground="{StaticResource AppWhiteBrush}"
+                                             Kind="Store" />
+                </Border>
+
+                <TextBlock Margin="0,20,0,4"
+                           HorizontalAlignment="Center"
+                           Style="{StaticResource PageTitleStyle}"
+                           Text="CHTL MANAGER" />
+
+                <TextBlock Margin="0,0,0,28"
+                           HorizontalAlignment="Center"
+                           Foreground="{StaticResource AppTextSecondaryBrush}"
+                           FontSize="14"
+                           Text="Quản lý cửa hàng tiện lợi" />
+
+                <TextBlock FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource AppTextPrimaryBrush}"
+                           Text="Tên đăng nhập" />
+
+                <TextBox x:Name="UsernameTextBox"
+                         Margin="0,7,0,18"
+                         Style="{StaticResource AppTextBoxStyle}"
+                         ToolTip="Nhập tên đăng nhập" />
+
+                <TextBlock FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource AppTextPrimaryBrush}"
+                           Text="Mật khẩu" />
+
+                <Border MinHeight="40"
+                        Margin="0,7,0,0"
+                        Background="{StaticResource AppSurfaceBrush}"
+                        BorderBrush="{StaticResource AppBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{StaticResource AppControlCornerRadius}">
+                    <PasswordBox x:Name="PasswordBox"
+                                 Padding="12,8"
+                                 VerticalContentAlignment="Center"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 FontFamily="Segoe UI"
+                                 FontSize="14"
+                                 Foreground="{StaticResource AppTextPrimaryBrush}"
+                                 ToolTip="Nhập mật khẩu" />
+                </Border>
+
+                <TextBlock x:Name="ErrorTextBlock"
+                           MinHeight="20"
+                           Margin="0,10,0,0"
+                           Foreground="{StaticResource AppDangerBrush}"
+                           FontSize="13"
+                           Text=""
+                           TextAlignment="Center"
+                           TextWrapping="Wrap" />
+
+                <Button x:Name="LoginButton"
+                        MinHeight="44"
+                        Margin="0,10,0,0"
+                        HorizontalAlignment="Stretch"
+                        Content="ĐĂNG NHẬP"
+                        Style="{StaticResource PrimaryButtonStyle}" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

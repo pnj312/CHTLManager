@@ -6,7 +6,7 @@ namespace CHTLManager.DAL
     public class AppDbContext : DbContext
     {
         // Khai báo kết nối CSDL (Sửa Server Name tương ứng trên máy em)
-        protected override OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
