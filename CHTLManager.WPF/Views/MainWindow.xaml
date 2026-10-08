@@ -143,37 +143,7 @@
                                    Text="Bán hàng" />
                     </StackPanel>
                 </TabItem.Header>
-                <Grid Background="{StaticResource AppBackgroundBrush}">
-                    <Border Width="560"
-                            Padding="32"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Style="{StaticResource AppCardStyle}">
-                        <StackPanel HorizontalAlignment="Center">
-                            <Border Width="72"
-                                    Height="72"
-                                    HorizontalAlignment="Center"
-                                    Background="{StaticResource AppPrimaryLightBrush}"
-                                    CornerRadius="36">
-                                <materialDesign:PackIcon Width="38"
-                                                         Height="38"
-                                                         HorizontalAlignment="Center"
-                                                         VerticalAlignment="Center"
-                                                         Foreground="{StaticResource AppPrimaryBrush}"
-                                                         Kind="CartOutline" />
-                            </Border>
-                            <TextBlock Margin="0,20,0,8"
-                                       HorizontalAlignment="Center"
-                                       Style="{StaticResource SectionTitleStyle}"
-                                       Text="Bán hàng" />
-                            <TextBlock Foreground="{StaticResource AppTextSecondaryBrush}"
-                                       FontSize="14"
-                                       Text="Giao diện bán hàng sẽ được triển khai ở bước tiếp theo."
-                                       TextAlignment="Center"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                    </Border>
-                </Grid>
+                <local:POSUserControl />
             </TabItem>
 
             <TabItem x:Name="ProductTabItem" Style="{StaticResource MainTabItemStyle}">
@@ -188,37 +158,7 @@
                                    Text="Quản lý Kho" />
                     </StackPanel>
                 </TabItem.Header>
-                <Grid Background="{StaticResource AppBackgroundBrush}">
-                    <Border Width="560"
-                            Padding="32"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Style="{StaticResource AppCardStyle}">
-                        <StackPanel HorizontalAlignment="Center">
-                            <Border Width="72"
-                                    Height="72"
-                                    HorizontalAlignment="Center"
-                                    Background="{StaticResource AppPrimaryLightBrush}"
-                                    CornerRadius="36">
-                                <materialDesign:PackIcon Width="38"
-                                                         Height="38"
-                                                         HorizontalAlignment="Center"
-                                                         VerticalAlignment="Center"
-                                                         Foreground="{StaticResource AppPrimaryBrush}"
-                                                         Kind="PackageVariantClosed" />
-                            </Border>
-                            <TextBlock Margin="0,20,0,8"
-                                       HorizontalAlignment="Center"
-                                       Style="{StaticResource SectionTitleStyle}"
-                                       Text="Quản lý Kho" />
-                            <TextBlock Foreground="{StaticResource AppTextSecondaryBrush}"
-                                       FontSize="14"
-                                       Text="Giao diện quản lý sản phẩm sẽ được triển khai ở bước tiếp theo."
-                                       TextAlignment="Center"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                    </Border>
-                </Grid>
+                <local:ProductUserControl />
             </TabItem>
         </TabControl>
     </Grid>

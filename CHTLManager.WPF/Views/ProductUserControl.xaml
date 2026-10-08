@@ -1,0 +1,200 @@
+<UserControl x:Class="CHTLManager.WPF.Views.ProductUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="560"
+             d:DesignWidth="980"
+             Background="{StaticResource AppBackgroundBrush}"
+             FontFamily="Segoe UI">
+    <Grid Background="{StaticResource AppBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Margin="0,16,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Margin="0,0,0,4"
+                           FontSize="24"
+                           Style="{StaticResource PageTitleStyle}"
+                           Text="QUẢN LÝ SẢN PHẨM" />
+                <TextBlock Foreground="{StaticResource AppTextSecondaryBrush}"
+                           FontSize="13"
+                           Text="Theo dõi danh sách và thông tin sản phẩm" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Width="280" VerticalAlignment="Center">
+                <TextBlock Margin="0,0,0,6"
+                           Foreground="{StaticResource AppTextPrimaryBrush}"
+                           FontWeight="SemiBold"
+                           Text="Tìm kiếm sản phẩm" />
+                <TextBox x:Name="ProductSearchTextBox"
+                         Style="{StaticResource AppTextBoxStyle}"
+                         ToolTip="Tìm theo mã vạch hoặc tên sản phẩm" />
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="370" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource AppCardStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Style="{StaticResource SectionTitleStyle}"
+                               Text="Danh sách sản phẩm" />
+
+                    <DataGrid x:Name="ProductDataGrid"
+                              Grid.Row="1"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              IsReadOnly="True"
+                              SelectionMode="Single"
+                              Style="{StaticResource AppDataGridStyle}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Mã" Binding="{Binding Id}" Width="60" />
+                            <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" Width="130" />
+                            <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="180" />
+                            <DataGridTextColumn Header="Giá nhập" Binding="{Binding ImportPrice}" Width="110" />
+                            <DataGridTextColumn Header="Giá bán" Binding="{Binding SellingPrice}" Width="110" />
+                            <DataGridTextColumn Header="Số lượng tồn" Binding="{Binding StockQuantity}" Width="105" />
+                            <DataGridTextColumn Header="Đơn vị tính" Binding="{Binding Unit}" Width="100" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource AppCardStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Style="{StaticResource SectionTitleStyle}"
+                               Text="Thông tin sản phẩm" />
+
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,6"
+                                       Foreground="{StaticResource AppTextPrimaryBrush}"
+                                       FontWeight="SemiBold"
+                                       Text="Mã vạch / Barcode" />
+                            <TextBox x:Name="BarcodeTextBox"
+                                     Margin="0,0,0,14"
+                                     Style="{StaticResource AppTextBoxStyle}" />
+
+                            <TextBlock Margin="0,0,0,6"
+                                       Foreground="{StaticResource AppTextPrimaryBrush}"
+                                       FontWeight="SemiBold"
+                                       Text="Tên sản phẩm" />
+                            <TextBox x:Name="ProductNameTextBox"
+                                     Margin="0,0,0,14"
+                                     Style="{StaticResource AppTextBoxStyle}" />
+
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Margin="0,0,0,6"
+                                               Foreground="{StaticResource AppTextPrimaryBrush}"
+                                               FontWeight="SemiBold"
+                                               Text="Giá nhập" />
+                                    <TextBox x:Name="ImportPriceTextBox"
+                                             Style="{StaticResource AppTextBoxStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Margin="0,0,0,6"
+                                               Foreground="{StaticResource AppTextPrimaryBrush}"
+                                               FontWeight="SemiBold"
+                                               Text="Giá bán" />
+                                    <TextBox x:Name="SellingPriceTextBox"
+                                             Style="{StaticResource AppTextBoxStyle}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Margin="0,0,0,6"
+                                               Foreground="{StaticResource AppTextPrimaryBrush}"
+                                               FontWeight="SemiBold"
+                                               Text="Số lượng tồn" />
+                                    <TextBox x:Name="StockTextBox"
+                                             Style="{StaticResource AppTextBoxStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Margin="0,0,0,6"
+                                               Foreground="{StaticResource AppTextPrimaryBrush}"
+                                               FontWeight="SemiBold"
+                                               Text="Đơn vị tính" />
+                                    <TextBox x:Name="UnitTextBox"
+                                             Style="{StaticResource AppTextBoxStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <StackPanel Grid.Row="2" Margin="0,14,0,0">
+                        <TextBlock x:Name="ProductMessageTextBlock"
+                                   MinHeight="18"
+                                   Foreground="{StaticResource AppDangerBrush}"
+                                   FontSize="12"
+                                   Text=""
+                                   TextWrapping="Wrap" />
+
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="AddProductButton"
+                                    Grid.Column="0"
+                                    MinWidth="0"
+                                    Content="Thêm"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                            <Button x:Name="UpdateProductButton"
+                                    Grid.Column="2"
+                                    MinWidth="0"
+                                    Content="Sửa"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                            <Button x:Name="DeleteProductButton"
+                                    Grid.Column="4"
+                                    MinWidth="0"
+                                    Content="Xóa"
+                                    Style="{StaticResource DangerButtonStyle}" />
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
