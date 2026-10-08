@@ -121,6 +121,7 @@
                     <Button x:Name="LogoutButton"
                             VerticalAlignment="Center"
                             Content="Đăng xuất"
+                            Click="LogoutButton_Click"
                             Style="{StaticResource SecondaryButtonStyle}" />
                 </StackPanel>
             </Grid>
@@ -143,7 +144,7 @@
                                    Text="Bán hàng" />
                     </StackPanel>
                 </TabItem.Header>
-                <local:POSUserControl />
+                <local:POSUserControl x:Name="PosUserControl" />
             </TabItem>
 
             <TabItem x:Name="ProductTabItem" Style="{StaticResource MainTabItemStyle}">

@@ -6,6 +6,8 @@
              mc:Ignorable="d"
              d:DesignHeight="560"
              d:DesignWidth="980"
+             Loaded="POSUserControl_Loaded"
+             Language="vi-VN"
              Background="{StaticResource AppBackgroundBrush}"
              FontFamily="Segoe UI">
     <Grid Background="{StaticResource AppBackgroundBrush}">
@@ -39,11 +41,14 @@
                     <TextBox x:Name="ProductLookupTextBox"
                              Width="300"
                              Style="{StaticResource AppTextBoxStyle}"
+                             KeyDown="ProductLookupTextBox_KeyDown"
+                             TextChanged="ProductLookupTextBox_TextChanged"
                              ToolTip="Nhập mã vạch hoặc tên sản phẩm" />
                     <Button x:Name="SearchProductButton"
                             MinWidth="80"
                             Margin="8,0,0,0"
                             Content="Tìm"
+                            Click="SearchProductButton_Click"
                             Style="{StaticResource SecondaryButtonStyle}" />
                 </StackPanel>
             </StackPanel>
@@ -73,11 +78,12 @@
                               CanUserDeleteRows="False"
                               IsReadOnly="True"
                               SelectionMode="Single"
+                              MouseDoubleClick="AvailableProductsDataGrid_MouseDoubleClick"
                               Style="{StaticResource AppDataGridStyle}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" Width="130" />
                             <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="180" />
-                            <DataGridTextColumn Header="Giá bán" Binding="{Binding SellingPrice}" Width="110" />
+                            <DataGridTextColumn Header="Giá bán" Binding="{Binding SellingPrice, StringFormat={}{0:N0} ₫}" Width="110" />
                             <DataGridTextColumn Header="Tồn kho" Binding="{Binding StockQuantity}" Width="90" />
                             <DataGridTextColumn Header="Đơn vị" Binding="{Binding Unit}" Width="80" />
                         </DataGrid.Columns>
@@ -97,6 +103,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <TextBlock Style="{StaticResource SectionTitleStyle}"
@@ -111,12 +118,40 @@
                                   SelectionMode="Single"
                                   Style="{StaticResource AppDataGridStyle}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Sản phẩm" Width="180" />
-                                <DataGridTextColumn Header="Đơn giá" Width="100" />
-                                <DataGridTextColumn Header="Số lượng" Width="90" />
-                                <DataGridTextColumn Header="Thành tiền" Width="110" />
+                                <DataGridTextColumn Header="Sản phẩm" Binding="{Binding Name}" Width="180" />
+                                <DataGridTextColumn Header="Đơn giá" Binding="{Binding UnitPrice, StringFormat={}{0:N0} ₫}" Width="100" />
+                                <DataGridTextColumn Header="Số lượng" Binding="{Binding Quantity}" Width="90" />
+                                <DataGridTextColumn Header="Thành tiền" Binding="{Binding LineTotal, StringFormat={}{0:N0} ₫}" Width="110" />
                             </DataGrid.Columns>
                         </DataGrid>
+
+                        <Grid Grid.Row="2" Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="8" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="IncreaseQuantityButton"
+                                    Grid.Column="0"
+                                    MinWidth="0"
+                                    Content="+1"
+                                    Click="IncreaseQuantityButton_Click"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                            <Button x:Name="DecreaseQuantityButton"
+                                    Grid.Column="2"
+                                    MinWidth="0"
+                                    Content="-1"
+                                    Click="DecreaseQuantityButton_Click"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                            <Button x:Name="RemoveCartItemButton"
+                                    Grid.Column="4"
+                                    MinWidth="0"
+                                    Content="Bỏ sản phẩm"
+                                    Click="RemoveCartItemButton_Click"
+                                    Style="{StaticResource DangerButtonStyle}" />
+                        </Grid>
                     </Grid>
                 </Border>
 
@@ -186,10 +221,12 @@
                             <Button x:Name="ClearCartButton"
                                     Grid.Column="0"
                                     Content="Hủy giỏ"
+                                    Click="ClearCartButton_Click"
                                     Style="{StaticResource SecondaryButtonStyle}" />
                             <Button x:Name="CheckoutButton"
                                     Grid.Column="2"
                                     Content="Thanh toán"
+                                    Click="CheckoutButton_Click"
                                     Style="{StaticResource PrimaryButtonStyle}" />
                         </Grid>
                     </StackPanel>

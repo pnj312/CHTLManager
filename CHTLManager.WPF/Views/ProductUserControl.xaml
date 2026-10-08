@@ -6,6 +6,7 @@
              mc:Ignorable="d"
              d:DesignHeight="560"
              d:DesignWidth="980"
+             Loaded="ProductUserControl_Loaded"
              Background="{StaticResource AppBackgroundBrush}"
              FontFamily="Segoe UI">
     <Grid Background="{StaticResource AppBackgroundBrush}">
@@ -37,6 +38,7 @@
                            Text="Tìm kiếm sản phẩm" />
                 <TextBox x:Name="ProductSearchTextBox"
                          Style="{StaticResource AppTextBoxStyle}"
+                         TextChanged="ProductSearchTextBox_TextChanged"
                          ToolTip="Tìm theo mã vạch hoặc tên sản phẩm" />
             </StackPanel>
         </Grid>
@@ -65,6 +67,7 @@
                               CanUserDeleteRows="False"
                               IsReadOnly="True"
                               SelectionMode="Single"
+                              SelectionChanged="ProductDataGrid_SelectionChanged"
                               Style="{StaticResource AppDataGridStyle}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Mã" Binding="{Binding Id}" Width="60" />
@@ -180,16 +183,19 @@
                                     Grid.Column="0"
                                     MinWidth="0"
                                     Content="Thêm"
+                                    Click="AddProductButton_Click"
                                     Style="{StaticResource PrimaryButtonStyle}" />
                             <Button x:Name="UpdateProductButton"
                                     Grid.Column="2"
                                     MinWidth="0"
                                     Content="Sửa"
+                                    Click="UpdateProductButton_Click"
                                     Style="{StaticResource SecondaryButtonStyle}" />
                             <Button x:Name="DeleteProductButton"
                                     Grid.Column="4"
                                     MinWidth="0"
                                     Content="Xóa"
+                                    Click="DeleteProductButton_Click"
                                     Style="{StaticResource DangerButtonStyle}" />
                         </Grid>
                     </StackPanel>
