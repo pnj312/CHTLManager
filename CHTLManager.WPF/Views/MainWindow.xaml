@@ -61,7 +61,7 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Padding="{StaticResource AppSpacingLarge}"
+                Padding="{StaticResource AppSpacingMedium}"
                 Background="{StaticResource AppSurfaceBrush}"
                 BorderBrush="{StaticResource AppBorderBrush}"
                 BorderThickness="0,0,0,1">
@@ -129,7 +129,7 @@
 
         <TabControl x:Name="MainTabControl"
                     Grid.Row="1"
-                    Margin="{StaticResource AppSpacingLarge}"
+                    Margin="{StaticResource AppSpacingMedium}"
                     Background="{StaticResource AppBackgroundBrush}"
                     BorderThickness="0">
             <TabItem x:Name="PosTabItem" Style="{StaticResource MainTabItemStyle}">

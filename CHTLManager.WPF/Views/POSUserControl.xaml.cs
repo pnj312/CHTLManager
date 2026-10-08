@@ -56,6 +56,14 @@ namespace CHTLManager.WPF.Views
                     }
 
                     item.AvailableStock = currentProduct.StockQuantity;
+                    if (item.Name != currentProduct.Name || item.Barcode != currentProduct.Barcode ||
+                        item.UnitPrice != currentProduct.SellingPrice)
+                    {
+                        item.Name = currentProduct.Name;
+                        item.Barcode = currentProduct.Barcode;
+                        item.UnitPrice = currentProduct.SellingPrice;
+                        cartAdjusted = true;
+                    }
                     if (item.Quantity > item.AvailableStock)
                     {
                         item.Quantity = item.AvailableStock;
@@ -66,7 +74,7 @@ namespace CHTLManager.WPF.Views
                 if (cartAdjusted)
                 {
                     RefreshCart();
-                    ShowMessage("Giỏ hàng đã được điều chỉnh theo tồn kho hiện tại.", true);
+                    ShowMessage("Giỏ hàng đã được cập nhật theo thông tin sản phẩm hiện tại.", false);
                 }
             }
             catch (Exception)
@@ -356,7 +364,7 @@ namespace CHTLManager.WPF.Views
 
         private static string FormatMoney(decimal amount)
         {
-            return $"{amount.ToString("N0", VietnameseCulture)} ₫";
+            return $"{amount.ToString("#,##0.##", VietnameseCulture)} ₫";
         }
 
         private void ShowMessage(string message, bool isError)

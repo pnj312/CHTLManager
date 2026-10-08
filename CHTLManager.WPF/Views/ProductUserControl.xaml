@@ -7,6 +7,7 @@
              d:DesignHeight="560"
              d:DesignWidth="980"
              Loaded="ProductUserControl_Loaded"
+             Language="vi-VN"
              Background="{StaticResource AppBackgroundBrush}"
              FontFamily="Segoe UI">
     <Grid Background="{StaticResource AppBackgroundBrush}">
@@ -47,7 +48,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="370" />
+                <ColumnDefinition Width="330" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Style="{StaticResource AppCardStyle}">
@@ -70,13 +71,13 @@
                               SelectionChanged="ProductDataGrid_SelectionChanged"
                               Style="{StaticResource AppDataGridStyle}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Mã" Binding="{Binding Id}" Width="60" />
-                            <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" Width="130" />
-                            <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="180" />
-                            <DataGridTextColumn Header="Giá nhập" Binding="{Binding ImportPrice}" Width="110" />
-                            <DataGridTextColumn Header="Giá bán" Binding="{Binding SellingPrice}" Width="110" />
-                            <DataGridTextColumn Header="Số lượng tồn" Binding="{Binding StockQuantity}" Width="105" />
-                            <DataGridTextColumn Header="Đơn vị tính" Binding="{Binding Unit}" Width="100" />
+                            <DataGridTextColumn Header="Mã" Binding="{Binding Id}" Width="45" />
+                            <DataGridTextColumn Header="Barcode" Binding="{Binding Barcode}" Width="120" />
+                            <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="125" />
+                            <DataGridTextColumn Header="Giá nhập" Binding="{Binding ImportPrice, StringFormat='{}{0:#,##0.##} ₫'}" Width="90" />
+                            <DataGridTextColumn Header="Giá bán" Binding="{Binding SellingPrice, StringFormat='{}{0:#,##0.##} ₫'}" Width="90" />
+                            <DataGridTextColumn Header="Tồn kho" Binding="{Binding StockQuantity}" Width="90" />
+                            <DataGridTextColumn Header="Đơn vị" Binding="{Binding Unit}" Width="70" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using CHTLManager.BLL.Services;
@@ -9,6 +10,7 @@ namespace CHTLManager.WPF.Views
     public partial class ProductUserControl : UserControl
     {
         private readonly ProductService _productService = new ProductService();
+        private static readonly CultureInfo VietnameseCulture = CultureInfo.GetCultureInfo("vi-VN");
         private Product? _selectedProduct;
 
         public ProductUserControl()
@@ -59,8 +61,8 @@ namespace CHTLManager.WPF.Views
             _selectedProduct = product;
             BarcodeTextBox.Text = product.Barcode;
             ProductNameTextBox.Text = product.Name;
-            ImportPriceTextBox.Text = product.ImportPrice.ToString();
-            SellingPriceTextBox.Text = product.SellingPrice.ToString();
+            ImportPriceTextBox.Text = product.ImportPrice.ToString("0.##", VietnameseCulture);
+            SellingPriceTextBox.Text = product.SellingPrice.ToString("0.##", VietnameseCulture);
             StockTextBox.Text = product.StockQuantity.ToString();
             UnitTextBox.Text = product.Unit;
             ProductMessageTextBlock.Text = string.Empty;
@@ -190,13 +192,13 @@ namespace CHTLManager.WPF.Views
                 return false;
             }
 
-            if (!decimal.TryParse(ImportPriceTextBox.Text.Trim(), out decimal importPrice) || importPrice < 0)
+            if (!decimal.TryParse(ImportPriceTextBox.Text.Trim(), NumberStyles.Number, VietnameseCulture, out decimal importPrice) || importPrice < 0)
             {
                 ShowMessage("Giá nhập phải là số không âm hợp lệ.", true);
                 return false;
             }
 
-            if (!decimal.TryParse(SellingPriceTextBox.Text.Trim(), out decimal sellingPrice) || sellingPrice < 0)
+            if (!decimal.TryParse(SellingPriceTextBox.Text.Trim(), NumberStyles.Number, VietnameseCulture, out decimal sellingPrice) || sellingPrice < 0)
             {
                 ShowMessage("Giá bán phải là số không âm hợp lệ.", true);
                 return false;
