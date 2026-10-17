@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>CHTLManager.WPF</RootNamespace>
+    <!-- Cho phép chạy trên runtime .NET mới hơn nếu máy chưa cài .NET 8 -->
+    <RollForward>LatestMajor</RollForward>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CHTLManager.BLL\CHTLManager.BLL.csproj" />
+  </ItemGroup>
+
+</Project>
