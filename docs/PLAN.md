@@ -114,15 +114,17 @@ Lý do: thực tế cửa hàng tiện lợi, số tồn trên phần mềm thư
 
 - Publish một file `.exe` self-contained:
   ```bash
-  dotnet publish CHTLManager.WPF -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+  dotnet publish CHTLManager.WPF -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=none -o publish
   ```
-  Cờ `IncludeNativeLibrariesForSelfExtract` cần cho SQLite native.
+  Cờ `IncludeNativeLibrariesForSelfExtract` cần cho SQLite native; nén giảm file từ 169 MB xuống 71 MB.
 - Chạy thử file `.exe` vừa tạo.
 - Thêm `publish/` vào `.gitignore`.
 
 **Checklist Phần 4**
-- [ ] File `.exe` tự chạy, tự tạo database, đăng nhập được
-- [ ] Ghi kích thước file và cách copy sang máy demo vào README
+- [x] File `.exe` tự chạy từ thư mục riêng (chỉ 1 file), tự tạo database, đăng nhập, bán hàng, xem doanh thu được. Mở lần đầu 6,7 giây, lần sau 3,1 giây
+- [x] Ghi kích thước file và cách copy sang máy demo vào README
+- [ ] Chưa thử trên máy khác thật (chỉ thử trên máy này, file self-contained nên không phụ thuộc .NET đã cài)
+- [x] Bạn duyệt → commit (`.gitignore`, README, PLAN; không commit file build)
 
 ---
 

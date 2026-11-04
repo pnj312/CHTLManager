@@ -31,7 +31,7 @@ CHTLManager.DAL  (EF Core 8 + SQLite)
 ## Yêu cầu hệ thống
 
 - Windows 10/11 64-bit.
-- Để chạy: .NET 8 Desktop Runtime (hoặc mới hơn).
+- Để chạy bản đóng gói (`.exe`): không cần cài gì thêm. Để chạy từ mã nguồn: .NET 8 Desktop Runtime (hoặc mới hơn).
 - Để build: .NET SDK 8 trở lên, hoặc Visual Studio 2022 (17.13+) với workload ".NET desktop development". Visual Studio không bắt buộc.
 
 ## Chạy từ mã nguồn
@@ -42,6 +42,17 @@ dotnet run --project CHTLManager.WPF
 ```
 
 Hoặc mở `CHTLManager.slnx` trong Visual Studio, đặt `CHTLManager.WPF` làm Startup Project và nhấn F5.
+
+## Đóng gói để chạy trên máy khác (không cần cài .NET)
+
+```bash
+dotnet publish CHTLManager.WPF -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=none -o publish
+```
+
+- Kết quả: một file duy nhất `publish\CHTLManager.WPF.exe` (khoảng 71 MB, đã gồm .NET runtime và SQLite).
+- Cài trên máy mới: copy file `.exe` sang (USB, Google Drive...) và nhấp đúp để chạy. Không cần cài .NET hay Visual Studio. Windows SmartScreen có thể cảnh báo vì file chưa ký số: chọn "More info" → "Run anyway".
+- Lần mở đầu mất vài giây để giải nén và tạo CSDL; các lần sau nhanh hơn.
+- Cập nhật phiên bản: thay file `.exe` mới, CSDL trong `%LocalAppData%` được giữ nguyên.
 
 Tài khoản mẫu:
 
