@@ -87,7 +87,26 @@ Mục tiêu: một bản demo **không có lỗi**, đủ các luồng chính, k
 - [ ] Tài khoản (Phần 5): tạo thu ngân mới → đăng nhập được; khóa → không đăng nhập được
 - [x] Không có lần nào app bị tắt đột ngột
 - [x] Lỗi phát sinh đã sửa: nút `+`/`−` trong giỏ quá hẹp, không thấy ký hiệu
-- [ ] Bạn duyệt → commit
+- [x] Bạn duyệt → commit (`301a9e5`)
+
+---
+
+## Phần 3b — Bán khi kho báo hết + Kiểm kê (bổ sung, ≈1,5 giờ) · commit `feat: oversell with confirmation and stock count`
+
+Lý do: thực tế cửa hàng tiện lợi, số tồn trên phần mềm thường lệch hàng trên kệ (nhập chưa ghi, đếm sai, mất, hỏng). Chặn bán khi kho báo hết làm mất doanh thu ngay trước mặt khách.
+
+- Thu ngân bấm `+` / quét / gõ SL vượt tồn → hộp thoại xác nhận (mặc định No). Yes → dòng đánh dấu "(vượt tồn)", được bán.
+- `OrderService.CreateOrder(..., allowOversellProductIds)`: chỉ sản phẩm đã xác nhận mới được bán vượt; tồn kho có thể âm.
+- Hóa đơn nhắc "kho đang âm, cần kiểm kê"; tồn âm hiện đỏ ở cả tab Bán hàng và Kho; bộ lọc "Chỉ hiện SP cần kiểm kê".
+- `ProductService.SetCountedStock` + mục **Kiểm kê** trong tab Kho: nhập số đếm thực tế, hiện chênh lệch, xác nhận.
+
+**Checklist Phần 3b**
+- [x] Build sạch
+- [x] Harness 17/17: không xác nhận thì vẫn chặn; xác nhận SP này không mở khóa SP khác; tồn âm; nhập kho/kiểm kê khi âm; sửa SP tồn âm được
+- [x] Lỗi phát hiện và đã sửa: sản phẩm tồn âm không sửa được giá/tên (kiểm tra "tồn ≥ 0" chạy cả khi Sửa)
+- [x] UI thật: hỏi xác nhận khi vượt tồn (No giữ nguyên, Yes bán được), gõ SL vượt tồn hỏi xác nhận, hóa đơn có lưu ý, tồn âm màu đỏ, lọc + kiểm kê đưa tồn về số thực tế
+- [x] README, DEMO (kịch bản 2b + câu hỏi 13–14), CLAUDE.md cập nhật
+- [x] Bạn duyệt → commit
 
 ---
 

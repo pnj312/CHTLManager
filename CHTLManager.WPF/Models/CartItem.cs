@@ -7,6 +7,7 @@ namespace CHTLManager.WPF.Models;
 public class CartItem : INotifyPropertyChanged
 {
     private int _quantity = 1;
+    private bool _oversellConfirmed;
 
     public int ProductId { get; init; }
     public string Barcode { get; init; } = string.Empty;
@@ -16,12 +17,30 @@ public class CartItem : INotifyPropertyChanged
     /// <summary>Tồn kho tại thời điểm tải dữ liệu, dùng để giới hạn số lượng.</summary>
     public int Stock { get; init; }
 
+    /// <summary>
+    /// Thu ngân đã xác nhận hàng thực tế vẫn còn dù kho báo không đủ: được bán vượt tồn kho.
+    /// </summary>
+    public bool OversellConfirmed
+    {
+        get => _oversellConfirmed;
+        set
+        {
+            _oversellConfirmed = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(DisplayName));
+        }
+    }
+
+    /// <summary>Tên hiển thị trong giỏ, đánh dấu dòng bán vượt tồn kho.</summary>
+    public string DisplayName => OversellConfirmed ? $"{Name} (vượt tồn)" : Name;
+
     public int Quantity
     {
         get => _quantity;
         set
         {
-            int v = Math.Max(1, Math.Min(value, Math.Max(Stock, 1)));
+            int v = Math.Max(1, value);
+            if (!OversellConfirmed) v = Math.Min(v, Math.Max(Stock, 1));
             _quantity = v;
             OnPropertyChanged();
             OnPropertyChanged(nameof(LineTotal));

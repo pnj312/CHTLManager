@@ -7,9 +7,12 @@ Phần mềm desktop (WPF, .NET 8) cho một quầy thu ngân của cửa hàng 
 | Vai trò | Chức năng |
 |---|---|
 | Thu ngân | Bán hàng: quét mã vạch hoặc tìm theo tên (không cần dấu), giỏ hàng, tính tiền thừa, thanh toán |
-| Admin | Mọi chức năng của thu ngân, cộng thêm: quản lý sản phẩm (thêm/sửa/xóa, nhập kho), xem lịch sử hóa đơn và thống kê doanh thu |
+| Admin | Mọi chức năng của thu ngân, cộng thêm: quản lý sản phẩm (thêm/sửa/xóa, nhập kho, kiểm kê), xem lịch sử hóa đơn và thống kê doanh thu |
 
-Quy tắc chính: không bán vượt tồn kho; giá luôn lấy từ CSDL khi thanh toán; thanh toán, trừ kho và lưu hóa đơn nằm trong một giao dịch; sản phẩm đã có trong hóa đơn chỉ bị ngừng kinh doanh chứ không xóa hẳn.
+Quy tắc chính:
+- Bán hàng trừ tồn kho đúng số lượng bán; thanh toán, trừ kho và lưu hóa đơn nằm trong một giao dịch. Giá luôn lấy từ CSDL khi thanh toán.
+- **Kho báo không đủ nhưng hàng thực tế vẫn còn** (hàng nhập chưa ghi, đếm sai...): thu ngân xác nhận "vẫn bán" thì hóa đơn vẫn lưu đầy đủ, tồn kho được phép âm. Sản phẩm tồn âm hiện màu đỏ; Admin dùng **Kiểm kê** để đặt tồn kho bằng số đếm thực tế (cũng dùng khi hàng mất, hỏng).
+- Sản phẩm đã có trong hóa đơn chỉ bị ngừng kinh doanh chứ không xóa hẳn; thêm lại cùng mã vạch thì kinh doanh lại.
 
 ## Kiến trúc
 
@@ -58,6 +61,6 @@ Tài khoản mẫu:
 
 - Chạy trên **một máy**. SQLite là CSDL dạng file, phù hợp với một quầy, không cần cài máy chủ CSDL. Muốn nhiều máy dùng chung dữ liệu cần đổi sang SQL Server trong mạng LAN hoặc thêm Web API (chỉ thay tầng DAL nhờ kiến trúc phân tầng).
 - Phân quyền thực hiện ở giao diện; CSDL không mã hóa.
-- Chưa có: in hóa đơn, phiếu nhập kho có lịch sử, trả hàng, khuyến mãi.
+- Chưa có: in hóa đơn, phiếu nhập kho và lịch sử kiểm kê, trả hàng, khuyến mãi.
 
 Kịch bản demo và câu hỏi bảo vệ: xem [docs/DEMO.md](docs/DEMO.md).

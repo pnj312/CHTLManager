@@ -53,5 +53,15 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="AlternatingRowBackground" Value="#F7F8FC"/>
         </Style>
+
+        <!-- Ô tồn kho: tô đỏ khi tồn âm (đã bán vượt tồn, cần kiểm kê). Dùng cho DataGridTextColumn.ElementStyle. -->
+        <Style x:Key="StockCellStyle" TargetType="TextBlock">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding NeedsStockCheck}" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </Application.Resources>
 </Application>

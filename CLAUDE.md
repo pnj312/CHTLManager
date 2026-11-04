@@ -33,7 +33,8 @@ Three layers, referenced strictly downward: `CHTLManager.WPF` → `CHTLManager.B
 
 - Throw `BusinessException` for user-facing validation errors; the UI shows its message directly and treats other exceptions as system errors.
 - `OrderService.CreateOrder` is the core sale path: one transaction that re-reads prices from the DB (never trust UI prices), checks/decrements stock, and generates the code `HDyyyyMMdd-NNNN` from a count of today's orders.
-- Products already referenced by orders are soft-deleted (`IsActive = false`); `ProductService.Add` with that barcode reactivates the same row. `ProductService.Update` never changes `Stock` — stock only moves through `UpdateStock` and sales.
+- Products already referenced by orders are soft-deleted (`IsActive = false`); `ProductService.Add` with that barcode reactivates the same row. `ProductService.Update` never changes `Stock` — stock only moves through `UpdateStock` (import), `SetCountedStock` (stock count) and sales.
+- Stock may be negative by design: `CreateOrder(..., allowOversellProductIds)` lets the cashier sell beyond recorded stock for products they explicitly confirmed (real shelf stock differs from the software). `Product.NeedsStockCheck` (`Stock < 0`) drives the red `StockCellStyle` in `App.xaml` and the "cần kiểm kê" filter. Never validate `Stock >= 0` on update paths; only `Add` and `SetCountedStock` require non-negative input.
 - `DbInitializer` seeds users/products when empty and ~20 sample orders over the last 7 days only when `EnsureCreated()` just created the DB.
 - Money is `decimal` mapped to `decimal(18,0)` (VND, no fractions). **SQLite cannot `Sum` or `OrderBy` decimals server-side** (EF throws `NotSupportedException`) — materialize first and aggregate in memory.
 - Schema is created with `Database.EnsureCreated()` in `DbInitializer` (no migrations). Schema changes will not apply to existing DB files; delete the `.db` during development or introduce migrations first.

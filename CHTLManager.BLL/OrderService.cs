@@ -28,7 +28,7 @@ public class OrderService : IOrderService
     public static decimal CalculateChange(decimal total, decimal customerPaid)
         => customerPaid - total;
 
-    public Order CreateOrder(Order order, List<OrderDetail> details)
+    public Order CreateOrder(Order order, List<OrderDetail> details, ISet<int>? allowOversellProductIds = null)
     {
         if (order == null) throw new BusinessException("Thông tin hóa đơn không hợp lệ.");
         if (details == null || details.Count == 0)
@@ -52,7 +52,10 @@ public class OrderService : IOrderService
             int quantity = group.Sum(d => d.Quantity);
             if (quantity <= 0)
                 throw new BusinessException($"Số lượng của '{product.Name}' phải lớn hơn 0.");
-            if (product.Stock < quantity)
+            // Kho trên phần mềm có thể lệch thực tế (hàng nhập chưa ghi, đếm sai...). Chỉ cho bán vượt tồn
+            // với sản phẩm thu ngân đã xác nhận là còn hàng thật; khi đó tồn kho có thể âm và cần kiểm kê sau.
+            bool oversellAllowed = allowOversellProductIds?.Contains(product.Id) == true;
+            if (product.Stock < quantity && !oversellAllowed)
                 throw new BusinessException($"'{product.Name}' chỉ còn {product.Stock} trong kho.");
 
             product.Stock -= quantity;

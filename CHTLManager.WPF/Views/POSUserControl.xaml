@@ -33,7 +33,8 @@
                     <DataGridTextColumn Header="Mã vạch" Binding="{Binding Barcode}" Width="140"/>
                     <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="*"/>
                     <DataGridTextColumn Header="Giá bán" Binding="{Binding Price, StringFormat=N0}" Width="90"/>
-                    <DataGridTextColumn Header="Tồn" Binding="{Binding Stock}" Width="60"/>
+                    <DataGridTextColumn Header="Tồn" Binding="{Binding Stock}" Width="60"
+                                        ElementStyle="{StaticResource StockCellStyle}"/>
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -58,7 +59,7 @@
 
                 <DataGrid Grid.Row="1" x:Name="dgCart" IsReadOnly="False" CellEditEnding="DgCart_CellEditEnding">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Sản phẩm" Binding="{Binding Name}" Width="*" IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Sản phẩm" Binding="{Binding DisplayName}" Width="*" IsReadOnly="True"/>
                         <DataGridTextColumn Header="Đơn giá" Binding="{Binding UnitPrice, StringFormat=N0}" Width="75" IsReadOnly="True"/>
                         <DataGridTextColumn Header="SL" Binding="{Binding Quantity, UpdateSourceTrigger=LostFocus}" Width="45"/>
                         <DataGridTextColumn Header="Thành tiền" Binding="{Binding LineTotal, StringFormat=N0}" Width="90" IsReadOnly="True"/>

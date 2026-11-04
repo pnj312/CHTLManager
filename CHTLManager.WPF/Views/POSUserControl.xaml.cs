@@ -84,21 +84,20 @@ public partial class POSUserControl : UserControl
 
     private void AddToCart(Product p)
     {
-        if (p.Stock <= 0)
+        var existing = _cart.FirstOrDefault(c => c.ProductId == p.Id);
+        int inCart = existing?.Quantity ?? 0;
+        bool confirmed = existing?.OversellConfirmed == true;
+
+        // Kho báo không đủ: hỏi thu ngân hàng thực tế còn không, thay vì chặn bán.
+        if (inCart + 1 > p.Stock && !confirmed)
         {
-            MessageBox.Show($"'{p.Name}' đã hết hàng.", "Hết hàng", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
+            if (!ConfirmOversell(p.Name, p.Stock)) return;
+            confirmed = true;
         }
 
-        var existing = _cart.FirstOrDefault(c => c.ProductId == p.Id);
         if (existing != null)
         {
-            if (existing.Quantity >= p.Stock)
-            {
-                MessageBox.Show($"'{p.Name}' chỉ còn {p.Stock} trong kho.", "Không đủ hàng",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            if (confirmed) existing.OversellConfirmed = true;
             existing.Quantity++;
         }
         else
@@ -110,6 +109,7 @@ public partial class POSUserControl : UserControl
                 Name = p.Name,
                 UnitPrice = p.Price,
                 Stock = p.Stock,
+                OversellConfirmed = confirmed,
                 Quantity = 1
             };
             item.PropertyChanged += CartItem_PropertyChanged;
@@ -131,13 +131,26 @@ public partial class POSUserControl : UserControl
             return;
         }
 
-        if (item.Quantity >= item.Stock)
+        if (item.Quantity >= item.Stock && !item.OversellConfirmed)
         {
-            MessageBox.Show($"'{item.Name}' chỉ còn {item.Stock} trong kho.", "Không đủ hàng",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
+            if (!ConfirmOversell(item.Name, item.Stock)) return;
+            item.OversellConfirmed = true;
         }
         item.Quantity++;
+    }
+
+    /// <summary>
+    /// Hỏi thu ngân khi kho trên phần mềm báo không đủ hàng. Mặc định là "No" để tránh bấm nhầm.
+    /// </summary>
+    private static bool ConfirmOversell(string name, int stock)
+    {
+        string message =
+            $"Kho đang ghi '{name}' còn {stock}.\n\n" +
+            "Nếu hàng thực tế vẫn còn trên kệ, chọn Yes để vẫn bán. " +
+            "Tồn kho trên phần mềm sẽ bị âm và Admin cần kiểm kê lại.\n\n" +
+            "Vẫn bán sản phẩm này?";
+        return MessageBox.Show(message, "Kho báo không đủ hàng", MessageBoxButton.YesNo,
+                   MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes;
     }
 
     private void BtnMinus_Click(object sender, RoutedEventArgs e)
@@ -157,11 +170,24 @@ public partial class POSUserControl : UserControl
         item.Quantity--;
     }
 
-    /// <summary>Kiểm tra số lượng gõ tay trong giỏ: phải là số nguyên từ 1 đến tồn kho.</summary>
+    /// <summary>Kiểm tra số lượng gõ tay trong giỏ: phải là số nguyên ≥ 1; vượt tồn kho thì hỏi xác nhận.</summary>
     private void DgCart_CellEditEnding(object? sender, DataGridCellEditEndingEventArgs e)
     {
         if (e.EditAction != DataGridEditAction.Commit) return;
         if (e.Row.Item is not CartItem item || e.EditingElement is not TextBox box) return;
+
+        // Vượt tồn kho chưa xác nhận: tạm giữ ở mức tồn kho, rồi hỏi sau khi ô đã commit xong.
+        if (int.TryParse(box.Text.Trim(), out int wanted) && wanted > item.Stock && !item.OversellConfirmed)
+        {
+            box.Text = Math.Max(item.Stock, 1).ToString();
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (!ConfirmOversell(item.Name, item.Stock)) return;
+                item.OversellConfirmed = true;
+                item.Quantity = wanted;
+            });
+            return;
+        }
 
         string? message = null;
         if (!int.TryParse(box.Text.Trim(), out int qty))
@@ -173,11 +199,6 @@ public partial class POSUserControl : UserControl
         {
             message = "Số lượng tối thiểu là 1. Muốn bỏ sản phẩm, bấm \"Xóa dòng\".";
             box.Text = "1";
-        }
-        else if (qty > item.Stock)
-        {
-            message = $"'{item.Name}' chỉ còn {item.Stock} trong kho. Số lượng được đặt về {item.Stock}.";
-            box.Text = item.Stock.ToString();
         }
 
         // Hiện thông báo sau khi DataGrid kết thúc chỉnh sửa, tránh mở hộp thoại giữa lúc đang commit ô.
@@ -279,7 +300,8 @@ public partial class POSUserControl : UserControl
                 UnitPrice = c.UnitPrice
             }).ToList();
 
-            var saved = AppServices.Orders.CreateOrder(order, details);
+            var oversell = _cart.Where(c => c.OversellConfirmed).Select(c => c.ProductId).ToHashSet();
+            var saved = AppServices.Orders.CreateOrder(order, details, oversell);
 
             MessageBox.Show(BuildReceipt(saved), "Thanh toán thành công",
                 MessageBoxButton.OK, MessageBoxImage.Information);
@@ -311,6 +333,15 @@ public partial class POSUserControl : UserControl
         sb.AppendLine($"Tổng tiền:  {o.Total:N0} đ");
         sb.AppendLine($"Khách đưa:  {o.CustomerPaid:N0} đ");
         sb.AppendLine($"Tiền thừa:  {o.Change:N0} đ");
+
+        var negative = o.Details.Where(d => d.Product is { Stock: < 0 }).Select(d => d.Product!).ToList();
+        if (negative.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("Lưu ý: kho trên phần mềm đang âm, Admin cần kiểm kê:");
+            foreach (var p in negative)
+                sb.AppendLine($"  • {p.Name}: tồn {p.Stock}");
+        }
         return sb.ToString();
     }
 

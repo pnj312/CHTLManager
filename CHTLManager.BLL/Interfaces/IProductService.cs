@@ -16,4 +16,7 @@ public interface IProductService
 
     /// <summary>Cộng (delta &gt; 0) hoặc trừ (delta &lt; 0) tồn kho.</summary>
     Product UpdateStock(int productId, int delta);
+
+    /// <summary>Kiểm kê: đặt tồn kho bằng số lượng đếm thực tế (≥ 0). Trả về sản phẩm sau cập nhật.</summary>
+    Product SetCountedStock(int productId, int countedStock);
 }

@@ -60,6 +60,7 @@ public class ProductService : IProductService
     public Product Add(Product product)
     {
         Validate(product);
+        if (product.Stock < 0) throw new BusinessException("Số lượng tồn không được âm.");
 
         using var db = _factory();
         string code = product.Barcode.Trim();
@@ -153,12 +154,25 @@ public class ProductService : IProductService
         return entity;
     }
 
+    public Product SetCountedStock(int productId, int countedStock)
+    {
+        if (countedStock < 0)
+            throw new BusinessException("Số lượng kiểm kê phải là số nguyên không âm.");
+
+        using var db = _factory();
+        var entity = db.Products.FirstOrDefault(p => p.Id == productId && p.IsActive)
+                     ?? throw new BusinessException("Không tìm thấy sản phẩm.");
+
+        entity.Stock = countedStock;
+        db.SaveChanges();
+        return entity;
+    }
+
     private static void Validate(Product p)
     {
         if (p == null) throw new BusinessException("Dữ liệu sản phẩm không hợp lệ.");
         if (string.IsNullOrWhiteSpace(p.Barcode)) throw new BusinessException("Mã vạch không được để trống.");
         if (string.IsNullOrWhiteSpace(p.Name)) throw new BusinessException("Tên sản phẩm không được để trống.");
         if (p.Price <= 0) throw new BusinessException("Giá bán phải lớn hơn 0.");
-        if (p.Stock < 0) throw new BusinessException("Số lượng tồn không được âm.");
     }
 }
