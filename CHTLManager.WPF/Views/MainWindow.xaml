@@ -15,6 +15,7 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
                 <TextBlock x:Name="txtUserInfo" Foreground="White" FontSize="14"
                            VerticalAlignment="Center" Margin="0,0,16,0"/>
+                <Button Content="Đổi mật khẩu" Click="BtnChangePassword_Click"/>
                 <Button Content="Đăng xuất" Click="BtnLogout_Click" Margin="0" Style="{StaticResource AccentButton}"/>
             </StackPanel>
         </Grid>
@@ -29,6 +30,9 @@
             <!-- Màn hình tự tải lại số liệu qua sự kiện Loaded mỗi lần tab được mở. -->
             <TabItem x:Name="tabReports" Header="Hóa đơn &amp; Doanh thu">
                 <views:OrderHistoryUserControl x:Name="reportView"/>
+            </TabItem>
+            <TabItem x:Name="tabUsers" Header="Tài khoản">
+                <views:UserUserControl x:Name="userView"/>
             </TabItem>
         </TabControl>
     </DockPanel>

@@ -1,4 +1,5 @@
 using System.Windows;
+using CHTLManager.BLL;
 
 namespace CHTLManager.WPF.Views;
 
@@ -37,6 +38,11 @@ public partial class LoginWindow : Window
 
             AppServices.CurrentUser = user;
             DialogResult = true;
+        }
+        catch (BusinessException ex)
+        {
+            txtError.Text = ex.Message;
+            txtPassword.Clear();
         }
         catch (Exception ex)
         {

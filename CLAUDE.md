@@ -22,7 +22,8 @@ Three layers, referenced strictly downward: `CHTLManager.WPF` → `CHTLManager.B
 
 - **DAL**: EF Core 8 + SQLite. `AppDbContext` configures itself from the static `AppDbContext.DbPath` (default `%LocalAppData%\CHTLManager\chtlmanager.db`, i.e. one DB per Windows user). Entities: `User`, `Product`, `Order`, `OrderDetail`.
 - **BLL**: `ProductService`, `OrderService`, `UserService` behind interfaces in `BLL/Interfaces`. Each service takes a `Func<AppDbContext>` (parameterless ctor uses the default DB) and opens a short-lived context per call. Point `AppDbContext.DbPath` at a temp file to exercise services against a throwaway DB.
-- **WPF**: code-behind (no MVVM). `AppServices` is a static service locator holding the service instances and `CurrentUser`. `MainWindow` hosts three tabs: `POSUserControl` (sales), `ProductUserControl` (inventory, Admin only) and `OrderHistoryUserControl` (order history + revenue via `OrderService.GetRevenueReport`, Admin only). Tab views reload data in their `Loaded` handler, which fires every time the tab is shown.
+- **WPF**: code-behind (no MVVM). `AppServices` is a static service locator holding the service instances and `CurrentUser`. `MainWindow` hosts four tabs: `POSUserControl` (sales), `ProductUserControl` (inventory, Admin only), `OrderHistoryUserControl` (order history + revenue via `OrderService.GetRevenueReport`, Admin only) and `UserUserControl` (accounts, Admin only); the header has a "Đổi mật khẩu" button opening `ChangePasswordWindow` for any role. Tab views reload data in their `Loaded` handler, which fires every time the tab is shown. A `SelectionChanged` from a DataGrid/ComboBox inside a tab bubbles up to `tabMain`; `MainWindow` filters by `e.Source`.
+- `UserService.Login` returns null for wrong credentials but throws `BusinessException` for a locked account (only after the password matched). `SetActive` refuses self-lock and locking the last active Admin.
 
 ## Project workflow
 

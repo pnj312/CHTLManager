@@ -47,6 +47,12 @@
 - Hóa đơn vừa bán ở bước 2 nằm đầu danh sách; bấm vào để xem chi tiết, tiền khách đưa, tiền thừa.
 - Bấm **Hôm nay** / **Tháng này** để đổi khoảng thời gian; xem doanh thu theo ngày và top 5 sản phẩm.
 
+### 5. Tài khoản (admin)
+- Tab **Tài khoản**: tạo thu ngân mới `thungan2`, mật khẩu `abc123` (thử mật khẩu `123` trước → báo phải ít nhất 6 ký tự).
+- Chọn `thungan2` → **Khóa tài khoản** → trạng thái "Đã khóa" màu đỏ. Chọn `admin` → Khóa → báo không thể tự khóa.
+- Đăng xuất, đăng nhập `thungan2 / abc123` → "Tài khoản đã bị khóa. Vui lòng liên hệ Admin."
+- Đăng nhập lại admin, mở khóa `thungan2`. Nút **Đổi mật khẩu** trên thanh tiêu đề: nhập sai mật khẩu hiện tại → báo lỗi.
+
 ## Câu hỏi bảo vệ và câu trả lời
 
 1. **Dự án giải quyết bài toán gì?** Tính tiền bằng mã vạch, tự trừ tồn kho, lưu hóa đơn và thống kê doanh thu cho cửa hàng tiện lợi một quầy, thay cho ghi sổ và tính tay.
@@ -58,7 +64,7 @@
 7. **Muốn nhiều nhân viên cùng dùng?** Trên một máy: đăng xuất, đăng nhập tài khoản khác. Nhiều máy: chuyển CSDL sang SQL Server trong mạng LAN (chỉ đổi provider ở tầng DAL), hoặc xây Web API làm trung gian để phân quyền ở server.
 8. **Cài đặt trên máy mới?** Cài .NET 8 Desktop Runtime và chạy file `.exe`, hoặc dùng bản publish self-contained không cần cài .NET. CSDL và dữ liệu mẫu tự tạo.
 9. **Quy trình sử dụng?** Đăng nhập → quét hàng → nhập tiền khách đưa → thanh toán. Admin quản lý sản phẩm, nhập kho và xem doanh thu.
-10. **Admin và Thu ngân có quyền gì?** Thu ngân chỉ bán hàng. Admin bán hàng, quản lý kho, xem hóa đơn và doanh thu.
+10. **Admin và Thu ngân có quyền gì?** Thu ngân bán hàng và tự đổi mật khẩu. Admin bán hàng, quản lý kho (nhập kho, kiểm kê), xem hóa đơn và doanh thu, quản lý tài khoản (tạo, khóa/mở khóa, đặt lại mật khẩu). Có chốt chặn: không thể tự khóa mình, không thể khóa Admin cuối cùng, nên hệ thống không bao giờ bị khóa hết quyền quản trị.
 11. **Hạn chế hiện tại?** Chỉ chạy một máy; phân quyền ở giao diện; CSDL không mã hóa; chưa có in hóa đơn, phiếu nhập kho và lịch sử kiểm kê, trả hàng, khuyến mãi.
 12. **Triển khai thực tế cần cải tiến gì?** CSDL máy chủ hoặc API cho nhiều quầy, phân quyền ở server, in hóa đơn, phiếu nhập kho và kiểm kê, sao lưu tự động, quản lý ca làm việc.
 

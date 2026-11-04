@@ -6,13 +6,14 @@ Phần mềm desktop (WPF, .NET 8) cho một quầy thu ngân của cửa hàng 
 
 | Vai trò | Chức năng |
 |---|---|
-| Thu ngân | Bán hàng: quét mã vạch hoặc tìm theo tên (không cần dấu), giỏ hàng, tính tiền thừa, thanh toán |
-| Admin | Mọi chức năng của thu ngân, cộng thêm: quản lý sản phẩm (thêm/sửa/xóa, nhập kho, kiểm kê), xem lịch sử hóa đơn và thống kê doanh thu |
+| Thu ngân | Bán hàng: quét mã vạch hoặc tìm theo tên (không cần dấu), giỏ hàng, tính tiền thừa, thanh toán. Tự đổi mật khẩu |
+| Admin | Mọi chức năng của thu ngân, cộng thêm: quản lý sản phẩm (thêm/sửa/xóa, nhập kho, kiểm kê), xem lịch sử hóa đơn và thống kê doanh thu, quản lý tài khoản (tạo, khóa/mở khóa, đặt lại mật khẩu) |
 
 Quy tắc chính:
 - Bán hàng trừ tồn kho đúng số lượng bán; thanh toán, trừ kho và lưu hóa đơn nằm trong một giao dịch. Giá luôn lấy từ CSDL khi thanh toán.
 - **Kho báo không đủ nhưng hàng thực tế vẫn còn** (hàng nhập chưa ghi, đếm sai...): thu ngân xác nhận "vẫn bán" thì hóa đơn vẫn lưu đầy đủ, tồn kho được phép âm. Sản phẩm tồn âm hiện màu đỏ; Admin dùng **Kiểm kê** để đặt tồn kho bằng số đếm thực tế (cũng dùng khi hàng mất, hỏng).
 - Sản phẩm đã có trong hóa đơn chỉ bị ngừng kinh doanh chứ không xóa hẳn; thêm lại cùng mã vạch thì kinh doanh lại.
+- Tài khoản: mật khẩu tối thiểu 6 ký tự, lưu dạng băm. Tài khoản bị khóa không đăng nhập được; không thể tự khóa mình hay khóa Admin cuối cùng đang hoạt động.
 
 ## Kiến trúc
 
@@ -60,6 +61,8 @@ Tài khoản mẫu:
 |---|---|---|
 | `admin` | `admin123` | Admin |
 | `thungan` | `123456` | Thu ngân |
+
+Khi dùng thật, hãy đổi mật khẩu mặc định ngay (nút **Đổi mật khẩu** trên thanh tiêu đề).
 
 ## Cơ sở dữ liệu
 

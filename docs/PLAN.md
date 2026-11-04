@@ -84,7 +84,7 @@ Mục tiêu: một bản demo **không có lỗi**, đủ các luồng chính, k
 - [x] Thêm, sửa sản phẩm (ô tồn kho bị khóa khi sửa), nhập thêm kho
 - [x] Xóa sản phẩm đã bán → ngừng kinh doanh; thêm lại cùng mã vạch → sản phẩm hiện lại
 - [x] Tab Hóa đơn & Doanh thu: có số liệu mẫu; hóa đơn vừa bán xuất hiện; xem chi tiết; đổi khoảng ngày
-- [ ] Tài khoản (Phần 5): tạo thu ngân mới → đăng nhập được; khóa → không đăng nhập được
+- [x] Tài khoản (Phần 5): tạo thu ngân mới → đăng nhập được; khóa → không đăng nhập được
 - [x] Không có lần nào app bị tắt đột ngột
 - [x] Lỗi phát sinh đã sửa: nút `+`/`−` trong giỏ quá hẹp, không thấy ký hiệu
 - [x] Bạn duyệt → commit (`301a9e5`)
@@ -141,10 +141,10 @@ Lý do: thực tế cửa hàng tiện lợi, số tồn trên phần mềm thư
 - `Views/ChangePasswordWindow.xaml(.cs)`: nút "Đổi mật khẩu" trên header `MainWindow`, mọi vai trò đều dùng được.
 
 **Checklist Phần 5**
-- [ ] Harness: tạo, khóa, mở khóa, đổi mật khẩu; chặn tự khóa và chặn khóa Admin cuối cùng
-- [ ] UI: tạo thu ngân → đăng nhập; đổi mật khẩu → mật khẩu cũ không còn dùng được
-- [ ] Chạy lại toàn bộ checklist demo ở Phần 3
-- [ ] Bạn duyệt → commit
+- [x] Harness 17/17: tạo, khóa, mở khóa, đặt lại, đổi mật khẩu; chặn tự khóa và chặn khóa Admin cuối cùng; tài khoản khóa không tạo được hóa đơn
+- [x] UI: tạo thu ngân → đăng nhập; khóa → báo "đã bị khóa"; tự khóa bị chặn; đặt lại + đổi mật khẩu → mật khẩu cũ không còn dùng được
+- [x] Chạy lại toàn bộ checklist demo ở Phần 3 (kể cả bán vượt tồn): đạt
+- [x] Bạn duyệt → commit
 
 ---
 

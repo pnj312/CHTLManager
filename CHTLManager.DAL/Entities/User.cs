@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CHTLManager.DAL.Entities;
 
@@ -27,6 +28,12 @@ public class User
     public UserRole Role { get; set; } = UserRole.Cashier;
 
     public bool IsActive { get; set; } = true;
+
+    [NotMapped]
+    public string RoleName => Role == UserRole.Admin ? "Admin" : "Thu ngân";
+
+    [NotMapped]
+    public string StatusName => IsActive ? "Đang hoạt động" : "Đã khóa";
 
     public ICollection<Order> Orders { get; set; } = new List<Order>();
 }
