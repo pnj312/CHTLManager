@@ -1,3 +1,4 @@
+using CHTLManager.BLL.Reports;
 using CHTLManager.DAL.Entities;
 
 namespace CHTLManager.BLL.Interfaces;
@@ -9,4 +10,7 @@ public interface IOrderService
 
     List<Order> GetHistory(DateTime? from = null, DateTime? to = null);
     Order? GetById(int id);
+
+    /// <summary>Báo cáo doanh thu từ ngày <paramref name="from"/> đến hết ngày <paramref name="to"/>.</summary>
+    RevenueReport GetRevenueReport(DateTime from, DateTime to);
 }

@@ -14,9 +14,12 @@ public partial class MainWindow : Window
         string role = AppServices.IsAdmin ? "Admin" : "Thu ngân";
         txtUserInfo.Text = $"{user?.FullName} ({role})";
 
-        // Phân quyền: chỉ Admin được vào tab Quản lý Kho
+        // Phân quyền: chỉ Admin được vào tab Quản lý Kho và Hóa đơn & Doanh thu
         if (!AppServices.IsAdmin)
+        {
             tabInventory.Visibility = Visibility.Collapsed;
+            tabReports.Visibility = Visibility.Collapsed;
+        }
     }
 
     private void TabMain_SelectionChanged(object sender, SelectionChangedEventArgs e)

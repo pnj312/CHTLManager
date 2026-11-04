@@ -1,4 +1,5 @@
 using CHTLManager.BLL.Interfaces;
+using CHTLManager.BLL.Reports;
 using CHTLManager.DAL;
 using CHTLManager.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -119,5 +120,59 @@ public class OrderService : IOrderService
             .Include(o => o.Cashier)
             .Include(o => o.Details).ThenInclude(d => d.Product)
             .FirstOrDefault(o => o.Id == id);
+    }
+
+    public RevenueReport GetRevenueReport(DateTime from, DateTime to)
+    {
+        DateTime start = from.Date, end = to.Date;
+        if (start > end)
+            throw new BusinessException("Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.");
+
+        var orders = GetHistory(start, end);
+
+        // SQLite không cộng/sắp xếp được kiểu decimal trong câu SQL, nên tổng hợp trong bộ nhớ.
+        decimal revenue = orders.Sum(o => o.Total);
+        var details = orders.SelectMany(o => o.Details).ToList();
+
+        var byDay = orders
+            .GroupBy(o => o.CreatedAt.Date)
+            .ToDictionary(g => g.Key, g => (Count: g.Count(), Revenue: g.Sum(o => o.Total)));
+
+        // Khoảng ngắn: liệt kê đủ từng ngày (kể cả ngày không bán được); khoảng dài: chỉ những ngày có bán.
+        IEnumerable<DateTime> days = (end - start).TotalDays <= 62
+            ? Enumerable.Range(0, (int)(end - start).TotalDays + 1).Select(i => end.AddDays(-i))
+            : byDay.Keys.OrderByDescending(d => d);
+
+        var daily = days.Select(d => byDay.TryGetValue(d, out var v)
+                ? new DailyRevenue { Date = d, OrderCount = v.Count, Revenue = v.Revenue }
+                : new DailyRevenue { Date = d })
+            .ToList();
+
+        var top = details
+            .GroupBy(d => d.ProductId)
+            .Select(g => new
+            {
+                Name = g.First().Product?.Name ?? $"Sản phẩm #{g.Key}",
+                Quantity = g.Sum(d => d.Quantity),
+                Revenue = g.Sum(d => d.LineTotal)
+            })
+            .OrderByDescending(x => x.Revenue)
+            .ThenByDescending(x => x.Quantity)
+            .Take(5)
+            .Select((x, i) => new TopProduct { Rank = i + 1, Name = x.Name, Quantity = x.Quantity, Revenue = x.Revenue })
+            .ToList();
+
+        return new RevenueReport
+        {
+            From = start,
+            To = end,
+            Orders = orders,
+            TotalRevenue = revenue,
+            OrderCount = orders.Count,
+            AverageOrderValue = orders.Count == 0 ? 0 : Math.Round(revenue / orders.Count, 0),
+            ItemsSold = details.Sum(d => d.Quantity),
+            Daily = daily,
+            TopProducts = top
+        };
     }
 }

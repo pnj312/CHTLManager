@@ -10,7 +10,7 @@ public static class DbInitializer
     public static void Initialize()
     {
         using var db = new AppDbContext();
-        db.Database.EnsureCreated();
+        bool created = db.Database.EnsureCreated();
 
         if (!db.Users.Any())
         {
@@ -37,5 +37,73 @@ public static class DbInitializer
         }
 
         db.SaveChanges();
+
+        // Hóa đơn mẫu chỉ nạp cho CSDL vừa tạo mới, để màn hình doanh thu có số liệu ngay khi demo.
+        if (created && !db.Orders.Any())
+        {
+            SeedSampleOrders(db, DateTime.Now);
+            db.SaveChanges();
+        }
+    }
+
+    /// <summary>
+    /// Tạo hóa đơn bán hàng mẫu trong 7 ngày gần nhất (kết quả cố định nhờ seed ngẫu nhiên cố định),
+    /// trừ tồn kho tương ứng để số liệu kho và doanh thu nhất quán.
+    /// </summary>
+    private static void SeedSampleOrders(AppDbContext db, DateTime now)
+    {
+        var rng = new Random(2026);
+        var products = db.Products.Where(p => p.IsActive).OrderBy(p => p.Id).ToList();
+        var cashier = db.Users.FirstOrDefault(u => u.Role == UserRole.Cashier);
+        var admin = db.Users.FirstOrDefault(u => u.Role == UserRole.Admin);
+        if (products.Count == 0 || cashier == null || admin == null) return;
+
+        const int openMinute = 7 * 60, closeMinute = 21 * 60;
+
+        for (int dayOffset = 6; dayOffset >= 0; dayOffset--)
+        {
+            DateTime day = now.Date.AddDays(-dayOffset);
+
+            // Hôm nay chỉ tạo hóa đơn trước thời điểm hiện tại.
+            int lastMinute = dayOffset == 0 ? Math.Min(closeMinute, (int)(now - now.Date).TotalMinutes - 5) : closeMinute;
+            if (lastMinute <= openMinute) continue;
+
+            int count = dayOffset == 0 ? 2 : rng.Next(3, 6);
+            var times = Enumerable.Range(0, count)
+                .Select(_ => day.AddMinutes(rng.Next(openMinute, lastMinute)))
+                .OrderBy(t => t)
+                .ToList();
+
+            int seq = 0;
+            foreach (var time in times)
+            {
+                var lines = new List<OrderDetail>();
+                foreach (var p in products.OrderBy(_ => rng.Next()).Take(rng.Next(1, 5)))
+                {
+                    int qty = Math.Min(rng.Next(1, 4), p.Stock - 5);
+                    if (qty <= 0) continue;
+
+                    p.Stock -= qty;
+                    lines.Add(new OrderDetail { ProductId = p.Id, Product = p, Quantity = qty, UnitPrice = p.Price });
+                }
+                if (lines.Count == 0) continue;
+
+                decimal total = OrderService.CalculateTotal(lines);
+                decimal step = total <= 50000 ? 10000 : 50000;
+                decimal paid = Math.Ceiling(total / step) * step;
+
+                seq++;
+                db.Orders.Add(new Order
+                {
+                    Code = $"HD{day:yyyyMMdd}-{seq:D4}",
+                    CreatedAt = time,
+                    CashierId = rng.Next(4) == 0 ? admin.Id : cashier.Id,
+                    Total = total,
+                    CustomerPaid = paid,
+                    Change = OrderService.CalculateChange(total, paid),
+                    Details = lines
+                });
+            }
+        }
     }
 }

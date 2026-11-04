@@ -26,6 +26,10 @@
             <TabItem x:Name="tabInventory" Header="Quản lý Kho">
                 <views:ProductUserControl x:Name="productView"/>
             </TabItem>
+            <!-- Màn hình tự tải lại số liệu qua sự kiện Loaded mỗi lần tab được mở. -->
+            <TabItem x:Name="tabReports" Header="Hóa đơn &amp; Doanh thu">
+                <views:OrderHistoryUserControl x:Name="reportView"/>
+            </TabItem>
         </TabControl>
     </DockPanel>
 </Window>

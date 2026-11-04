@@ -28,7 +28,7 @@ Mục tiêu: một bản demo **không có lỗi**, đủ các luồng chính, k
 - [x] Build: 0 lỗi, 0 cảnh báo
 - [x] Harness BLL: thêm lại mã vạch đã xóa mềm thì sản phẩm hiện lại; Update không đổi tồn kho; giá 0 bị từ chối
 - [x] Harness MoneyParser: các input hợp lệ ra đúng giá trị, các input sai đều bị từ chối
-- [ ] Bạn duyệt → commit
+- [x] Bạn duyệt → commit (`22ef9b9`)
 
 ---
 
@@ -53,10 +53,11 @@ Mục tiêu: một bản demo **không có lỗi**, đủ các luồng chính, k
 - Trừ tồn kho tương ứng để số liệu nhất quán.
 
 **Checklist Phần 2**
-- [ ] Build sạch
-- [ ] Harness: database mới có hóa đơn mẫu, tồn kho đã bị trừ đúng, mã không trùng
-- [ ] Harness: `GetRevenueReport` khớp với tổng tính tay; khoảng ngày rỗng trả về 0, không lỗi
-- [ ] Bán thêm một hóa đơn hôm nay: mã tiếp nối đúng (không trùng với hóa đơn mẫu)
+- [x] Build sạch
+- [x] Harness: database mới có hóa đơn mẫu, tồn kho đã bị trừ đúng, mã không trùng
+- [x] Harness: `GetRevenueReport` khớp với tổng tính tay; khoảng ngày rỗng trả về 0, không lỗi
+- [x] Bán thêm một hóa đơn hôm nay: mã tiếp nối đúng (không trùng với hóa đơn mẫu)
+- [ ] Giao diện tab mới hiển thị đúng (kiểm tra cùng lượt chạy thử ở Phần 3)
 - [ ] Bạn duyệt → commit
 
 ---
