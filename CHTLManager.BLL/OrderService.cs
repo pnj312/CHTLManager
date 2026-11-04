@@ -84,8 +84,16 @@ public class OrderService : IOrderService
         };
 
         db.Orders.Add(newOrder);
-        db.SaveChanges();
-        tx.Commit();
+        try
+        {
+            db.SaveChanges();
+            tx.Commit();
+        }
+        catch (DbUpdateException)
+        {
+            // Ví dụ: trùng mã hóa đơn khi có thao tác ghi khác cùng lúc. Giao dịch được hủy, tồn kho không bị trừ.
+            throw new BusinessException("Không lưu được hóa đơn do dữ liệu vừa thay đổi. Vui lòng bấm Thanh toán lại.");
+        }
         return newOrder;
     }
 

@@ -63,8 +63,22 @@ public class ProductService : IProductService
 
         using var db = _factory();
         string code = product.Barcode.Trim();
-        if (db.Products.Any(p => p.Barcode == code))
-            throw new BusinessException($"Mã vạch '{code}' đã tồn tại.");
+        var existing = db.Products.FirstOrDefault(p => p.Barcode == code);
+        if (existing != null)
+        {
+            if (existing.IsActive)
+                throw new BusinessException($"Mã vạch '{code}' đã tồn tại.");
+
+            // Mã vạch thuộc sản phẩm đã ngừng kinh doanh: kinh doanh lại sản phẩm đó với thông tin mới
+            // (giữ nguyên Id để lịch sử hóa đơn cũ vẫn trỏ đúng sản phẩm).
+            existing.Name = product.Name.Trim();
+            existing.Category = (product.Category ?? string.Empty).Trim();
+            existing.Price = product.Price;
+            existing.Stock = product.Stock;
+            existing.IsActive = true;
+            db.SaveChanges();
+            return existing;
+        }
 
         var entity = new Product
         {
@@ -89,14 +103,17 @@ public class ProductService : IProductService
                      ?? throw new BusinessException("Không tìm thấy sản phẩm cần sửa.");
 
         string code = product.Barcode.Trim();
-        if (db.Products.Any(p => p.Barcode == code && p.Id != product.Id))
-            throw new BusinessException($"Mã vạch '{code}' đã được dùng cho sản phẩm khác.");
+        var conflict = db.Products.FirstOrDefault(p => p.Barcode == code && p.Id != product.Id);
+        if (conflict != null)
+            throw new BusinessException(conflict.IsActive
+                ? $"Mã vạch '{code}' đã được dùng cho sản phẩm khác."
+                : $"Mã vạch '{code}' thuộc sản phẩm đã ngừng kinh doanh '{conflict.Name}'. Hãy dùng mã khác.");
 
         entity.Barcode = code;
         entity.Name = product.Name.Trim();
         entity.Category = (product.Category ?? string.Empty).Trim();
         entity.Price = product.Price;
-        entity.Stock = product.Stock;
+        // Không sửa tồn kho ở đây (tránh ghi đè số đã bán); tồn kho chỉ thay đổi qua UpdateStock hoặc bán hàng.
         db.SaveChanges();
         return entity;
     }
@@ -141,7 +158,7 @@ public class ProductService : IProductService
         if (p == null) throw new BusinessException("Dữ liệu sản phẩm không hợp lệ.");
         if (string.IsNullOrWhiteSpace(p.Barcode)) throw new BusinessException("Mã vạch không được để trống.");
         if (string.IsNullOrWhiteSpace(p.Name)) throw new BusinessException("Tên sản phẩm không được để trống.");
-        if (p.Price < 0) throw new BusinessException("Giá bán không được âm.");
+        if (p.Price <= 0) throw new BusinessException("Giá bán phải lớn hơn 0.");
         if (p.Stock < 0) throw new BusinessException("Số lượng tồn không được âm.");
     }
 }

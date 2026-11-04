@@ -12,6 +12,14 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // Lưới an toàn: lỗi chưa được xử lý ở giao diện chỉ hiện thông báo, không làm tắt ứng dụng.
+        DispatcherUnhandledException += (_, args) =>
+        {
+            MessageBox.Show("Đã xảy ra lỗi không mong muốn:\n" + args.Exception.Message,
+                "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+            args.Handled = true;
+        };
+
         // Định dạng số/tiền theo chuẩn Việt Nam (1.025.845,26)
         var culture = new CultureInfo("vi-VN");
         CultureInfo.DefaultThreadCurrentCulture = culture;

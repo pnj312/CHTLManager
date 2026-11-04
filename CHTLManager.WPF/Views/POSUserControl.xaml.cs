@@ -125,13 +125,70 @@ public partial class POSUserControl : UserControl
 
     private void BtnPlus_Click(object sender, RoutedEventArgs e)
     {
-        if (dgCart.SelectedItem is CartItem item) item.Quantity++;
+        if (dgCart.SelectedItem is not CartItem item)
+        {
+            ShowSelectCartRow();
+            return;
+        }
+
+        if (item.Quantity >= item.Stock)
+        {
+            MessageBox.Show($"'{item.Name}' chỉ còn {item.Stock} trong kho.", "Không đủ hàng",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        item.Quantity++;
     }
 
     private void BtnMinus_Click(object sender, RoutedEventArgs e)
     {
-        if (dgCart.SelectedItem is CartItem item) item.Quantity--;
+        if (dgCart.SelectedItem is not CartItem item)
+        {
+            ShowSelectCartRow();
+            return;
+        }
+
+        if (item.Quantity <= 1)
+        {
+            MessageBox.Show("Số lượng tối thiểu là 1. Muốn bỏ sản phẩm, bấm \"Xóa dòng\".", "Thông báo",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        item.Quantity--;
     }
+
+    /// <summary>Kiểm tra số lượng gõ tay trong giỏ: phải là số nguyên từ 1 đến tồn kho.</summary>
+    private void DgCart_CellEditEnding(object? sender, DataGridCellEditEndingEventArgs e)
+    {
+        if (e.EditAction != DataGridEditAction.Commit) return;
+        if (e.Row.Item is not CartItem item || e.EditingElement is not TextBox box) return;
+
+        string? message = null;
+        if (!int.TryParse(box.Text.Trim(), out int qty))
+        {
+            message = "Số lượng phải là số nguyên.";
+            box.Text = item.Quantity.ToString();
+        }
+        else if (qty < 1)
+        {
+            message = "Số lượng tối thiểu là 1. Muốn bỏ sản phẩm, bấm \"Xóa dòng\".";
+            box.Text = "1";
+        }
+        else if (qty > item.Stock)
+        {
+            message = $"'{item.Name}' chỉ còn {item.Stock} trong kho. Số lượng được đặt về {item.Stock}.";
+            box.Text = item.Stock.ToString();
+        }
+
+        // Hiện thông báo sau khi DataGrid kết thúc chỉnh sửa, tránh mở hộp thoại giữa lúc đang commit ô.
+        if (message != null)
+            Dispatcher.BeginInvoke(() => MessageBox.Show(message, "Số lượng không hợp lệ",
+                MessageBoxButton.OK, MessageBoxImage.Warning));
+    }
+
+    private static void ShowSelectCartRow()
+        => MessageBox.Show("Hãy chọn một dòng trong giỏ hàng.", "Thông báo",
+            MessageBoxButton.OK, MessageBoxImage.Information);
 
     private void BtnRemove_Click(object sender, RoutedEventArgs e)
     {

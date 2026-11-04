@@ -55,8 +55,9 @@
                 <TextBlock Text="Giá bán (đ) *" Margin="0,0,0,3"/>
                 <TextBox x:Name="txtPrice" Margin="0,0,0,8" HorizontalContentAlignment="Right"/>
 
-                <TextBlock Text="Tồn kho *" Margin="0,0,0,3"/>
-                <TextBox x:Name="txtStock" Margin="0,0,0,12" HorizontalContentAlignment="Right"/>
+                <TextBlock Text="Tồn kho * (chỉ nhập khi thêm mới)" Margin="0,0,0,3"/>
+                <TextBox x:Name="txtStock" Margin="0,0,0,12" HorizontalContentAlignment="Right"
+                         ToolTip="Muốn tăng tồn kho của sản phẩm đã có, dùng mục 'Nhập kho nhanh' bên dưới."/>
 
                 <WrapPanel Margin="0,0,0,12">
                     <Button Content="Thêm" Click="BtnAdd_Click" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>

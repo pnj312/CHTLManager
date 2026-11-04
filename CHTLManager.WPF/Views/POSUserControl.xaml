@@ -56,7 +56,7 @@
                 <TextBlock Grid.Row="0" Text="GIỎ HÀNG" FontSize="18" FontWeight="Bold"
                            Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,8"/>
 
-                <DataGrid Grid.Row="1" x:Name="dgCart" IsReadOnly="False">
+                <DataGrid Grid.Row="1" x:Name="dgCart" IsReadOnly="False" CellEditEnding="DgCart_CellEditEnding">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Sản phẩm" Binding="{Binding Name}" Width="*" IsReadOnly="True"/>
                         <DataGridTextColumn Header="Đơn giá" Binding="{Binding UnitPrice, StringFormat=N0}" Width="75" IsReadOnly="True"/>

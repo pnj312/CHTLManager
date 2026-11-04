@@ -16,11 +16,25 @@ public partial class ProductUserControl : UserControl
 
     private void UserControl_Loaded(object sender, RoutedEventArgs e) => Reload();
 
-    public void Reload()
+    public void Reload() => Reload(null);
+
+    /// <summary>Tải lại danh sách; nếu có <paramref name="selectId"/> thì chọn lại sản phẩm đó để form hiển thị số liệu mới.</summary>
+    private void Reload(int? selectId)
     {
         try
         {
-            dgProducts.ItemsSource = AppServices.Products.Search(txtSearch.Text);
+            var items = AppServices.Products.Search(txtSearch.Text);
+            dgProducts.ItemsSource = items;
+
+            if (selectId.HasValue)
+            {
+                var again = items.FirstOrDefault(p => p.Id == selectId.Value);
+                if (again != null)
+                {
+                    dgProducts.SelectedItem = again;
+                    dgProducts.ScrollIntoView(again);
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -45,6 +59,12 @@ public partial class ProductUserControl : UserControl
             txtCategory.Text = p.Category;
             txtPrice.Text = p.Price.ToString("0");
             txtStock.Text = p.Stock.ToString();
+            // Đang sửa sản phẩm có sẵn: tồn kho chỉ thay đổi qua "Nhập kho nhanh".
+            txtStock.IsEnabled = false;
+        }
+        else
+        {
+            ClearForm();
         }
     }
 
@@ -53,13 +73,19 @@ public partial class ProductUserControl : UserControl
     private void BtnNew_Click(object sender, RoutedEventArgs e)
     {
         dgProducts.SelectedItem = null;
+        ClearForm();
+        txtBarcode.Focus();
+    }
+
+    private void ClearForm()
+    {
         txtBarcode.Clear();
         txtName.Clear();
         txtCategory.Clear();
         txtPrice.Clear();
         txtStock.Clear();
+        txtStock.IsEnabled = true;
         txtImportQty.Clear();
-        txtBarcode.Focus();
     }
 
     private void BtnAdd_Click(object sender, RoutedEventArgs e)
@@ -94,7 +120,7 @@ public partial class ProductUserControl : UserControl
         {
             AppServices.Products.Update(product);
             MessageBox.Show("Đã cập nhật sản phẩm.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-            Reload();
+            Reload(selected.Id);
         }
         catch (BusinessException ex) { ShowWarning(ex.Message); }
         catch (Exception ex) { ShowError(ex); }
@@ -144,8 +170,8 @@ public partial class ProductUserControl : UserControl
         try
         {
             var updated = AppServices.Products.UpdateStock(selected.Id, qty);
+            Reload(selected.Id);
             txtImportQty.Clear();
-            Reload();
             MessageBox.Show($"Tồn kho của '{updated.Name}' hiện là {updated.Stock}.", "Thành công",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -164,9 +190,9 @@ public partial class ProductUserControl : UserControl
             return null;
         }
 
-        if (!MoneyParser.TryParse(txtPrice.Text, out decimal price))
+        if (!MoneyParser.TryParse(txtPrice.Text, out decimal price) || price <= 0)
         {
-            ShowWarning("Giá bán không hợp lệ.");
+            ShowWarning("Giá bán phải là số nguyên dương (ví dụ 15000 hoặc 15.000).");
             return null;
         }
 
