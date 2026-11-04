@@ -66,8 +66,10 @@
                 </DataGrid>
 
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,8">
-                    <Button Content="+" Width="36" Click="BtnPlus_Click"/>
-                    <Button Content="−" Width="36" Click="BtnMinus_Click"/>
+                    <Button Content="+" Width="44" Padding="0,2" FontSize="18" FontWeight="Bold" Click="BtnPlus_Click"
+                            ToolTip="Tăng số lượng dòng đang chọn"/>
+                    <Button Content="−" Width="44" Padding="0,2" FontSize="18" FontWeight="Bold" Click="BtnMinus_Click"
+                            ToolTip="Giảm số lượng dòng đang chọn"/>
                     <Button Content="Xóa dòng" Click="BtnRemove_Click" Style="{StaticResource DangerButton}"/>
                     <Button Content="Xóa giỏ" Click="BtnClear_Click"/>
                 </StackPanel>

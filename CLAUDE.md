@@ -22,15 +22,22 @@ Three layers, referenced strictly downward: `CHTLManager.WPF` → `CHTLManager.B
 
 - **DAL**: EF Core 8 + SQLite. `AppDbContext` configures itself from the static `AppDbContext.DbPath` (default `%LocalAppData%\CHTLManager\chtlmanager.db`, i.e. one DB per Windows user). Entities: `User`, `Product`, `Order`, `OrderDetail`.
 - **BLL**: `ProductService`, `OrderService`, `UserService` behind interfaces in `BLL/Interfaces`. Each service takes a `Func<AppDbContext>` (parameterless ctor uses the default DB) and opens a short-lived context per call. Point `AppDbContext.DbPath` at a temp file to exercise services against a throwaway DB.
-- **WPF**: code-behind (no MVVM). `AppServices` is a static service locator holding the service instances and `CurrentUser`. `MainWindow` hosts two tabs: `POSUserControl` (sales) and `ProductUserControl` (inventory, Admin only).
+- **WPF**: code-behind (no MVVM). `AppServices` is a static service locator holding the service instances and `CurrentUser`. `MainWindow` hosts three tabs: `POSUserControl` (sales), `ProductUserControl` (inventory, Admin only) and `OrderHistoryUserControl` (order history + revenue via `OrderService.GetRevenueReport`, Admin only). Tab views reload data in their `Loaded` handler, which fires every time the tab is shown.
+
+## Project workflow
+
+- Plan and checklist live in `docs/PLAN.md`; tick items as they are done. Demo script and defense Q&A live in `docs/DEMO.md`.
+- Work part by part; after each part, build + verify, then wait for the user's approval before committing (one commit per part). Pushing is a separate decision.
 
 ## Conventions and gotchas
 
 - Throw `BusinessException` for user-facing validation errors; the UI shows its message directly and treats other exceptions as system errors.
 - `OrderService.CreateOrder` is the core sale path: one transaction that re-reads prices from the DB (never trust UI prices), checks/decrements stock, and generates the code `HDyyyyMMdd-NNNN` from a count of today's orders.
-- Products already referenced by orders are soft-deleted (`IsActive = false`); their barcode stays reserved by the unique index.
+- Products already referenced by orders are soft-deleted (`IsActive = false`); `ProductService.Add` with that barcode reactivates the same row. `ProductService.Update` never changes `Stock` — stock only moves through `UpdateStock` and sales.
+- `DbInitializer` seeds users/products when empty and ~20 sample orders over the last 7 days only when `EnsureCreated()` just created the DB.
 - Money is `decimal` mapped to `decimal(18,0)` (VND, no fractions). **SQLite cannot `Sum` or `OrderBy` decimals server-side** (EF throws `NotSupportedException`) — materialize first and aggregate in memory.
 - Schema is created with `Database.EnsureCreated()` in `DbInitializer` (no migrations). Schema changes will not apply to existing DB files; delete the `.db` during development or introduce migrations first.
-- Authorization is UI-only (Inventory tab hidden for Cashier); BLL services do not check roles.
+- Authorization is UI-only (Admin tabs hidden for Cashier); BLL services do not check roles.
 - Passwords are hashed with PBKDF2 (`BLL/Security/PasswordHasher`), stored as `iterations.salt.hash`.
-- `App.OnStartup` forces `vi-VN` culture; money input goes through `WPF/Helpers/MoneyParser`.
+- `App.OnStartup` forces `vi-VN` culture; money input goes through `WPF/Helpers/MoneyParser` (positive integers only, `.`/`,` accepted only as thousand separators).
+- Verification without the UI: a scratch console project referencing `CHTLManager.BLL` can set `AppDbContext.DbPath` to a temp file, call `DbInitializer.Initialize()`, then exercise the services.

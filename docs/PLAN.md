@@ -57,8 +57,8 @@ Mục tiêu: một bản demo **không có lỗi**, đủ các luồng chính, k
 - [x] Harness: database mới có hóa đơn mẫu, tồn kho đã bị trừ đúng, mã không trùng
 - [x] Harness: `GetRevenueReport` khớp với tổng tính tay; khoảng ngày rỗng trả về 0, không lỗi
 - [x] Bán thêm một hóa đơn hôm nay: mã tiếp nối đúng (không trùng với hóa đơn mẫu)
-- [ ] Giao diện tab mới hiển thị đúng (kiểm tra cùng lượt chạy thử ở Phần 3)
-- [ ] Bạn duyệt → commit
+- [x] Giao diện tab mới hiển thị đúng (kiểm tra cùng lượt chạy thử ở Phần 3)
+- [x] Bạn duyệt → commit (`bb25538`)
 
 ---
 
@@ -67,25 +67,26 @@ Mục tiêu: một bản demo **không có lỗi**, đủ các luồng chính, k
 - Viết lại `README.md`: yêu cầu hệ thống, cách chạy và publish, vị trí database, backup/reset database, tài khoản mẫu, phạm vi một máy. Bỏ dòng "chưa biên dịch".
 - Thêm `docs/DEMO.md`: kịch bản demo theo thứ tự và các câu trả lời bảo vệ (lấy từ mục I của báo cáo audit, cập nhật theo chức năng mới).
 - Cập nhật `CLAUDE.md` nếu kiến trúc thay đổi.
-- **Chạy thử UI thật:** xóa database → mở app → đi qua toàn bộ checklist bên dưới. Tôi điều khiển app bằng computer use (cần bạn cho phép). Nếu không được, bạn tự chạy theo checklist.
+- **Chạy thử UI thật:** xóa database → mở app → đi qua toàn bộ checklist bên dưới. Đã chạy bằng Windows UI Automation (script PowerShell điền ô, bấm nút, gõ phím thật, đọc hộp thoại, chụp màn hình) do computer use chưa bật.
 
 **Checklist demo end-to-end (database sạch)**
-- [ ] Mở app lần đầu: tự tạo database, hiện màn đăng nhập
-- [ ] Sai mật khẩu → báo lỗi, không crash
-- [ ] Đăng nhập `thungan`: chỉ thấy tab Bán hàng
-- [ ] Quét mã vạch đúng → vào giỏ; mã sai → cảnh báo
-- [ ] Tìm "hao hao" (không dấu) → ra "Mì Hảo Hảo"
-- [ ] Bấm + đến khi vượt tồn → có cảnh báo
-- [ ] Nhập khách đưa `100.000` → tiền thừa đúng; `100.000,5` → báo không hợp lệ
-- [ ] Thanh toán thiếu tiền → bị chặn
-- [ ] Thanh toán đủ → hiện hóa đơn, giỏ trống, tồn kho giảm
-- [ ] Đăng xuất → quay lại đăng nhập
-- [ ] Đăng nhập `admin`: thấy đủ các tab
-- [ ] Thêm, sửa sản phẩm (ô tồn kho bị khóa khi sửa), nhập thêm kho
-- [ ] Xóa sản phẩm đã bán → ngừng kinh doanh; thêm lại cùng mã vạch → sản phẩm hiện lại
-- [ ] Tab Hóa đơn & Doanh thu: có số liệu mẫu; hóa đơn vừa bán xuất hiện; xem chi tiết; đổi khoảng ngày
+- [x] Mở app lần đầu: tự tạo database, hiện màn đăng nhập
+- [x] Sai mật khẩu → báo lỗi, không crash
+- [x] Đăng nhập `thungan`: chỉ thấy tab Bán hàng
+- [x] Quét mã vạch đúng → vào giỏ; mã sai → cảnh báo
+- [x] Tìm "hao hao" (không dấu) → ra "Mì Hảo Hảo"
+- [x] Bấm + đến khi vượt tồn → có cảnh báo; gõ SL vượt tồn / 0 / chữ → có cảnh báo; quét hàng hết → cảnh báo
+- [x] Nhập khách đưa `100.000` → tiền thừa đúng; `100.000,5` → báo không hợp lệ
+- [x] Thanh toán thiếu tiền → bị chặn
+- [x] Thanh toán đủ → hiện hóa đơn, giỏ trống, tồn kho giảm
+- [x] Đăng xuất → quay lại đăng nhập
+- [x] Đăng nhập `admin`: thấy đủ các tab
+- [x] Thêm, sửa sản phẩm (ô tồn kho bị khóa khi sửa), nhập thêm kho
+- [x] Xóa sản phẩm đã bán → ngừng kinh doanh; thêm lại cùng mã vạch → sản phẩm hiện lại
+- [x] Tab Hóa đơn & Doanh thu: có số liệu mẫu; hóa đơn vừa bán xuất hiện; xem chi tiết; đổi khoảng ngày
 - [ ] Tài khoản (Phần 5): tạo thu ngân mới → đăng nhập được; khóa → không đăng nhập được
-- [ ] Không có lần nào app bị tắt đột ngột
+- [x] Không có lần nào app bị tắt đột ngột
+- [x] Lỗi phát sinh đã sửa: nút `+`/`−` trong giỏ quá hẹp, không thấy ký hiệu
 - [ ] Bạn duyệt → commit
 
 ---
