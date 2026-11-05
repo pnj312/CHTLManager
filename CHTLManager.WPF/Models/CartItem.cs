@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using CHTLManager.BLL;
 
 namespace CHTLManager.WPF.Models;
 
@@ -40,12 +41,15 @@ public class CartItem : INotifyPropertyChanged
         set
         {
             int v = Math.Max(1, value);
-            if (!OversellConfirmed) v = Math.Min(v, Math.Max(Stock, 1));
+            v = Math.Min(v, OversellConfirmed ? MaxQuantity : Math.Max(Stock, 1));
             _quantity = v;
             OnPropertyChanged();
             OnPropertyChanged(nameof(LineTotal));
         }
     }
+
+    /// <summary>Số lượng tối đa của dòng này khi đã xác nhận bán ngoài sổ.</summary>
+    public int MaxQuantity => Math.Max(Stock, 0) + OrderService.MaxOutOfBookPerLine;
 
     public decimal LineTotal => UnitPrice * Quantity;
 

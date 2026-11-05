@@ -39,7 +39,7 @@
 - Tab **Quản lý Kho**: thêm sản phẩm mới (mã vạch, tên, giá, tồn).
 - Chọn một sản phẩm, sửa giá → ô Tồn kho bị khóa (giải thích: tồn kho chỉ thay đổi qua nhập kho hoặc bán hàng, tránh ghi đè số liệu).
 - Chọn một sản phẩm bình thường, bấm **Nhập kho sản phẩm đang chọn...**: nhập số lượng `20`, nhà cung cấp, số hóa đơn → tồn kho tăng đúng 20.
-- Xóa Mì Hảo Hảo (đã có trong hóa đơn) → chuyển sang ngừng kinh doanh, lịch sử vẫn giữ. Thêm lại cùng mã vạch → sản phẩm được kinh doanh lại.
+- Xóa Mì Hảo Hảo khi còn hàng → bị chặn, app yêu cầu bán hết hoặc kiểm kê về 0 (để không ai dùng xóa rồi thêm lại mà che số lệch). Sản phẩm tồn 0 đã có lịch sử thì chuyển sang ngừng kinh doanh; thêm lại cùng mã vạch thì kinh doanh lại với tồn kho giữ nguyên.
 - **Nhà cung cấp giao lô mới, lô cũ chưa chốt:** tích **"Chỉ hiện SP cần kiểm kê"** → chỉ còn Dầu gội. Chọn nó, bấm **Nhập kho** → app báo cần kiểm kê trước để hai lô không lẫn, rồi tự mở cửa sổ Kiểm kê. Nhập số đếm được `2`, chọn **Hàng nhập chưa ghi**, số hóa đơn cũ `0099` → tồn về 2. Cửa sổ Nhập kho tự mở: `10`, `NPP Unilever`, `0123` → tồn **12**. Bỏ tích ô lọc.
 - **Tình huống ngược lại (thất thoát):** chọn Coca, bấm **Kiểm kê sản phẩm đang chọn...**, nhập số đếm ít hơn sổ 3 cái → app kết luận "Thực tế ít hơn sổ 3 cái: thất thoát". Bấm Cập nhật khi chưa chọn lý do → bị chặn. Chọn **Mất** → cập nhật.
 - Tab **Nhật ký kho**: thấy đủ cả hai chiều lệch (Bán ngoài sổ kèm mã hóa đơn, Kiểm kê: thất thoát kèm lý do), ai làm, lúc nào. Thẻ đầu trang là **tổng thất thoát** trong kỳ; có sẵn vài dòng mẫu.

@@ -72,12 +72,12 @@ public class ProductService : IProductService
                 throw new BusinessException($"Mã vạch '{code}' đã tồn tại.");
 
             // Mã vạch thuộc sản phẩm đã ngừng kinh doanh: kinh doanh lại sản phẩm đó với thông tin mới
-            // (giữ nguyên Id để lịch sử hóa đơn cũ vẫn trỏ đúng sản phẩm).
+            // (giữ nguyên Id để lịch sử hóa đơn cũ vẫn trỏ đúng sản phẩm). Tồn kho không đổi:
+            // cho khai lại ở đây sẽ thành cửa sau né kiểm kê, nhập kho và giấu thất thoát.
             existing.Name = product.Name.Trim();
             existing.Category = (product.Category ?? string.Empty).Trim();
             existing.Price = product.Price;
             existing.IsActive = true;
-            ChangeStock(db, existing, product.Stock, StockMovementType.Initial, StockReason.None, userId);
             db.SaveChanges();
             return existing;
         }
@@ -125,6 +125,9 @@ public class ProductService : IProductService
         using var db = _factory();
         var entity = db.Products.FirstOrDefault(p => p.Id == id)
                      ?? throw new BusinessException("Không tìm thấy sản phẩm cần xóa.");
+
+        if (entity.Stock != 0)
+            throw new BusinessException($"'{entity.Name}' còn tồn kho {entity.StockDisplay}. Hãy bán hết hoặc kiểm kê về 0 trước khi ngừng kinh doanh.");
 
         bool hasHistory = db.OrderDetails.Any(d => d.ProductId == id) || db.StockMovements.Any(m => m.ProductId == id);
         if (hasHistory)

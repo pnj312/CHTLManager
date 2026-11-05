@@ -98,8 +98,11 @@ public partial class ProductUserControl : UserControl
 
         try
         {
-            AppServices.Products.Add(product, AppServices.CurrentUser!.Id);
-            MessageBox.Show("Đã thêm sản phẩm.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            var saved = AppServices.Products.Add(product, AppServices.CurrentUser!.Id);
+            string message = saved.Stock == product.Stock
+                ? "Đã thêm sản phẩm."
+                : $"Mã vạch này thuộc sản phẩm đã ngừng kinh doanh nên được kinh doanh lại. Tồn kho giữ nguyên là {saved.StockDisplay}; muốn tăng tồn kho hãy dùng Nhập kho.";
+            MessageBox.Show(message, "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             Reload();
             BtnNew_Click(sender, e);
         }

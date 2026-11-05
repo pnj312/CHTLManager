@@ -9,6 +9,9 @@ namespace CHTLManager.BLL;
 /// <summary>Tạo hóa đơn bán hàng, tính tổng tiền/tiền thừa và lưu lịch sử bán.</summary>
 public class OrderService : IOrderService
 {
+    /// <summary>Số cái được bán vượt tồn kho trên một dòng hóa đơn; nhiều hơn thì phải nhận hàng hoặc kiểm kê trước.</summary>
+    public const int MaxOutOfBookPerLine = 10;
+
     private readonly Func<AppDbContext> _factory;
 
     public OrderService() : this(() => new AppDbContext())
@@ -59,6 +62,10 @@ public class OrderService : IOrderService
             bool oversellAllowed = allowOversellProductIds?.Contains(product.Id) == true;
             if (product.Stock < quantity && !oversellAllowed)
                 throw new BusinessException($"'{product.Name}' chỉ còn {Math.Max(product.Stock, 0)} trong kho.");
+
+            if (quantity - Math.Max(product.Stock, 0) > MaxOutOfBookPerLine)
+                throw new BusinessException(
+                    $"'{product.Name}' chỉ được bán ngoài sổ tối đa {MaxOutOfBookPerLine} cái. Hãy nhận hàng hoặc kiểm kê trước khi bán thêm.");
 
             int before = product.Stock;
             product.Stock -= quantity;

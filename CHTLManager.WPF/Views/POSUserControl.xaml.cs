@@ -98,6 +98,11 @@ public partial class POSUserControl : UserControl
         if (existing != null)
         {
             if (confirmed) existing.OversellConfirmed = true;
+            if (confirmed && existing.Quantity >= existing.MaxQuantity)
+            {
+                ShowOutOfBookLimit(existing.Name);
+                return;
+            }
             existing.Quantity++;
         }
         else
@@ -136,8 +141,18 @@ public partial class POSUserControl : UserControl
             if (!ConfirmOversell(item.Name, item.Stock)) return;
             item.OversellConfirmed = true;
         }
+        if (item.OversellConfirmed && item.Quantity >= item.MaxQuantity)
+        {
+            ShowOutOfBookLimit(item.Name);
+            return;
+        }
         item.Quantity++;
     }
+
+    private static void ShowOutOfBookLimit(string name)
+        => MessageBox.Show(
+            $"'{name}' chỉ được bán ngoài sổ tối đa {OrderService.MaxOutOfBookPerLine} cái. Hãy nhận hàng hoặc kiểm kê trước khi bán thêm.",
+            "Vượt giới hạn bán ngoài sổ", MessageBoxButton.OK, MessageBoxImage.Warning);
 
     /// <summary>
     /// Hỏi thu ngân khi kho trên phần mềm báo không đủ hàng. Mặc định là "No" để tránh bấm nhầm.
@@ -184,7 +199,15 @@ public partial class POSUserControl : UserControl
                 if (!ConfirmOversell(item.Name, item.Stock)) return;
                 item.OversellConfirmed = true;
                 item.Quantity = wanted;
+                if (wanted > item.MaxQuantity) ShowOutOfBookLimit(item.Name);
             });
+            return;
+        }
+
+        if (wanted > item.MaxQuantity && item.OversellConfirmed)
+        {
+            box.Text = item.MaxQuantity.ToString();
+            Dispatcher.BeginInvoke(() => ShowOutOfBookLimit(item.Name));
             return;
         }
 
