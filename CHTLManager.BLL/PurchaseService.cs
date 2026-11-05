@@ -60,12 +60,12 @@ public class PurchaseService : IPurchaseService
         if (lines.Any(l => l.UnitCost < 0))
             throw new BusinessException("Giá nhập không được âm.");
 
-        string key = invoice.ToUpperInvariant();
+        string key = InvoiceKeyOf(invoice);
         using var db = _factory();
         var supplier = db.Suppliers.FirstOrDefault(s => s.Id == supplierId && s.IsActive)
                        ?? throw new BusinessException("Không tìm thấy nhà cung cấp.");
 
-        if (db.PurchaseReceipts.Any(r => r.SupplierId == supplierId && r.InvoiceKey == key && r.Status != ReceiptStatus.Cancelled))
+        if (InvoiceAlreadyEntered(db, supplierId, key))
             throw new BusinessException($"Hóa đơn '{invoice}' của {supplier.Name} đã được nhập rồi.");
 
         var ids = lines.Select(l => l.ProductId).ToList();
@@ -142,6 +142,58 @@ public class PurchaseService : IPurchaseService
         return receipt;
     }
 
+    public void CorrectReceiptCosts(int receiptId, IReadOnlyDictionary<int, decimal> unitCostByLineId, string reason, int adminId)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new BusinessException("Hãy nhập lý do sửa giá.");
+
+        using var db = _factory();
+        var receipt = db.PurchaseReceipts
+                          .Include(r => r.Supplier)
+                          .Include(r => r.Lines).ThenInclude(l => l.Product)
+                          .FirstOrDefault(r => r.Id == receiptId)
+                      ?? throw new BusinessException("Không tìm thấy phiếu nhập.");
+        if (receipt.Status != ReceiptStatus.Confirmed)
+            throw new BusinessException($"Chỉ sửa giá được phiếu đã xác nhận; phiếu {receipt.Code} đang là '{receipt.StatusName}'.");
+
+        foreach (var line in receipt.Lines)
+        {
+            if (!unitCostByLineId.TryGetValue(line.Id, out decimal cost))
+                throw new BusinessException("Hãy nhập giá nhập cho mọi dòng.");
+            if (cost < 0)
+                throw new BusinessException("Giá nhập không được âm.");
+        }
+
+        decimal newTotal = receipt.Lines.Sum(l => unitCostByLineId[l.Id] * l.ReceivedQuantity);
+        decimal paid = PaidTo(db, receipt.SupplierId);
+        if (paid > PurchasedFrom(db, receipt.SupplierId) - receipt.Total + newTotal)
+            throw new BusinessException(
+                $"Không sửa được: đã trả {receipt.Supplier!.Name} {paid:N0} đ, giá mới làm số đã trả vượt tiền hàng. Hãy hủy lần trả tương ứng trước.");
+
+        bool changed = false;
+        foreach (var line in receipt.Lines)
+        {
+            decimal oldCost = line.UnitCost ?? 0, newCost = unitCostByLineId[line.Id];
+            if (oldCost == newCost) continue;
+            changed = true;
+
+            var product = line.Product!;
+            var (pool, quantity) = CostPool(db, receipt, line);
+            product.AverageCost = CostCalculator.ChangeLotCost(product.AverageCost, pool, quantity, oldCost, newCost, DilutionAfter(db, receipt, line.ProductId));
+            if (newCost > 0 && !OtherCosts(db, line.ProductId, receipt.Id).Any(c => c.ReceiptId > receipt.Id))
+                product.LastCost = newCost;
+            line.UnitCost = newCost;
+
+            StockLedger.Apply(db, product, product.Stock, StockMovementType.CostCorrected, adminId, logUnchanged: true,
+                supplier: receipt.Supplier!.Name, invoiceNo: receipt.InvoiceNo, receipt: receipt,
+                note: $"Giá {oldCost:N0} thành {newCost:N0}: {reason.Trim()}");
+        }
+
+        if (!changed)
+            throw new BusinessException("Giá nhập không có gì thay đổi.");
+        Save(db);
+    }
+
     public void CancelReceipt(int receiptId, string reason, int adminId)
     {
         if (string.IsNullOrWhiteSpace(reason))
@@ -175,7 +227,16 @@ public class PurchaseService : IPurchaseService
         foreach (var line in receipt.Lines)
         {
             if (costWasApplied)
-                line.Product!.AverageCost = CostCalculator.RemoveFromAverage(line.Product.Stock, line.Product.AverageCost, line.ReceivedQuantity, line.UnitCost ?? 0);
+            {
+                var product = line.Product!;
+                var (pool, quantity) = CostPool(db, receipt, line);
+                product.AverageCost = CostCalculator.RemoveLot(product.AverageCost, pool, quantity, line.UnitCost ?? 0, DilutionAfter(db, receipt, line.ProductId));
+
+                // Giá nhập gần nhất không được giữ giá của phiếu vừa hủy.
+                var others = OtherCosts(db, line.ProductId, receipt.Id);
+                if (others.Count > 0) product.LastCost = others[0].Cost;
+                else if (pool > quantity && product.AverageCost > 0) product.LastCost = product.AverageCost;
+            }
 
             StockLedger.Apply(db, line.Product!, line.Product!.Stock - line.ReceivedQuantity, StockMovementType.ReceiptCancelled, adminId,
                 supplier: receipt.Supplier!.Name, invoiceNo: receipt.InvoiceNo, receipt: receipt);
@@ -218,11 +279,11 @@ public class PurchaseService : IPurchaseService
         string invoice = invoiceNo.Trim();
         if (invoice.Length == 0)
             throw new BusinessException("Hãy nhập số hóa đơn của lô chưa ghi.");
-        string key = invoice.ToUpperInvariant();
+        string key = InvoiceKeyOf(invoice);
 
         var supplier = db.Suppliers.FirstOrDefault(s => s.Id == supplierId)
                        ?? throw new BusinessException("Không tìm thấy nhà cung cấp.");
-        if (db.PurchaseReceipts.Any(r => r.SupplierId == supplierId && r.InvoiceKey == key && r.Status != ReceiptStatus.Cancelled))
+        if (InvoiceAlreadyEntered(db, supplierId, key))
             throw new BusinessException($"Hóa đơn '{invoice}' của {supplier.Name} đã được nhập rồi.");
 
         var product = db.Products.First(p => p.Id == discrepancy.ProductId);
@@ -255,7 +316,7 @@ public class PurchaseService : IPurchaseService
 
         // Phần đã bán ngoài sổ không còn trên kệ nên chỉ đổi giá phần thực sự tăng lên; lúc đếm nó đã vào bình quân theo giá cũ.
         int onHandIncrease = discrepancy.CountedStock - Math.Max(discrepancy.BookStock, 0);
-        product.AverageCost = CostCalculator.ReplaceInAverage(product.Stock, product.AverageCost, onHandIncrease, Math.Min(discrepancy.UnitCost, product.AverageCost), unitCost);
+        product.AverageCost = CostCalculator.ReplaceInAverage(product.Stock, product.AverageCost, onHandIncrease, Math.Min(discrepancy.UnitCost, product.AverageCost), unitCost, discrepancy.CountedStock);
         if (unitCost > 0) product.LastCost = unitCost;
 
         return receipt;
@@ -366,6 +427,61 @@ public class PurchaseService : IPurchaseService
             .Where(p => p.SupplierId == supplierId && !p.IsCancelled)
             .ToList()
             .Sum(p => p.Amount);
+
+    /// <summary>Bỏ mọi khoảng trắng và không phân biệt hoa thường: "hd 001" và "HD001" là cùng một hóa đơn.</summary>
+    private static string InvoiceKeyOf(string invoice)
+        => string.Concat(invoice.Where(c => !char.IsWhiteSpace(c))).ToUpperInvariant();
+
+    // So sánh trong bộ nhớ để cũng nhận ra các phiếu cũ có khóa còn khoảng trắng, không cần sửa dữ liệu đã lưu.
+    private static bool InvoiceAlreadyEntered(AppDbContext db, int supplierId, string key)
+        => db.PurchaseReceipts.AsNoTracking()
+            .Where(r => r.SupplierId == supplierId && r.Status != ReceiptStatus.Cancelled)
+            .Select(r => r.InvoiceKey)
+            .AsEnumerable()
+            .Any(k => InvoiceKeyOf(k) == key);
+
+    /// <summary>Số hàng lúc lô này vào bình quân và số đơn vị của lô nằm trong bình quân.</summary>
+    private static (int Pool, int Quantity) CostPool(AppDbContext db, PurchaseReceipt receipt, PurchaseReceiptLine line)
+    {
+        if (receipt.StockDiscrepancyId is int discrepancyId)
+        {
+            var d = db.StockDiscrepancies.AsNoTracking().First(x => x.Id == discrepancyId);
+            return (d.CountedStock, d.CountedStock - Math.Max(d.BookStock, 0));
+        }
+
+        var movement = db.StockMovements.AsNoTracking().FirstOrDefault(m => m.PurchaseReceiptId == receipt.Id
+            && m.ProductId == line.ProductId && m.Type == StockMovementType.ReceiptIn);
+        return (movement?.AfterStock ?? Math.Max(line.Product!.Stock, line.ReceivedQuantity), line.ReceivedQuantity);
+    }
+
+    /// <summary>Mỗi lô nhập sau đó pha loãng ảnh hưởng của lô này theo tỷ lệ hàng cũ trên tổng hàng lúc nhập.</summary>
+    private static decimal DilutionAfter(AppDbContext db, PurchaseReceipt receipt, int productId)
+    {
+        var later = db.StockMovements.AsNoTracking()
+            .Where(m => m.ProductId == productId && m.Type == StockMovementType.ReceiptIn
+                        && m.PurchaseReceiptId != receipt.Id && m.CreatedAt > receipt.ReceivedAt
+                        && m.PurchaseReceipt!.Status == ReceiptStatus.Confirmed)
+            .ToList();
+
+        decimal dilution = 1;
+        foreach (var m in later.Where(x => x.Delta > 0))
+        {
+            int before = Math.Max(m.BeforeStock, 0);
+            dilution *= (decimal)before / (before + m.Delta);
+        }
+        return dilution;
+    }
+
+    /// <summary>Giá nhập có giá trị ở các phiếu đã xác nhận khác, phiếu mới nhất trước.</summary>
+    private static List<(int ReceiptId, decimal Cost)> OtherCosts(AppDbContext db, int productId, int receiptId)
+        => db.PurchaseReceipts.AsNoTracking()
+            .Include(r => r.Lines)
+            .Where(r => r.Id != receiptId && r.Status == ReceiptStatus.Confirmed && r.Lines.Any(l => l.ProductId == productId))
+            .OrderByDescending(r => r.Id)
+            .ToList()
+            .Select(r => (r.Id, Cost: r.Lines.First(l => l.ProductId == productId).UnitCost ?? 0))
+            .Where(x => x.Cost > 0)
+            .ToList();
 
     private static void ApplyCost(Product product, int stockBefore, PurchaseReceiptLine line)
     {

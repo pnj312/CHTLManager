@@ -19,7 +19,9 @@ public enum StockMovementType
     /// <summary>Khai báo giá vốn cho sản phẩm chưa có giá; không đổi tồn kho.</summary>
     CostDeclared = 7,
     /// <summary>Hủy hóa đơn bán, hoàn lại số đã trừ.</summary>
-    SaleCancelled = 8
+    SaleCancelled = 8,
+    /// <summary>Sửa giá nhập của phiếu đã xác nhận; không đổi tồn kho.</summary>
+    CostCorrected = 9
 }
 
 /// <summary>Lý do chênh lệch khi kiểm kê.</summary>
@@ -73,6 +75,10 @@ public class StockMovement
     [MaxLength(50)]
     public string? InvoiceNo { get; set; }
 
+    /// <summary>Ghi chú của thao tác, ví dụ giá cũ, giá mới và lý do sửa giá nhập.</summary>
+    [MaxLength(300)]
+    public string? Note { get; set; }
+
     /// <summary>Số cái bán vượt số đã ghi trong sổ ở lần này.</summary>
     [NotMapped]
     public int OutOfBookQuantity => Type == StockMovementType.OutOfBookSale
@@ -90,6 +96,7 @@ public class StockMovement
         StockMovementType.ReceiptCancelled => "Hủy phiếu nhập",
         StockMovementType.CostDeclared => "Khai báo giá vốn",
         StockMovementType.SaleCancelled => "Hủy hóa đơn bán",
+        StockMovementType.CostCorrected => "Sửa giá nhập",
         _ => string.Empty
     };
 
@@ -110,6 +117,7 @@ public class StockMovement
 
             var parts = new[]
             {
+                Note ?? string.Empty,
                 ReasonName(Reason),
                 Supplier ?? string.Empty,
                 string.IsNullOrEmpty(InvoiceNo) ? string.Empty : $"HĐ {InvoiceNo}"

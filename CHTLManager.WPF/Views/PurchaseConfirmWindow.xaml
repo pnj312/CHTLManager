@@ -22,7 +22,7 @@
         <TextBlock Grid.Row="2" x:Name="txtError" Foreground="{StaticResource DangerBrush}" TextWrapping="Wrap" MinHeight="20" Margin="0,8,0,8"/>
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button x:Name="btnSave" Content="Xác nhận phiếu" Click="BtnSave_Click" Style="{StaticResource AccentButton}"/>
-            <Button Content="Để sau" IsCancel="True" Margin="0"/>
+            <Button x:Name="btnLater" Content="Để sau" IsCancel="True" Margin="0"/>
         </StackPanel>
     </Grid>
 </Window>

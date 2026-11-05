@@ -8,7 +8,7 @@ public class CostCalculatorTests
     [InlineData(10, 100, 10, 120, 110)]
     [InlineData(0, 100, 5, 120, 120)]   // hết hàng: lấy giá nhập mới
     [InlineData(-1, 100, 5, 120, 120)]  // tồn âm không được kéo công thức sai
-    [InlineData(3, 0, 3, 100, 50)]      // giá cũ 0 vẫn đúng công thức
+    [InlineData(3, 0, 3, 100, 100)]     // còn hàng mà giá 0 là chưa biết giá: lấy giá nhập, không kéo bình quân
     [InlineData(5, 100, 0, 999, 100)]   // không nhận gì: giữ nguyên
     [InlineData(0, 100, 0, 999, 100)]   // không chia cho 0
     public void AddToAverage_Cases(int stock, double average, int quantity, double cost, double expected)
@@ -41,6 +41,14 @@ public class CostCalculatorTests
     [Fact]
     public void ReplaceInAverage_NoOldAverage_UsesNewCostForReplacedUnits()
         => Assert.Equal(110m, CostCalculator.ReplaceInAverage(2, 0, 2, 0, 110));
+
+    [Fact]
+    public void ReplaceInAverage_NoOldAverage_MoreStockThanReplaced_UsesNewCost()
+        => Assert.Equal(110m, CostCalculator.ReplaceInAverage(12, 0, 2, 0, 110));
+
+    [Fact]
+    public void ReplaceInAverage_ReferenceStock_SpreadsOverTheOriginalQuantity()
+        => Assert.Equal(15000m, CostCalculator.ReplaceInAverage(2, 10000, 10, 10000, 20000, referenceStock: 20));
 
     [Fact]
     public void ReplaceInAverage_NeverNegative()

@@ -42,11 +42,13 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="txtDetail" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap"
                        Foreground="{StaticResource PrimaryBrush}" Text="CHI TIẾT PHIẾU"/>
             <Button Grid.Column="1" x:Name="btnConfirm" Content="Xác nhận phiếu..." Click="BtnConfirm_Click" Style="{StaticResource PrimaryButton}"/>
-            <Button Grid.Column="2" x:Name="btnCancel" Content="Hủy phiếu..." Click="BtnCancel_Click" Style="{StaticResource DangerButton}" Margin="0"/>
+            <Button Grid.Column="2" x:Name="btnCorrect" Content="Sửa giá nhập..." Click="BtnCorrect_Click" Style="{StaticResource PrimaryButton}"/>
+            <Button Grid.Column="3" x:Name="btnCancel" Content="Hủy phiếu..." Click="BtnCancel_Click" Style="{StaticResource DangerButton}" Margin="0"/>
         </Grid>
 
         <DataGrid Grid.Row="3" x:Name="dgLines">

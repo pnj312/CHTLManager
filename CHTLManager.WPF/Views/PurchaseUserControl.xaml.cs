@@ -62,6 +62,7 @@ public partial class PurchaseUserControl : UserControl
     {
         dgLines.ItemsSource = receipt?.Lines;
         btnConfirm.IsEnabled = receipt?.Status == ReceiptStatus.Pending;
+        btnCorrect.IsEnabled = receipt?.Status == ReceiptStatus.Confirmed;
         btnCancel.IsEnabled = receipt != null && receipt.Status != ReceiptStatus.Cancelled;
 
         if (receipt == null)
@@ -86,12 +87,18 @@ public partial class PurchaseUserControl : UserControl
         if (new PurchaseConfirmWindow(receipt) { Owner = Window.GetWindow(this) }.ShowDialog() == true) ReloadAfterChange();
     }
 
+    private void BtnCorrect_Click(object sender, RoutedEventArgs e)
+    {
+        if (dgReceipts.SelectedItem is not PurchaseReceipt receipt) return;
+        if (new PurchaseConfirmWindow(receipt, correcting: true) { Owner = Window.GetWindow(this) }.ShowDialog() == true) ReloadAfterChange();
+    }
+
     private void BtnCancel_Click(object sender, RoutedEventArgs e)
     {
         if (dgReceipts.SelectedItem is not PurchaseReceipt receipt) return;
 
         string? reason = ReasonWindow.Ask(Window.GetWindow(this), "Hủy phiếu nhập",
-            $"Hủy phiếu {receipt.Code}? Tồn kho sẽ bị trừ lại đúng số đã cộng. Lý do hủy:");
+            $"Hủy phiếu {receipt.Code}? Tồn kho sẽ bị trừ lại đúng số đã cộng. Chỉ hủy khi hàng thực sự không nhập; nếu chỉ sai giá, hãy dùng Sửa giá nhập, vì hủy rồi nhập lại sẽ làm sai tồn kho khi hàng đã bán. Lý do hủy:");
         if (reason == null) return;
 
         try

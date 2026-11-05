@@ -57,10 +57,10 @@ Hoặc mở `CHTLManager.slnx` trong Visual Studio, đặt `CHTLManager.WPF` là
 dotnet publish CHTLManager.WPF -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=none -o publish
 ```
 
-- Kết quả: một file duy nhất `publish\CHTLManager.WPF.exe` (khoảng 71 MB, đã gồm .NET runtime và SQLite).
+- Kết quả: thư mục `publish` gồm `CHTLManager.WPF.exe` (khoảng 71 MB, đã gồm .NET runtime và SQLite) và `CHTL Manager (demo).bat` để mở với dữ liệu mẫu.
 - Cài trên máy mới: copy file `.exe` sang (USB, Google Drive...) và nhấp đúp để chạy. Không cần cài .NET hay Visual Studio. Windows SmartScreen có thể cảnh báo vì file chưa ký số: chọn "More info" → "Run anyway".
 - Lần mở đầu mất vài giây để giải nén và tạo CSDL; các lần sau nhanh hơn.
-- Cập nhật phiên bản: thay file `.exe` mới, CSDL trong `%LocalAppData%` được giữ nguyên.
+- Cập nhật phiên bản: thay file `.exe` mới, CSDL trong `%LocalAppData%` được giữ nguyên và tự sao lưu trước khi đổi cấu trúc. Sản phẩm cũ chưa có giá vốn: khai báo ở tab Kho, lọc "Chưa có giá vốn", nút "Giá vốn...".
 
 Tài khoản ban đầu là `admin` / `admin123`. Chế độ `--demo` có thêm `thungan` / `123456`.
 

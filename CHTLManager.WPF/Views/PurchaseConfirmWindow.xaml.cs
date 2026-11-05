@@ -6,7 +6,7 @@ using CHTLManager.WPF.Helpers;
 
 namespace CHTLManager.WPF.Views;
 
-/// <summary>Admin đối chiếu phiếu do thu ngân nhận với hóa đơn và nhập giá.</summary>
+/// <summary>Admin đối chiếu phiếu do thu ngân nhận với hóa đơn và nhập giá, hoặc sửa giá của phiếu đã xác nhận.</summary>
 public partial class PurchaseConfirmWindow : Window
 {
     private sealed class Row
@@ -20,20 +20,31 @@ public partial class PurchaseConfirmWindow : Window
 
     private readonly PurchaseReceipt _receipt;
     private readonly List<Row> _rows;
+    private readonly bool _correcting;
 
-    public PurchaseConfirmWindow(PurchaseReceipt receipt)
+    public PurchaseConfirmWindow(PurchaseReceipt receipt, bool correcting = false)
     {
         InitializeComponent();
         _receipt = receipt;
+        _correcting = correcting;
         txtHeader.Text = $"Phiếu {receipt.Code} – {receipt.Supplier?.Name}, hóa đơn {receipt.InvoiceNo}. Người nhận: {receipt.CreatedBy?.FullName}.";
         _rows = receipt.Lines.Select(l => new Row
         {
             LineId = l.Id,
             Name = l.Product?.Name ?? string.Empty,
             Invoiced = l.InvoicedQuantity,
-            Received = l.ReceivedQuantity
+            Received = l.ReceivedQuantity,
+            CostText = correcting ? (l.UnitCost ?? 0).ToString("N0") : string.Empty
         }).ToList();
         dgLines.ItemsSource = _rows;
+
+        if (correcting)
+        {
+            Title = "Sửa giá nhập";
+            btnSave.Content = "Lưu giá mới";
+            btnLater.Content = "Đóng";
+            txtHeader.Text += " Công nợ và giá vốn sẽ đổi theo giá mới, tồn kho giữ nguyên. Lãi của các hóa đơn đã bán không đổi.";
+        }
     }
 
     private void BtnSave_Click(object sender, RoutedEventArgs e)
@@ -52,11 +63,32 @@ public partial class PurchaseConfirmWindow : Window
             costs[row.LineId] = cost;
         }
 
+        if (_correcting)
+        {
+            SaveCorrection(costs);
+            return;
+        }
+
         try
         {
             var saved = AppServices.Purchases.ConfirmReceipt(_receipt.Id, costs, AppServices.CurrentUser!.Id);
             MessageBox.Show($"Đã xác nhận phiếu {saved.Code}. Tiền hàng: {MoneyParser.Format(saved.Total)}.", "Thành công",
                 MessageBoxButton.OK, MessageBoxImage.Information);
+            DialogResult = true;
+        }
+        catch (BusinessException ex) { txtError.Text = ex.Message; }
+        catch (Exception ex) { txtError.Text = "Lỗi hệ thống: " + ex.Message; }
+    }
+
+    private void SaveCorrection(Dictionary<int, decimal> costs)
+    {
+        string? reason = ReasonWindow.Ask(this, "Lý do sửa giá", $"Vì sao sửa giá phiếu {_receipt.Code}?");
+        if (reason == null) return;
+
+        try
+        {
+            AppServices.Purchases.CorrectReceiptCosts(_receipt.Id, costs, reason, AppServices.CurrentUser!.Id);
+            MessageBox.Show($"Đã sửa giá phiếu {_receipt.Code}.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             DialogResult = true;
         }
         catch (BusinessException ex) { txtError.Text = ex.Message; }

@@ -104,4 +104,5 @@
 - **Giá có bị sửa từ giao diện được không?** Không. Khi thanh toán, giá và giá vốn được đọc lại từ CSDL.
 - **Mật khẩu lưu thế nào?** Băm PBKDF2-SHA256, 100.000 vòng, có salt ngẫu nhiên.
 - **Có bị SQL Injection không?** Dữ liệu người dùng luôn qua Entity Framework có tham số hóa. SQL viết tay chỉ dùng cho nâng cấp cấu trúc và không chứa dữ liệu người dùng.
+- **Nhập nhầm giá thì sửa thế nào?** Admin bấm **Sửa giá nhập** trên phiếu đã xác nhận và phải ghi lý do: công nợ và giá vốn đổi theo, tồn kho giữ nguyên, nhật ký kho ghi giá cũ, giá mới và người sửa. Không hủy rồi nhập lại, vì nếu hàng đã bán thì việc đó tạo ra tồn kho không có thật. Lãi của hóa đơn đã bán giữ nguyên vì giá vốn được chốt lúc bán; khoản lệch nếu có nằm ở các lần bán sau.
 - **Có kiểm thử không?** Có project xUnit cho tầng nghiệp vụ, chạy trên database tạm, gồm cả nâng cấp từ database cũ và đối chiếu dữ liệu mẫu với chứng từ. Giao diện được chạy thử bằng UI Automation, không nằm trong bộ test.

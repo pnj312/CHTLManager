@@ -8,7 +8,7 @@ internal static class StockLedger
 {
     public static void Apply(AppDbContext db, Product product, int newStock, StockMovementType type, int userId,
         StockReason reason = StockReason.None, bool logUnchanged = false, string? supplier = null,
-        string? invoiceNo = null, PurchaseReceipt? receipt = null, Order? order = null)
+        string? invoiceNo = null, PurchaseReceipt? receipt = null, Order? order = null, string? note = null)
     {
         int before = product.Stock;
         product.Stock = newStock;
@@ -28,7 +28,8 @@ internal static class StockLedger
             Supplier = supplier,
             InvoiceNo = invoiceNo,
             PurchaseReceipt = receipt,
-            Order = order
+            Order = order,
+            Note = note
         });
     }
 }

@@ -42,6 +42,12 @@ public interface IPurchaseService
     /// <summary>Admin đối chiếu phiếu đang chờ và nhập giá cho mọi dòng.</summary>
     PurchaseReceipt ConfirmReceipt(int receiptId, IReadOnlyDictionary<int, decimal> unitCostByLineId, int adminId);
 
+    /// <summary>
+    /// Sửa giá nhập của phiếu đã xác nhận (kể cả phiếu từ kiểm kê): công nợ và giá vốn đổi theo, tồn kho không đổi.
+    /// Bắt buộc có lý do; không cho sửa xuống dưới số đã trả nhà cung cấp.
+    /// </summary>
+    void CorrectReceiptCosts(int receiptId, IReadOnlyDictionary<int, decimal> unitCostByLineId, string reason, int adminId);
+
     /// <summary>Hủy phiếu, trừ lại phần đã cộng vào kho; có thể làm sản phẩm rơi vào trạng thái bán ngoài sổ.</summary>
     void CancelReceipt(int receiptId, string reason, int adminId);
 
