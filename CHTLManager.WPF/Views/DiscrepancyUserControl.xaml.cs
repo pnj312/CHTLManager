@@ -73,6 +73,7 @@ public partial class DiscrepancyUserControl : UserControl
         btnResolve.IsEnabled = d?.Status == DiscrepancyStatus.Pending;
         btnCollect.IsEnabled = d is { CompensationRemaining: > 0 };
         btnPayments.IsEnabled = d is { Payments.Count: > 0 };
+        btnEditCompensation.IsEnabled = d?.Resolution == DiscrepancyResolution.Compensation;
     }
 
     private void BtnResolve_Click(object sender, RoutedEventArgs e)
@@ -113,6 +114,12 @@ public partial class DiscrepancyUserControl : UserControl
 
         new CompensationPaymentsWindow(d) { Owner = Window.GetWindow(this) }.ShowDialog();
         Reload();
+    }
+
+    private void BtnEditCompensation_Click(object sender, RoutedEventArgs e)
+    {
+        if (dgDiscrepancies.SelectedItem is not StockDiscrepancy d) return;
+        if (new CompensationEditWindow(d) { Owner = Window.GetWindow(this) }.ShowDialog() == true) Reload();
     }
 
     private static void ShowWarning(string message)

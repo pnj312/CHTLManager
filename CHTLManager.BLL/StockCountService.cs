@@ -1,3 +1,4 @@
+using System.Globalization;
 using CHTLManager.BLL.Interfaces;
 using CHTLManager.DAL;
 using CHTLManager.DAL.Entities;
@@ -138,6 +139,56 @@ public class StockCountService : IStockCountService
         db.CompensationPayments.Add(payment);
         db.SaveChanges();
         return payment;
+    }
+
+    public void CorrectCompensation(int id, int? responsibleUserId, string? responsibleName, decimal amount, string reason, int adminId)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new BusinessException("Hãy nhập lý do sửa khoản bồi thường.");
+        if (amount <= 0)
+            throw new BusinessException("Số tiền bồi thường phải lớn hơn 0.");
+        string? name = responsibleUserId == null ? responsibleName?.Trim() : null;
+        if (responsibleUserId == null && string.IsNullOrEmpty(name))
+            throw new BusinessException("Hãy chọn hoặc nhập người chịu trách nhiệm.");
+
+        using var db = _factory();
+        var d = db.StockDiscrepancies.Include(x => x.Payments).Include(x => x.ResponsibleUser).FirstOrDefault(x => x.Id == id)
+                ?? throw new BusinessException("Không tìm thấy phiếu chênh lệch.");
+        if (d.Resolution != DiscrepancyResolution.Compensation)
+            throw new BusinessException("Phiếu này không có khoản bồi thường.");
+
+        User? newUser = null;
+        if (responsibleUserId != null)
+            newUser = db.Users.FirstOrDefault(u => u.Id == responsibleUserId)
+                      ?? throw new BusinessException("Không tìm thấy người chịu trách nhiệm.");
+
+        string oldPerson = d.ResponsibleDisplay;
+        decimal oldAmount = d.CompensationAmount ?? 0;
+        bool personChanged = responsibleUserId != d.ResponsibleUserId || name != d.ResponsibleName;
+        if (!personChanged && amount == oldAmount)
+            throw new BusinessException("Khoản bồi thường không có gì thay đổi.");
+
+        decimal collected = d.CompensationCollected;
+        if (personChanged && collected > 0)
+            throw new BusinessException($"Đã thu {collected:N0} đ từ {oldPerson}. Hãy hủy các lần thu đó trước khi đổi người.");
+        if (amount < collected)
+            throw new BusinessException($"Đã thu {collected:N0} đ, số phải bồi thường không được thấp hơn. Hãy hủy lần thu ghi nhầm trước.");
+
+        d.ResponsibleUserId = responsibleUserId;
+        d.ResponsibleUser = newUser;
+        d.ResponsibleName = name;
+        d.CompensationAmount = amount;
+
+        // Lưu thành chữ trong nhật ký nên cố định định dạng, không phụ thuộc máy đang chạy.
+        var vi = CultureInfo.GetCultureInfo("vi-VN");
+        var changes = new List<string>();
+        if (personChanged) changes.Add($"Người {oldPerson} thành {d.ResponsibleDisplay}");
+        if (amount != oldAmount) changes.Add(string.Format(vi, "Tiền {0:N0} thành {1:N0}", oldAmount, amount));
+
+        var product = db.Products.First(p => p.Id == d.ProductId);
+        StockLedger.Apply(db, product, product.Stock, StockMovementType.CompensationCorrected, adminId, logUnchanged: true,
+            note: $"{string.Join(", ", changes)}: {reason.Trim()}");
+        db.SaveChanges();
     }
 
     public void CancelCompensationPayment(int paymentId, string reason, int adminId)

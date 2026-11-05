@@ -21,7 +21,9 @@ public enum StockMovementType
     /// <summary>Hủy hóa đơn bán, hoàn lại số đã trừ.</summary>
     SaleCancelled = 8,
     /// <summary>Sửa giá nhập của phiếu đã xác nhận; không đổi tồn kho.</summary>
-    CostCorrected = 9
+    CostCorrected = 9,
+    /// <summary>Sửa người hoặc số tiền của khoản bồi thường; không đổi tồn kho.</summary>
+    CompensationCorrected = 10
 }
 
 /// <summary>Lý do chênh lệch khi kiểm kê.</summary>
@@ -97,6 +99,7 @@ public class StockMovement
         StockMovementType.CostDeclared => "Khai báo giá vốn",
         StockMovementType.SaleCancelled => "Hủy hóa đơn bán",
         StockMovementType.CostCorrected => "Sửa giá nhập",
+        StockMovementType.CompensationCorrected => "Sửa khoản bồi thường",
         _ => string.Empty
     };
 

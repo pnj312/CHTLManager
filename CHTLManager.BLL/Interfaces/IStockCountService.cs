@@ -20,6 +20,12 @@ public interface IStockCountService
     /// <summary>Hủy lần thu ghi nhầm, bắt buộc có lý do: số còn phải thu tăng lại, dòng vẫn được giữ để đối chiếu.</summary>
     void CancelCompensationPayment(int paymentId, string reason, int adminId);
 
+    /// <summary>
+    /// Sửa người chịu trách nhiệm hoặc số tiền của khoản bồi thường, bắt buộc có lý do và ghi nhật ký.
+    /// Không giảm dưới số đã thu; không đổi người khi còn lần thu có hiệu lực, vì tiền đó do người cũ trả.
+    /// </summary>
+    void CorrectCompensation(int id, int? responsibleUserId, string? responsibleName, decimal amount, string reason, int adminId);
+
     /// <summary>Mọi lần thu của một phiếu chênh lệch, kể cả lần đã hủy, mới nhất trước.</summary>
     List<CompensationPayment> GetCompensationPayments(int discrepancyId);
 
