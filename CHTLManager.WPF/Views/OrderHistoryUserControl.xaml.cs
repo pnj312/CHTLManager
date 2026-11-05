@@ -40,7 +40,12 @@ public partial class OrderHistoryUserControl : UserControl
 
             dgOrders.ItemsSource = report.Orders;
             dgDaily.ItemsSource = report.Daily;
-            dgTop.ItemsSource = report.TopProducts;
+
+            var profit = AppServices.Orders.GetProfitReport(from, to);
+            txtCost.Text = MoneyParser.Format(profit.CostOfGoods);
+            txtGrossProfit.Text = (profit.GrossProfit < 0 ? "-" : string.Empty) + MoneyParser.Format(Math.Abs(profit.GrossProfit));
+            txtCostWarning.Text = profit.EstimatedLineCount > 0 ? $"{profit.EstimatedLineCount} dòng giá vốn tạm tính" : string.Empty;
+            dgTop.ItemsSource = profit.Products;
 
             if (report.Orders.Count > 0) dgOrders.SelectedIndex = 0;
             else ShowDetail(null);

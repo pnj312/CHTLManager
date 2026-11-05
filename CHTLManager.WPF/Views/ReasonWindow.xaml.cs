@@ -24,7 +24,7 @@ public partial class ReasonWindow : Window
     {
         if (string.IsNullOrWhiteSpace(txtReason.Text))
         {
-            txtError.Text = "Hãy nhập lý do.";
+            txtError.Text = "Hãy nhập nội dung.";
             return;
         }
         DialogResult = true;

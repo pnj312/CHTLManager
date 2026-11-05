@@ -43,14 +43,28 @@
             <Button Content="Hôm nay" Click="BtnToday_Click"/>
             <Button Content="7 ngày" Click="BtnWeek_Click"/>
             <Button Content="Tháng này" Click="BtnMonth_Click"/>
+            <TextBlock x:Name="txtCostWarning" Foreground="{StaticResource DangerBrush}" VerticalAlignment="Center" Margin="8,0,0,0"
+                       ToolTip="Bán ngoài sổ hoặc sản phẩm chưa có giá vốn: lãi có thể khác thực tế. Hãy khai báo giá vốn ở tab Kho."/>
         </StackPanel>
 
         <!-- ===== Thẻ tổng quan ===== -->
-        <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,-10,10">
+        <UniformGrid Grid.Row="1" Columns="6" Margin="0,0,-10,10">
             <Border Style="{StaticResource CardBorder}">
                 <StackPanel>
                     <TextBlock Text="Doanh thu" Style="{StaticResource CardTitle}"/>
                     <TextBlock x:Name="txtRevenue" Text="0 đ" Style="{StaticResource CardValue}" Foreground="{StaticResource AccentBrush}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <TextBlock Text="Giá vốn" Style="{StaticResource CardTitle}"/>
+                    <TextBlock x:Name="txtCost" Text="0 đ" Style="{StaticResource CardValue}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <TextBlock Text="Lãi gộp" Style="{StaticResource CardTitle}"/>
+                    <TextBlock x:Name="txtGrossProfit" Text="0 đ" Style="{StaticResource CardValue}" Foreground="{StaticResource AccentBrush}"/>
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource CardBorder}">
@@ -145,13 +159,14 @@
             </DockPanel>
 
             <DockPanel Grid.Column="2">
-                <TextBlock DockPanel.Dock="Top" Text="TOP 5 SẢN PHẨM BÁN CHẠY (THEO DOANH THU)" Style="{StaticResource SectionTitle}"/>
+                <TextBlock DockPanel.Dock="Top" Text="LỢI NHUẬN THEO SẢN PHẨM (LÃI CAO NHẤT TRƯỚC)" Style="{StaticResource SectionTitle}"/>
                 <DataGrid x:Name="dgTop">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="#" Binding="{Binding Rank}" Width="35"/>
                         <DataGridTextColumn Header="Sản phẩm" Binding="{Binding Name}" Width="*"/>
-                        <DataGridTextColumn Header="SL bán" Binding="{Binding Quantity}" Width="70"/>
-                        <DataGridTextColumn Header="Doanh thu" Binding="{Binding Revenue, StringFormat=N0}" Width="110"/>
+                        <DataGridTextColumn Header="SL" Binding="{Binding Quantity}" Width="45"/>
+                        <DataGridTextColumn Header="Doanh thu" Binding="{Binding Revenue, StringFormat=N0}" Width="90"/>
+                        <DataGridTextColumn Header="Giá vốn" Binding="{Binding Cost, StringFormat=N0}" Width="90"/>
+                        <DataGridTextColumn Header="Lãi" Binding="{Binding Profit, StringFormat=N0}" Width="90"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </DockPanel>

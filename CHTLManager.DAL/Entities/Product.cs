@@ -21,6 +21,12 @@ public class Product
     /// <summary>Giá bán (VNĐ).</summary>
     public decimal Price { get; set; }
 
+    /// <summary>Giá vốn bình quân gia quyền một đơn vị; 0 nghĩa là chưa có giá vốn.</summary>
+    public decimal AverageCost { get; set; }
+
+    /// <summary>Giá nhập gần nhất, dùng tạm khi chưa có giá vốn bình quân.</summary>
+    public decimal LastCost { get; set; }
+
     /// <summary>Số lượng tồn kho trên phần mềm. Có thể âm khi đã bán vượt tồn (kho lệch thực tế, cần kiểm kê).</summary>
     public int Stock { get; set; }
 

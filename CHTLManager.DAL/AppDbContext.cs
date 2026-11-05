@@ -49,6 +49,8 @@ public class AppDbContext : DbContext
         {
             e.HasIndex(p => p.Barcode).IsUnique();
             e.Property(p => p.Price).HasColumnType("decimal(18,0)");
+            e.Property(p => p.AverageCost).HasColumnType("decimal(18,2)");
+            e.Property(p => p.LastCost).HasColumnType("decimal(18,2)");
         });
 
         modelBuilder.Entity<Order>(e =>
@@ -66,6 +68,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<OrderDetail>(e =>
         {
             e.Property(d => d.UnitPrice).HasColumnType("decimal(18,0)");
+            e.Property(d => d.UnitCost).HasColumnType("decimal(18,2)");
             e.HasOne(d => d.Order)
              .WithMany(o => o.Details)
              .HasForeignKey(d => d.OrderId)
@@ -81,6 +84,7 @@ public class AppDbContext : DbContext
             e.Property(m => m.Type).HasConversion<string>().HasMaxLength(20);
             e.Property(m => m.Reason).HasConversion<string>().HasMaxLength(20);
             e.Property(m => m.UnitPrice).HasColumnType("decimal(18,0)");
+            e.Property(m => m.UnitCost).HasColumnType("decimal(18,2)");
             e.HasOne(m => m.Product).WithMany().HasForeignKey(m => m.ProductId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(m => m.User).WithMany().HasForeignKey(m => m.UserId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(m => m.Order).WithMany().HasForeignKey(m => m.OrderId).OnDelete(DeleteBehavior.Restrict);

@@ -16,6 +16,8 @@
                 <TextBlock x:Name="txtUserInfo" Foreground="White" FontSize="14"
                            VerticalAlignment="Center" Margin="0,0,16,0"/>
                 <Button x:Name="btnReminder" Click="BtnReminder_Click" Visibility="Collapsed" Style="{StaticResource DangerButton}"/>
+                <Button x:Name="btnReceive" Content="Nhận hàng..." Click="BtnReceive_Click" Visibility="Collapsed"
+                        ToolTip="Nhà cung cấp giao hàng: ghi phiếu theo hóa đơn"/>
                 <Button Content="Đổi mật khẩu" Click="BtnChangePassword_Click"/>
                 <Button Content="Đăng xuất" Click="BtnLogout_Click" Margin="0" Style="{StaticResource AccentButton}"/>
             </StackPanel>

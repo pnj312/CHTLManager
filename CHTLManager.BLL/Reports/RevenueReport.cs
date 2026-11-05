@@ -20,22 +20,11 @@ public class RevenueReport
 
     /// <summary>Doanh thu theo từng ngày (mới nhất trước).</summary>
     public List<DailyRevenue> Daily { get; init; } = new();
-
-    /// <summary>Các sản phẩm có doanh thu cao nhất.</summary>
-    public List<TopProduct> TopProducts { get; init; } = new();
 }
 
 public class DailyRevenue
 {
     public DateTime Date { get; init; }
     public int OrderCount { get; init; }
-    public decimal Revenue { get; init; }
-}
-
-public class TopProduct
-{
-    public int Rank { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public int Quantity { get; init; }
     public decimal Revenue { get; init; }
 }

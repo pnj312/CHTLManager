@@ -40,8 +40,7 @@
 
             <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,10,0,0">
                 <Button Content="Thêm vào giỏ" Click="BtnAddSelected_Click" Style="{StaticResource PrimaryButton}"/>
-                <TextBlock Text="(hoặc nhấp đúp vào sản phẩm)" Foreground="Gray" VerticalAlignment="Center" Margin="0,0,16,0"/>
-                <Button Content="Nhận hàng..." Click="BtnReceive_Click" ToolTip="Nhà cung cấp giao hàng: ghi phiếu theo hóa đơn"/>
+                <TextBlock Text="(hoặc nhấp đúp vào sản phẩm)" Foreground="Gray" VerticalAlignment="Center"/>
             </StackPanel>
         </Grid>
 

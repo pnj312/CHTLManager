@@ -62,6 +62,7 @@ public class ProductService : IProductService
     {
         Validate(product);
         if (product.Stock < 0) throw new BusinessException("Số lượng tồn không được âm.");
+        if (product.AverageCost < 0) throw new BusinessException("Giá vốn không được âm.");
 
         using var db = _factory();
         string code = product.Barcode.Trim();
@@ -88,6 +89,8 @@ public class ProductService : IProductService
             Name = product.Name.Trim(),
             Category = (product.Category ?? string.Empty).Trim(),
             Price = product.Price,
+            AverageCost = product.AverageCost,
+            LastCost = product.AverageCost,
             IsActive = true
         };
         db.Products.Add(entity);
@@ -141,6 +144,35 @@ public class ProductService : IProductService
         db.Products.Remove(entity);
         db.SaveChanges();
         return true;
+    }
+
+    public void SetOpeningCost(int productId, decimal cost, int adminId)
+    {
+        if (cost <= 0)
+            throw new BusinessException("Giá vốn phải lớn hơn 0.");
+
+        using var db = _factory();
+        var entity = db.Products.FirstOrDefault(p => p.Id == productId && p.IsActive)
+                     ?? throw new BusinessException("Không tìm thấy sản phẩm.");
+
+        // Chỉ khai báo khi chưa có: sửa giá vốn đang dùng sẽ làm sai lợi nhuận mà không có chứng từ nào giải thích.
+        if (entity.AverageCost > 0)
+            throw new BusinessException($"'{entity.Name}' đã có giá vốn {entity.AverageCost:N0} đ. Giá vốn thay đổi qua phiếu nhập.");
+
+        entity.AverageCost = cost;
+        if (entity.LastCost <= 0) entity.LastCost = cost;
+        db.StockMovements.Add(new StockMovement
+        {
+            ProductId = entity.Id,
+            UserId = adminId,
+            CreatedAt = DateTime.Now,
+            Type = StockMovementType.CostDeclared,
+            BeforeStock = entity.Stock,
+            AfterStock = entity.Stock,
+            UnitPrice = entity.Price,
+            UnitCost = cost
+        });
+        db.SaveChanges();
     }
 
     public Product SetCountedStock(int productId, int countedStock, StockReason reason, int userId, string? invoiceNo = null)

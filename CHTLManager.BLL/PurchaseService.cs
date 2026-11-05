@@ -106,6 +106,7 @@ public class PurchaseService : IPurchaseService
         foreach (var line in receipt.Lines)
         {
             var product = products[line.ProductId];
+            if (asAdmin) ApplyCost(product, product.Stock, line);
             StockLedger.Apply(db, product, product.Stock + line.ReceivedQuantity, StockMovementType.ReceiptIn, userId,
                 supplier: supplier.Name, invoiceNo: invoice, receipt: receipt);
         }
@@ -117,7 +118,7 @@ public class PurchaseService : IPurchaseService
     public PurchaseReceipt ConfirmReceipt(int receiptId, IReadOnlyDictionary<int, decimal> unitCostByLineId, int adminId)
     {
         using var db = _factory();
-        var receipt = db.PurchaseReceipts.Include(r => r.Lines).FirstOrDefault(r => r.Id == receiptId)
+        var receipt = db.PurchaseReceipts.Include(r => r.Lines).ThenInclude(l => l.Product).FirstOrDefault(r => r.Id == receiptId)
                       ?? throw new BusinessException("Không tìm thấy phiếu nhập.");
         if (receipt.Status != ReceiptStatus.Pending)
             throw new BusinessException($"Phiếu {receipt.Code} không ở trạng thái chờ xác nhận.");
@@ -129,6 +130,9 @@ public class PurchaseService : IPurchaseService
             if (cost < 0)
                 throw new BusinessException("Giá nhập không được âm.");
             line.UnitCost = cost;
+
+            // Phần tồn ngoài phiếu này (đã cộng lúc nhận hàng) mới là hàng cũ tính bình quân.
+            ApplyCost(line.Product!, line.Product!.Stock - line.ReceivedQuantity, line);
         }
 
         receipt.Status = ReceiptStatus.Confirmed;
@@ -152,10 +156,14 @@ public class PurchaseService : IPurchaseService
         if (receipt.Status == ReceiptStatus.Cancelled)
             throw new BusinessException($"Phiếu {receipt.Code} đã hủy rồi.");
 
+        bool costWasApplied = receipt.Status == ReceiptStatus.Confirmed;
         receipt.Status = ReceiptStatus.Cancelled;
         receipt.CancelReason = reason.Trim();
         foreach (var line in receipt.Lines)
         {
+            if (costWasApplied)
+                line.Product!.AverageCost = CostCalculator.RemoveFromAverage(line.Product.Stock, line.Product.AverageCost, line.ReceivedQuantity, line.UnitCost ?? 0);
+
             StockLedger.Apply(db, line.Product!, line.Product!.Stock - line.ReceivedQuantity, StockMovementType.ReceiptCancelled, adminId,
                 supplier: receipt.Supplier!.Name, invoiceNo: receipt.InvoiceNo, receipt: receipt);
         }
@@ -185,6 +193,13 @@ public class PurchaseService : IPurchaseService
     {
         using var db = _factory();
         return db.PurchaseReceipts.Count(r => r.Status == ReceiptStatus.Pending);
+    }
+
+    private static void ApplyCost(Product product, int stockBefore, PurchaseReceiptLine line)
+    {
+        decimal cost = line.UnitCost ?? 0;
+        product.AverageCost = CostCalculator.AddToAverage(stockBefore, product.AverageCost, line.ReceivedQuantity, cost);
+        if (cost > 0) product.LastCost = cost; // hàng tặng giá 0 không làm mất giá nhập gần nhất
     }
 
     private static void Save(AppDbContext db)

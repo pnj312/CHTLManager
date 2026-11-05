@@ -17,4 +17,7 @@ public interface IOrderService
 
     /// <summary>Báo cáo doanh thu từ ngày <paramref name="from"/> đến hết ngày <paramref name="to"/>.</summary>
     RevenueReport GetRevenueReport(DateTime from, DateTime to);
+
+    /// <summary>Lãi gộp (doanh thu trừ giá vốn) từ ngày <paramref name="from"/> đến hết ngày <paramref name="to"/>.</summary>
+    ProfitReport GetProfitReport(DateTime from, DateTime to);
 }

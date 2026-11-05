@@ -41,6 +41,10 @@ public static class DbInitializer
                 new Product { Barcode = "8936079120011", Name = "Bút bi Thiên Long TL-027", Category = "Văn phòng phẩm", Price = 4000, Stock = 200 });
         db.SaveChanges();
 
+        foreach (var product in db.Products)
+            product.AverageCost = product.LastCost = Math.Round(product.Price * 0.7m, 0);
+        db.SaveChanges();
+
         SeedSampleOrders(db, DateTime.Now);
         db.SaveChanges();
         SeedSampleStockMovements(db, DateTime.Now);
@@ -121,7 +125,7 @@ public static class DbInitializer
                     if (qty <= 0) continue;
 
                     p.Stock -= qty;
-                    lines.Add(new OrderDetail { ProductId = p.Id, Product = p, Quantity = qty, UnitPrice = p.Price });
+                    lines.Add(new OrderDetail { ProductId = p.Id, Product = p, Quantity = qty, UnitPrice = p.Price, UnitCost = p.AverageCost });
                 }
                 if (lines.Count == 0) continue;
 

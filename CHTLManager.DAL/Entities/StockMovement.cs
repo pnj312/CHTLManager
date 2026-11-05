@@ -15,7 +15,9 @@ public enum StockMovementType
     /// <summary>Nhập hàng theo phiếu nhập.</summary>
     ReceiptIn = 5,
     /// <summary>Hủy phiếu nhập, trừ lại phần đã cộng.</summary>
-    ReceiptCancelled = 6
+    ReceiptCancelled = 6,
+    /// <summary>Khai báo giá vốn cho sản phẩm chưa có giá; không đổi tồn kho.</summary>
+    CostDeclared = 7
 }
 
 /// <summary>Lý do chênh lệch khi kiểm kê.</summary>
@@ -58,6 +60,9 @@ public class StockMovement
     /// <summary>Giá bán tại thời điểm ghi, dùng để tính giá trị thất thoát.</summary>
     public decimal UnitPrice { get; set; }
 
+    /// <summary>Giá vốn được khai báo (chỉ có ở dòng khai báo giá vốn).</summary>
+    public decimal? UnitCost { get; set; }
+
     /// <summary>Nhà cung cấp của lô nhập.</summary>
     [MaxLength(100)]
     public string? Supplier { get; set; }
@@ -89,6 +94,7 @@ public class StockMovement
         StockMovementType.OutOfBookSale => "Bán ngoài sổ",
         StockMovementType.ReceiptIn => "Nhập theo phiếu",
         StockMovementType.ReceiptCancelled => "Hủy phiếu nhập",
+        StockMovementType.CostDeclared => "Khai báo giá vốn",
         _ => string.Empty
     };
 
@@ -105,6 +111,7 @@ public class StockMovement
         get
         {
             if (Order != null) return $"Hóa đơn bán {Order.Code}";
+            if (Type == StockMovementType.CostDeclared) return $"Giá vốn {UnitCost:N0}";
 
             var parts = new[]
             {

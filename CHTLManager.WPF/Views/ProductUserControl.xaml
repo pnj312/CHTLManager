@@ -21,14 +21,18 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBox x:Name="txtSearch" TextChanged="TxtSearch_TextChanged" Margin="0,0,8,0"
                          ToolTip="Tìm theo tên hoặc mã vạch"/>
-                <CheckBox Grid.Column="1" x:Name="chkNeedsCheck" Content="Chỉ hiện SP cần kiểm kê"
+                <CheckBox Grid.Column="1" x:Name="chkNeedsCheck" Content="Cần kiểm kê"
                           VerticalAlignment="Center" Margin="0,0,10,0"
                           Checked="ChkNeedsCheck_Changed" Unchecked="ChkNeedsCheck_Changed"
                           ToolTip="Sản phẩm đã bán ngoài sổ, cần đếm lại hàng thực tế"/>
-                <Button Grid.Column="2" Content="Làm mới" Margin="0" Click="BtnRefresh_Click"/>
+                <CheckBox Grid.Column="2" x:Name="chkNoCost" Content="Chưa có giá vốn"
+                          VerticalAlignment="Center" Margin="0,0,10,0"
+                          Checked="ChkNeedsCheck_Changed" Unchecked="ChkNeedsCheck_Changed"/>
+                <Button Grid.Column="3" Content="Làm mới" Margin="0" Click="BtnRefresh_Click"/>
             </Grid>
 
             <DataGrid Grid.Row="1" x:Name="dgProducts" SelectionChanged="DgProducts_SelectionChanged">
@@ -37,6 +41,7 @@
                     <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="*"/>
                     <DataGridTextColumn Header="Nhóm hàng" Binding="{Binding Category}" Width="130"/>
                     <DataGridTextColumn Header="Giá bán" Binding="{Binding Price, StringFormat=N0}" Width="90"/>
+                    <DataGridTextColumn Header="Giá vốn" Binding="{Binding AverageCost, StringFormat=N0}" Width="80"/>
                     <DataGridTextColumn Header="Tồn kho" Binding="{Binding StockDisplay}" SortMemberPath="Stock" Width="Auto" MinWidth="70"
                                         ElementStyle="{StaticResource StockCellStyle}"/>
                 </DataGrid.Columns>
@@ -45,6 +50,7 @@
 
         <!-- ===== Form thêm / sửa / xóa ===== -->
         <Border Grid.Column="2" Background="{StaticResource SurfaceBrush}" Padding="14" CornerRadius="6">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <TextBlock Text="THÔNG TIN SẢN PHẨM" FontSize="18" FontWeight="Bold"
                            Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,10"/>
@@ -61,9 +67,23 @@
                 <TextBlock Text="Giá bán (đ) *" Margin="0,0,0,3"/>
                 <TextBox x:Name="txtPrice" Margin="0,0,0,8" HorizontalContentAlignment="Right"/>
 
-                <TextBlock Text="Tồn kho * (chỉ nhập khi thêm mới)" Margin="0,0,0,3"/>
-                <TextBox x:Name="txtStock" Margin="0,0,0,12" HorizontalContentAlignment="Right"
-                         ToolTip="Muốn thay đổi tồn kho của sản phẩm đã có, dùng nút Nhập kho hoặc Kiểm kê bên dưới."/>
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Tồn kho * (khi thêm mới)" Margin="0,0,0,3"/>
+                        <TextBox x:Name="txtStock" HorizontalContentAlignment="Right"
+                                 ToolTip="Muốn thay đổi tồn kho của sản phẩm đã có, dùng nút Nhập kho hoặc Kiểm kê bên dưới."/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Giá vốn (khi thêm mới)" Margin="0,0,0,3"/>
+                        <TextBox x:Name="txtCost" HorizontalContentAlignment="Right"
+                                 ToolTip="Giá vốn một đơn vị của số hàng đang có. Sau đó giá vốn thay đổi qua phiếu nhập."/>
+                    </StackPanel>
+                </Grid>
 
                 <WrapPanel Margin="0,0,0,12">
                     <Button Content="Thêm" Click="BtnAdd_Click" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
@@ -74,14 +94,17 @@
 
                 <Separator Margin="0,0,0,10"/>
 
-                <Button Content="Nhập kho sản phẩm đang chọn..." Click="BtnImport_Click"
-                        Style="{StaticResource AccentButton}" Margin="0"
-                        ToolTip="Nhập một lô hàng theo hóa đơn của nhà cung cấp"/>
-
-                <Button Content="Kiểm kê sản phẩm đang chọn..." Click="BtnStockCount_Click"
-                        Style="{StaticResource PrimaryButton}" Margin="0,10,0,0"
-                        ToolTip="Đếm hàng thực tế trên kệ và trong kho, nhập số đếm được và lý do nếu có chênh lệch"/>
+                <TextBlock Text="Với sản phẩm đang chọn:" Margin="0,0,0,6"/>
+                <UniformGrid Columns="3">
+                    <Button Content="Nhập kho..." Click="BtnImport_Click" Style="{StaticResource AccentButton}" Margin="0,0,6,0" Padding="4,7"
+                            ToolTip="Nhập một lô hàng theo hóa đơn của nhà cung cấp"/>
+                    <Button Content="Kiểm kê..." Click="BtnStockCount_Click" Style="{StaticResource PrimaryButton}" Margin="0,0,6,0" Padding="4,7"
+                            ToolTip="Đếm hàng thực tế trên kệ và trong kho, nhập số đếm được và lý do nếu có chênh lệch"/>
+                    <Button Content="Giá vốn..." Click="BtnDeclareCost_Click" Margin="0" Padding="4,7"
+                            ToolTip="Khai báo giá vốn cho sản phẩm chưa có giá"/>
+                </UniformGrid>
             </StackPanel>
+            </ScrollViewer>
         </Border>
     </Grid>
 </UserControl>

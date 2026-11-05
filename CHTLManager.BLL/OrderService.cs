@@ -88,7 +88,9 @@ public class OrderService : IOrderService
                 ProductId = product.Id,
                 Product = product,
                 Quantity = quantity,
-                UnitPrice = product.Price // luôn lấy giá từ CSDL, không tin giá do giao diện gửi lên
+                UnitPrice = product.Price, // luôn lấy giá từ CSDL, không tin giá do giao diện gửi lên
+                UnitCost = product.AverageCost > 0 ? product.AverageCost : product.LastCost,
+                CostIsEstimated = before < quantity || product.AverageCost <= 0
             });
         }
 
@@ -150,6 +152,32 @@ public class OrderService : IOrderService
             .FirstOrDefault(o => o.Id == id);
     }
 
+    public ProfitReport GetProfitReport(DateTime from, DateTime to)
+    {
+        if (from.Date > to.Date)
+            throw new BusinessException("Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.");
+
+        // SQLite không cộng được kiểu decimal trong câu SQL, nên tổng hợp trong bộ nhớ.
+        var details = GetHistory(from, to).SelectMany(o => o.Details).ToList();
+        return new ProfitReport
+        {
+            Revenue = details.Sum(d => d.LineTotal),
+            CostOfGoods = details.Sum(d => d.LineCost),
+            EstimatedLineCount = details.Count(d => d.CostIsEstimated),
+            Products = details
+                .GroupBy(d => d.ProductId)
+                .Select(g => new ProductProfit
+                {
+                    Name = g.First().Product?.Name ?? $"Sản phẩm #{g.Key}",
+                    Quantity = g.Sum(d => d.Quantity),
+                    Revenue = g.Sum(d => d.LineTotal),
+                    Cost = g.Sum(d => d.LineCost)
+                })
+                .OrderByDescending(p => p.Profit)
+                .ToList()
+        };
+    }
+
     public RevenueReport GetRevenueReport(DateTime from, DateTime to)
     {
         DateTime start = from.Date, end = to.Date;
@@ -176,20 +204,6 @@ public class OrderService : IOrderService
                 : new DailyRevenue { Date = d })
             .ToList();
 
-        var top = details
-            .GroupBy(d => d.ProductId)
-            .Select(g => new
-            {
-                Name = g.First().Product?.Name ?? $"Sản phẩm #{g.Key}",
-                Quantity = g.Sum(d => d.Quantity),
-                Revenue = g.Sum(d => d.LineTotal)
-            })
-            .OrderByDescending(x => x.Revenue)
-            .ThenByDescending(x => x.Quantity)
-            .Take(5)
-            .Select((x, i) => new TopProduct { Rank = i + 1, Name = x.Name, Quantity = x.Quantity, Revenue = x.Revenue })
-            .ToList();
-
         return new RevenueReport
         {
             From = start,
@@ -199,8 +213,7 @@ public class OrderService : IOrderService
             OrderCount = orders.Count,
             AverageOrderValue = orders.Count == 0 ? 0 : Math.Round(revenue / orders.Count, 0),
             ItemsSold = details.Sum(d => d.Quantity),
-            Daily = daily,
-            TopProducts = top
+            Daily = daily
         };
     }
 }

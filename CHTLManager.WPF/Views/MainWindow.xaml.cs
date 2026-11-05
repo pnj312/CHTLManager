@@ -22,6 +22,7 @@ public partial class MainWindow : Window
             tabReports.Visibility = Visibility.Collapsed;
             tabStockLog.Visibility = Visibility.Collapsed;
             tabUsers.Visibility = Visibility.Collapsed;
+            btnReceive.Visibility = Visibility.Visible; // Admin nhập hàng ở tab Nhập hàng và tab Kho
         }
 
         purchaseView.ReceiptsChanged += RefreshReminder;
@@ -42,6 +43,11 @@ public partial class MainWindow : Window
     {
         tabMain.SelectedItem = tabPurchases;
         purchaseView.ShowPending();
+    }
+
+    private void BtnReceive_Click(object sender, RoutedEventArgs e)
+    {
+        if (new PurchaseReceiptWindow { Owner = this }.ShowDialog() == true) posView.Reload();
     }
 
     private void BtnChangePassword_Click(object sender, RoutedEventArgs e)

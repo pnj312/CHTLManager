@@ -26,6 +26,8 @@ public partial class ProductUserControl : UserControl
             var items = AppServices.Products.Search(txtSearch.Text);
             if (chkNeedsCheck.IsChecked == true)
                 items = items.Where(p => p.NeedsStockCheck).ToList();
+            if (chkNoCost.IsChecked == true)
+                items = items.Where(p => p.AverageCost <= 0).ToList();
             dgProducts.ItemsSource = items;
 
             if (selectId.HasValue)
@@ -63,6 +65,8 @@ public partial class ProductUserControl : UserControl
             txtCategory.Text = p.Category;
             txtPrice.Text = p.Price.ToString("0");
             txtStock.Text = p.StockDisplay;
+            txtCost.Text = p.AverageCost.ToString("0");
+            txtCost.IsEnabled = false;
             // Đang sửa sản phẩm có sẵn: tồn kho chỉ thay đổi qua nhập kho hoặc kiểm kê.
             txtStock.IsEnabled = false;
         }
@@ -89,6 +93,8 @@ public partial class ProductUserControl : UserControl
         txtPrice.Clear();
         txtStock.Clear();
         txtStock.IsEnabled = true;
+        txtCost.Clear();
+        txtCost.IsEnabled = true;
     }
 
     private void BtnAdd_Click(object sender, RoutedEventArgs e)
@@ -171,6 +177,33 @@ public partial class ProductUserControl : UserControl
         Reload(selected.Id);
     }
 
+    private void BtnDeclareCost_Click(object sender, RoutedEventArgs e)
+    {
+        if (dgProducts.SelectedItem is not Product selected)
+        {
+            ShowWarning("Hãy chọn sản phẩm cần khai báo giá vốn.");
+            return;
+        }
+
+        string? text = ReasonWindow.Ask(Window.GetWindow(this), "Khai báo giá vốn",
+            $"Giá vốn một đơn vị của '{selected.Name}' (đ). Chỉ khai báo được khi sản phẩm chưa có giá vốn:");
+        if (text == null) return;
+
+        if (!MoneyParser.TryParse(text, out decimal cost))
+        {
+            ShowWarning("Giá vốn phải là số nguyên, ví dụ 7000 hoặc 7.000.");
+            return;
+        }
+
+        try
+        {
+            AppServices.Products.SetOpeningCost(selected.Id, cost, AppServices.CurrentUser!.Id);
+            Reload(selected.Id);
+        }
+        catch (BusinessException ex) { ShowWarning(ex.Message); }
+        catch (Exception ex) { ShowError(ex); }
+    }
+
     // ---------------- Kiểm kê ----------------
 
     private void BtnStockCount_Click(object sender, RoutedEventArgs e)
@@ -210,13 +243,30 @@ public partial class ProductUserControl : UserControl
             return null;
         }
 
+        decimal cost = 0;
+        if (txtCost.IsEnabled)
+        {
+            bool hasCost = MoneyParser.TryParse(txtCost.Text, out cost);
+            if (!string.IsNullOrWhiteSpace(txtCost.Text) && !hasCost)
+            {
+                ShowWarning("Giá vốn phải là số nguyên, ví dụ 7000 hoặc 7.000.");
+                return null;
+            }
+            if (stock > 0 && cost <= 0)
+            {
+                ShowWarning("Sản phẩm có tồn kho thì cần giá vốn, để tính được lợi nhuận.");
+                return null;
+            }
+        }
+
         return new Product
         {
             Barcode = txtBarcode.Text.Trim(),
             Name = txtName.Text.Trim(),
             Category = txtCategory.Text.Trim(),
             Price = price,
-            Stock = stock
+            Stock = stock,
+            AverageCost = cost
         };
     }
 
