@@ -34,7 +34,8 @@ public partial class App : Application
 
         try
         {
-            DbInitializer.Initialize();
+            DatabaseUpgrader.Upgrade();
+            DbInitializer.Initialize(seedDemoData: e.Args.Contains("--demo"));
         }
         catch (Exception ex)
         {

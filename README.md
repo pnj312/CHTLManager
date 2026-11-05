@@ -45,6 +45,8 @@ dotnet build CHTLManager.slnx
 dotnet run --project CHTLManager.WPF
 ```
 
+Thêm `-- --demo` để nạp dữ liệu mẫu khi cửa hàng chưa có dữ liệu.
+
 Hoặc mở `CHTLManager.slnx` trong Visual Studio, đặt `CHTLManager.WPF` làm Startup Project và nhấn F5.
 
 ## Đóng gói để chạy trên máy khác (không cần cài .NET)
@@ -58,21 +60,17 @@ dotnet publish CHTLManager.WPF -c Release -r win-x64 --self-contained -p:Publish
 - Lần mở đầu mất vài giây để giải nén và tạo CSDL; các lần sau nhanh hơn.
 - Cập nhật phiên bản: thay file `.exe` mới, CSDL trong `%LocalAppData%` được giữ nguyên.
 
-Tài khoản mẫu:
-
-| Tên đăng nhập | Mật khẩu | Vai trò |
-|---|---|---|
-| `admin` | `admin123` | Admin |
-| `thungan` | `123456` | Thu ngân |
+Tài khoản ban đầu là `admin` / `admin123`. Chế độ `--demo` có thêm `thungan` / `123456`.
 
 Khi dùng thật, hãy đổi mật khẩu mặc định ngay (nút **Đổi mật khẩu** trên thanh tiêu đề).
 
 ## Cơ sở dữ liệu
 
-- Lần chạy đầu, ứng dụng tự tạo file `%LocalAppData%\CHTLManager\chtlmanager.db`, nạp 2 tài khoản, 12 sản phẩm và khoảng 20 hóa đơn mẫu trong 7 ngày gần nhất.
+- Lần chạy đầu, ứng dụng tự tạo file `%LocalAppData%\CHTLManager\chtlmanager.db` với tài khoản Admin, không có dữ liệu giả. Chạy với tham số `--demo` để có 12 sản phẩm và khoảng 20 hóa đơn mẫu.
+- **Nâng cấp phiên bản:** dữ liệu được giữ nguyên. Trước khi đổi cấu trúc, ứng dụng tự sao lưu thành `chtlmanager.backup-*.db` cùng thư mục, giữ 5 bản gần nhất.
 - CSDL nằm trong thư mục của tài khoản Windows đang dùng: mỗi máy, mỗi tài khoản Windows có một CSDL riêng.
 - **Sao lưu:** tắt ứng dụng, copy file `chtlmanager.db` ra nơi khác. **Khôi phục:** chép file đó trở lại đúng vị trí.
-- **Làm mới dữ liệu demo:** tắt ứng dụng, xóa file `chtlmanager.db`, mở lại ứng dụng.
+- **Làm mới dữ liệu demo (không dùng cho cửa hàng thật):** tắt ứng dụng, xóa file `chtlmanager.db`, mở lại với `--demo`.
 
 ## Phạm vi và hạn chế
 

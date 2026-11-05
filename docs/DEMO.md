@@ -4,7 +4,7 @@
 
 1. Tắt ứng dụng nếu đang mở.
 2. Xóa file `%LocalAppData%\CHTLManager\chtlmanager.db` để có dữ liệu mẫu sạch. Mở thư mục nhanh: nhấn `Win + R`, gõ `%LocalAppData%\CHTLManager`.
-3. Mở ứng dụng **trong khoảng 7:00–21:00** để hóa đơn mẫu có cả hóa đơn của ngày hôm đó.
+3. Mở ứng dụng với tham số `--demo` **trong khoảng 7:00–21:00** để có dữ liệu mẫu, gồm cả hóa đơn của ngày hôm đó: `CHTLManager.WPF.exe --demo`. Không có tham số này, app chỉ có tài khoản Admin như một cửa hàng thật.
 4. Để sẵn danh sách mã vạch dưới đây (copy/dán thay cho máy quét).
 
 | Sản phẩm | Mã vạch | Ghi chú |

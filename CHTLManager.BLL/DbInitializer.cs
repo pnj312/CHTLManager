@@ -1,91 +1,50 @@
 using CHTLManager.BLL.Security;
 using CHTLManager.DAL;
 using CHTLManager.DAL.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace CHTLManager.BLL;
 
-/// <summary>Tạo CSDL (nếu chưa có) và nạp dữ liệu mẫu cho lần chạy đầu tiên.</summary>
+/// <summary>Tạo tài khoản đầu tiên; dữ liệu mẫu chỉ nạp khi chạy demo và cửa hàng chưa có dữ liệu.</summary>
 public static class DbInitializer
 {
-    public static void Initialize()
+    public static void Initialize(bool seedDemoData)
     {
         using var db = new AppDbContext();
-        bool created = db.Database.EnsureCreated();
-        if (!created) EnsureStockMovementsTable(db);
 
         if (!db.Users.Any())
         {
-            db.Users.AddRange(
-                new User { Username = "admin", PasswordHash = PasswordHasher.Hash("admin123"), FullName = "Quản trị viên", Role = UserRole.Admin },
-                new User { Username = "thungan", PasswordHash = PasswordHasher.Hash("123456"), FullName = "Thu ngân 01", Role = UserRole.Cashier });
-        }
-
-        if (!db.Products.Any())
-        {
-            db.Products.AddRange(
-                new Product { Barcode = "8934563138165", Name = "Mì Hảo Hảo tôm chua cay", Category = "Mì ăn liền", Price = 4500, Stock = 100 },
-                new Product { Barcode = "8934563138172", Name = "Mì Omachi sườn hầm", Category = "Mì ăn liền", Price = 8000, Stock = 60 },
-                new Product { Barcode = "8935049500018", Name = "Nước suối Aquafina 500ml", Category = "Đồ uống", Price = 6000, Stock = 120 },
-                new Product { Barcode = "8934588012105", Name = "Coca-Cola lon 330ml", Category = "Đồ uống", Price = 10000, Stock = 80 },
-                new Product { Barcode = "8935024140013", Name = "Trà xanh 0 độ 455ml", Category = "Đồ uống", Price = 10000, Stock = 70 },
-                new Product { Barcode = "8934673101011", Name = "Sữa tươi Vinamilk 180ml", Category = "Sữa", Price = 8500, Stock = 90 },
-                new Product { Barcode = "8934804023012", Name = "Bánh Oreo vani 133g", Category = "Bánh kẹo", Price = 16000, Stock = 40 },
-                new Product { Barcode = "8935001710015", Name = "Snack Oishi tôm cay 40g", Category = "Bánh kẹo", Price = 7000, Stock = 55 },
-                new Product { Barcode = "8936017360018", Name = "Cà phê G7 3in1 (hộp 18 gói)", Category = "Cà phê", Price = 52000, Stock = 25 },
-                new Product { Barcode = "8934868150012", Name = "Dầu gội Clear 330g", Category = "Chăm sóc cá nhân", Price = 98000, Stock = 15 },
-                new Product { Barcode = "8935210600019", Name = "Khăn giấy Pulppy 2 lớp", Category = "Gia dụng", Price = 12000, Stock = 50 },
-                new Product { Barcode = "8936079120011", Name = "Bút bi Thiên Long TL-027", Category = "Văn phòng phẩm", Price = 4000, Stock = 200 });
-        }
-
-        db.SaveChanges();
-
-        // Hóa đơn mẫu chỉ nạp cho CSDL vừa tạo mới, để màn hình doanh thu có số liệu ngay khi demo.
-        if (created && !db.Orders.Any())
-        {
-            SeedSampleOrders(db, DateTime.Now);
-            db.SaveChanges();
-            SeedSampleStockMovements(db, DateTime.Now);
+            db.Users.Add(new User { Username = "admin", PasswordHash = PasswordHasher.Hash("admin123"), FullName = "Quản trị viên", Role = UserRole.Admin });
             db.SaveChanges();
         }
+
+        if (seedDemoData && !db.Products.Any() && !db.Orders.Any())
+            SeedDemoData(db);
     }
 
-    /// <summary>
-    /// CSDL tạo từ phiên bản cũ chưa có bảng nhật ký kho, và EnsureCreated không thêm bảng vào CSDL đã có.
-    /// shortcut: viết tay cho riêng bảng này; khi schema đổi tiếp thì chuyển sang EF Migrations.
-    /// </summary>
-    private static void EnsureStockMovementsTable(AppDbContext db)
+    private static void SeedDemoData(AppDbContext db)
     {
-        db.Database.ExecuteSqlRaw("""
-            CREATE TABLE IF NOT EXISTS "StockMovements" (
-                "Id" INTEGER NOT NULL CONSTRAINT "PK_StockMovements" PRIMARY KEY AUTOINCREMENT,
-                "ProductId" INTEGER NOT NULL,
-                "UserId" INTEGER NOT NULL,
-                "OrderId" INTEGER NULL,
-                "CreatedAt" TEXT NOT NULL,
-                "Type" TEXT NOT NULL,
-                "BeforeStock" INTEGER NOT NULL,
-                "AfterStock" INTEGER NOT NULL,
-                "Delta" INTEGER NOT NULL,
-                "Reason" TEXT NOT NULL,
-                "UnitPrice" decimal(18,0) NOT NULL,
-                "Supplier" TEXT NULL,
-                "InvoiceNo" TEXT NULL,
-                CONSTRAINT "FK_StockMovements_Orders_OrderId" FOREIGN KEY ("OrderId") REFERENCES "Orders" ("Id") ON DELETE RESTRICT,
-                CONSTRAINT "FK_StockMovements_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT,
-                CONSTRAINT "FK_StockMovements_Users_UserId" FOREIGN KEY ("UserId") REFERENCES "Users" ("Id") ON DELETE RESTRICT
-            )
-            """);
+        if (!db.Users.Any(u => u.Role == UserRole.Cashier))
+            db.Users.Add(new User { Username = "thungan", PasswordHash = PasswordHasher.Hash("123456"), FullName = "Thu ngân 01", Role = UserRole.Cashier });
 
-        // Bảng tạo từ phiên bản trước chưa có hai cột này (luôn được thêm cùng nhau).
-        bool hasSupplierColumn = db.Database
-            .SqlQueryRaw<int>("SELECT COUNT(*) AS \"Value\" FROM pragma_table_info('StockMovements') WHERE name = 'Supplier'")
-            .ToList()[0] > 0;
-        if (!hasSupplierColumn)
-        {
-            db.Database.ExecuteSqlRaw("ALTER TABLE \"StockMovements\" ADD COLUMN \"Supplier\" TEXT NULL");
-            db.Database.ExecuteSqlRaw("ALTER TABLE \"StockMovements\" ADD COLUMN \"InvoiceNo\" TEXT NULL");
-        }
+        db.Products.AddRange(
+                new Product { Barcode = "8934563138165", Name = "Mì Hảo Hảo tôm chua cay", Category = "Mì ăn liền", Price = 4500, Stock = 100 },
+                new Product { Barcode = "8934563138172", Name = "Mì Omachi sườn hầm", Category = "Mì ăn liền", Price = 8000, Stock = 60 },
+                new Product { Barcode = "8935049500018", Name = "Nước suối Aquafina 500ml", Category = "Đồ uống", Price = 6000, Stock = 120 },
+                new Product { Barcode = "8934588012105", Name = "Coca-Cola lon 330ml", Category = "Đồ uống", Price = 10000, Stock = 80 },
+                new Product { Barcode = "8935024140013", Name = "Trà xanh 0 độ 455ml", Category = "Đồ uống", Price = 10000, Stock = 70 },
+                new Product { Barcode = "8934673101011", Name = "Sữa tươi Vinamilk 180ml", Category = "Sữa", Price = 8500, Stock = 90 },
+                new Product { Barcode = "8934804023012", Name = "Bánh Oreo vani 133g", Category = "Bánh kẹo", Price = 16000, Stock = 40 },
+                new Product { Barcode = "8935001710015", Name = "Snack Oishi tôm cay 40g", Category = "Bánh kẹo", Price = 7000, Stock = 55 },
+                new Product { Barcode = "8936017360018", Name = "Cà phê G7 3in1 (hộp 18 gói)", Category = "Cà phê", Price = 52000, Stock = 25 },
+                new Product { Barcode = "8934868150012", Name = "Dầu gội Clear 330g", Category = "Chăm sóc cá nhân", Price = 98000, Stock = 15 },
+                new Product { Barcode = "8935210600019", Name = "Khăn giấy Pulppy 2 lớp", Category = "Gia dụng", Price = 12000, Stock = 50 },
+                new Product { Barcode = "8936079120011", Name = "Bút bi Thiên Long TL-027", Category = "Văn phòng phẩm", Price = 4000, Stock = 200 });
+        db.SaveChanges();
+
+        SeedSampleOrders(db, DateTime.Now);
+        db.SaveChanges();
+        SeedSampleStockMovements(db, DateTime.Now);
+        db.SaveChanges();
     }
 
     /// <summary>Vài dòng nhật ký kho mẫu (nhập hàng, thất thoát, đếm sai) để màn hình Nhật ký kho có số liệu khi demo.</summary>

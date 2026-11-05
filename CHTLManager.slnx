@@ -2,4 +2,5 @@
   <Project Path="CHTLManager.BLL/CHTLManager.BLL.csproj" Id="63158100-d633-4fad-8c83-e560dd080783" />
   <Project Path="CHTLManager.DAL/CHTLManager.DAL.csproj" Id="efdb61b2-96d3-4972-87e2-b6b022e16288" />
   <Project Path="CHTLManager.WPF/CHTLManager.WPF.csproj" Id="7a085364-f79b-41c7-94cb-582564c9cde2" />
+  <Project Path="CHTLManager.Tests/CHTLManager.Tests.csproj" />
 </Solution>

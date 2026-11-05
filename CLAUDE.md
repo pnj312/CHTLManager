@@ -8,13 +8,17 @@ CHTLManager is a single-machine WPF point-of-sale and inventory app for a small 
 
 ```bash
 dotnet build CHTLManager.slnx                      # build all 3 projects
-dotnet run --project CHTLManager.WPF               # run the app
+dotnet test CHTLManager.Tests                      # BLL tests (xUnit, temp SQLite files)
+dotnet test CHTLManager.Tests --filter "FullyQualifiedName~DatabaseUpgraderTests"   # one class
+dotnet run --project CHTLManager.WPF               # run the app (real store: only an Admin account)
+dotnet run --project CHTLManager.WPF -- --demo     # with sample data, when the store has no data yet
+dotnet tool restore                                # then: dotnet ef migrations add <Name> --project CHTLManager.DAL
 dotnet publish CHTLManager.WPF -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 ```
 
 - Solution file is `.slnx` (needs VS 2022 17.13+ or a recent .NET SDK).
-- There is no test project and no linter configured.
-- Sample accounts (seeded on first run): `admin / admin123` (Admin), `thungan / 123456` (Cashier).
+- No linter configured. Tests cover the BLL only; UI is checked by hand or UI Automation.
+- First run creates `admin / admin123`. `--demo` also creates `thungan / 123456`, products and sample orders.
 
 ## Architecture
 
@@ -37,10 +41,10 @@ Three layers, referenced strictly downward: `CHTLManager.WPF` → `CHTLManager.B
 - Products already referenced by orders are soft-deleted (`IsActive = false`); `ProductService.Add` with that barcode reactivates the same row. `ProductService.Update` never changes `Stock` — stock only moves through `ImportStock`, `SetCountedStock` (stock count), `Add` (initial/reactivate) and sales.
 - `Stock` may be negative by design: it is a ledger number, not shelf quantity. `CreateOrder(..., allowOversellProductIds)` lets the cashier sell beyond recorded stock for products they explicitly confirmed; the negative value lets a later stock count compute the true size of the unrecorded lot. `ImportStock` refuses while `Stock < 0` (and requires supplier + invoice number): those units belong to an earlier lot, so the UI sends the user through `StockCountWindow` first, then `ImportStockWindow`, keeping each lot's logged quantity equal to its invoice. Users never see a negative number: show `Product.StockDisplay`/`FormatStock` ("0 (bán ngoài sổ: N)"), never `Stock` directly. `Product.NeedsStockCheck` drives the red `StockCellStyle` and the "cần kiểm kê" filter. Never validate `Stock >= 0` on update paths; only `Add` and `SetCountedStock` require non-negative input.
 - Every stock change except a normal sale must write a `StockMovement` row in the same `SaveChanges` (`ProductService.ChangeStock`, out-of-book branch of `CreateOrder`); there is deliberately no API to edit or delete them. Products with movements are soft-deleted. `SetCountedStock` requires a reason matching the direction of the difference. Loss = `StockMovement.IsLoss` (Lost/Damaged/Expired), valued at sale price because there is no cost price.
-- `DbInitializer` seeds users/products when empty and ~20 sample orders plus a few stock movements over the last 7 days only when `EnsureCreated()` just created the DB. `EnsureStockMovementsTable` adds the table and its later columns to older DB files with hand-written SQL; keep it in sync with the model until migrations exist.
+- `DbInitializer.Initialize(seedDemoData)` creates the first Admin; sample data only with `--demo` on a store with no products and no orders.
 - Money is `decimal` mapped to `decimal(18,0)` (VND, no fractions). **SQLite cannot `Sum` or `OrderBy` decimals server-side** (EF throws `NotSupportedException`) — materialize first and aggregate in memory.
-- Schema is created with `Database.EnsureCreated()` in `DbInitializer` (no migrations). Schema changes will not apply to existing DB files; delete the `.db` during development or introduce migrations first.
+- Schema changes go through EF Migrations, never by deleting the DB: real stores keep their data. `DatabaseUpgrader.Upgrade()` runs at startup: `VACUUM INTO` backup before any change (keeps 5), marks DB files from before migrations as baseline `InitialCreate`. `CHTLManager.Tests/LegacySchema.sql` is the frozen old schema; do not regenerate it.
 - Authorization is UI-only (Admin tabs hidden for Cashier); BLL services do not check roles.
 - Passwords are hashed with PBKDF2 (`BLL/Security/PasswordHasher`), stored as `iterations.salt.hash`.
 - `App.OnStartup` forces `vi-VN` culture; money input goes through `WPF/Helpers/MoneyParser` (positive integers only, `.`/`,` accepted only as thousand separators).
-- Verification without the UI: a scratch console project referencing `CHTLManager.BLL` can set `AppDbContext.DbPath` to a temp file, call `DbInitializer.Initialize()`, then exercise the services.
+- Tests use `TestDb` (`CHTLManager.Tests/TestDb.cs`): a temp DB per test via the static `AppDbContext.DbPath`, so parallelization is disabled.
