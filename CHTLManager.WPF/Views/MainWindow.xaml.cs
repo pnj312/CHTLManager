@@ -19,6 +19,7 @@ public partial class MainWindow : Window
         {
             tabInventory.Visibility = Visibility.Collapsed;
             tabPurchases.Visibility = Visibility.Collapsed;
+            tabDebts.Visibility = Visibility.Collapsed;
             tabReports.Visibility = Visibility.Collapsed;
             tabStockLog.Visibility = Visibility.Collapsed;
             tabUsers.Visibility = Visibility.Collapsed;

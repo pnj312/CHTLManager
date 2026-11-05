@@ -33,6 +33,9 @@
             <TabItem x:Name="tabPurchases" Header="Nhập hàng">
                 <views:PurchaseUserControl x:Name="purchaseView"/>
             </TabItem>
+            <TabItem x:Name="tabDebts" Header="Công nợ NCC">
+                <views:SupplierDebtUserControl x:Name="debtView"/>
+            </TabItem>
             <!-- Màn hình tự tải lại số liệu qua sự kiện Loaded mỗi lần tab được mở. -->
             <TabItem x:Name="tabReports" Header="Hóa đơn &amp; Doanh thu">
                 <views:OrderHistoryUserControl x:Name="reportView"/>

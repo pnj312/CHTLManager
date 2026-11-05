@@ -319,6 +319,44 @@ namespace CHTLManager.DAL.Migrations
                     b.ToTable("Suppliers");
                 });
 
+            modelBuilder.Entity("CHTLManager.DAL.Entities.SupplierPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,0)");
+
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupplierId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SupplierPayments");
+                });
+
             modelBuilder.Entity("CHTLManager.DAL.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -460,6 +498,25 @@ namespace CHTLManager.DAL.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("PurchaseReceipt");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CHTLManager.DAL.Entities.SupplierPayment", b =>
+                {
+                    b.HasOne("CHTLManager.DAL.Entities.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CHTLManager.DAL.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Supplier");
 
                     b.Navigation("User");
                 });

@@ -157,6 +157,16 @@ public class PurchaseService : IPurchaseService
             throw new BusinessException($"Phiếu {receipt.Code} đã hủy rồi.");
 
         bool costWasApplied = receipt.Status == ReceiptStatus.Confirmed;
+        if (costWasApplied)
+        {
+            decimal paid = PaidTo(db, receipt.SupplierId);
+            decimal purchasedWithoutThis = PurchasedFrom(db, receipt.SupplierId) - receipt.Total;
+            if (paid > purchasedWithoutThis)
+                throw new BusinessException(
+                    $"Không hủy được: đã trả {receipt.Supplier!.Name} {paid:N0} đ, hủy phiếu này thì số đã trả vượt tiền hàng. Hãy hủy lần trả tương ứng trước (ví dụ khi được hoàn tiền).");
+        }
+
+
         receipt.Status = ReceiptStatus.Cancelled;
         receipt.CancelReason = reason.Trim();
         foreach (var line in receipt.Lines)
@@ -194,6 +204,112 @@ public class PurchaseService : IPurchaseService
         using var db = _factory();
         return db.PurchaseReceipts.Count(r => r.Status == ReceiptStatus.Pending);
     }
+
+    public List<SupplierBalance> GetSupplierBalances()
+    {
+        using var db = _factory();
+        return db.Suppliers.AsNoTracking().OrderBy(s => s.Name).ToList()
+            .Select(s => new SupplierBalance(s, PurchasedFrom(db, s.Id), PaidTo(db, s.Id)))
+            .ToList();
+    }
+
+    public List<SupplierLedgerEntry> GetSupplierHistory(int supplierId)
+    {
+        using var db = _factory();
+        var receipts = db.PurchaseReceipts.AsNoTracking()
+            .Include(r => r.Lines)
+            .Include(r => r.ConfirmedBy)
+            .Where(r => r.SupplierId == supplierId && r.Status == ReceiptStatus.Confirmed)
+            .ToList();
+        var payments = db.SupplierPayments.AsNoTracking()
+            .Include(p => p.User)
+            .Where(p => p.SupplierId == supplierId)
+            .ToList();
+
+        var events = receipts
+            .Select(r => (Date: r.ConfirmedAt ?? r.ReceivedAt, Receipt: (PurchaseReceipt?)r, Payment: (SupplierPayment?)null))
+            .Concat(payments.Select(p => (Date: p.PaidAt, Receipt: (PurchaseReceipt?)null, Payment: (SupplierPayment?)p)))
+            .OrderBy(e => e.Date);
+
+        decimal balance = 0;
+        var entries = new List<SupplierLedgerEntry>();
+        foreach (var e in events)
+        {
+            if (e.Receipt is { } r)
+            {
+                balance += r.Total;
+                entries.Add(new SupplierLedgerEntry(e.Date, $"Phiếu {r.Code}, hóa đơn {r.InvoiceNo}", r.Total, 0, balance,
+                    r.ConfirmedBy?.FullName ?? string.Empty, null, false));
+            }
+            else if (e.Payment is { } p)
+            {
+                if (!p.IsCancelled) balance -= p.Amount;
+                string description = p.IsCancelled
+                    ? $"Trả {p.Amount:N0} đ (đã hủy: {p.CancelReason})"
+                    : string.IsNullOrEmpty(p.Note) ? "Trả tiền" : $"Trả tiền: {p.Note}";
+                entries.Add(new SupplierLedgerEntry(e.Date, description, 0, p.IsCancelled ? 0 : p.Amount, balance,
+                    p.User?.FullName ?? string.Empty, p.Id, p.IsCancelled));
+            }
+        }
+        entries.Reverse();
+        return entries;
+    }
+
+    public SupplierPayment PaySupplier(int supplierId, decimal amount, string? note, int adminId)
+    {
+        if (amount <= 0)
+            throw new BusinessException("Số tiền trả phải lớn hơn 0.");
+
+        using var db = _factory();
+        var supplier = db.Suppliers.FirstOrDefault(s => s.Id == supplierId)
+                       ?? throw new BusinessException("Không tìm thấy nhà cung cấp.");
+
+        decimal balance = PurchasedFrom(db, supplierId) - PaidTo(db, supplierId);
+        if (amount > balance)
+            throw new BusinessException($"{supplier.Name} chỉ còn nợ {balance:N0} đ, không thể trả {amount:N0} đ.");
+
+        var payment = new SupplierPayment
+        {
+            SupplierId = supplierId,
+            Amount = amount,
+            PaidAt = DateTime.Now,
+            UserId = adminId,
+            Note = string.IsNullOrWhiteSpace(note) ? null : note.Trim()
+        };
+        db.SupplierPayments.Add(payment);
+        db.SaveChanges();
+        return payment;
+    }
+
+    public void CancelPayment(int paymentId, string reason, int adminId)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new BusinessException("Hãy nhập lý do hủy lần trả.");
+
+        using var db = _factory();
+        var payment = db.SupplierPayments.FirstOrDefault(p => p.Id == paymentId)
+                      ?? throw new BusinessException("Không tìm thấy lần trả tiền.");
+        if (payment.IsCancelled)
+            throw new BusinessException("Lần trả này đã hủy rồi.");
+
+        payment.IsCancelled = true;
+        payment.CancelReason = reason.Trim();
+        db.SaveChanges();
+    }
+
+    // SQLite không cộng được kiểu decimal trong câu SQL, nên tổng hợp trong bộ nhớ.
+    private static decimal PurchasedFrom(AppDbContext db, int supplierId)
+        => db.PurchaseReceipts.AsNoTracking()
+            .Include(r => r.Lines)
+            .Where(r => r.SupplierId == supplierId && r.Status == ReceiptStatus.Confirmed)
+            .ToList()
+            .Sum(r => r.Total);
+
+    private static decimal PaidTo(AppDbContext db, int supplierId)
+        => db.SupplierPayments.AsNoTracking()
+            .Where(p => p.SupplierId == supplierId && !p.IsCancelled)
+            .ToList()
+            .Sum(p => p.Amount);
 
     private static void ApplyCost(Product product, int stockBefore, PurchaseReceiptLine line)
     {

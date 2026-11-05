@@ -1,0 +1,65 @@
+<UserControl x:Class="CHTLManager.WPF.Views.SupplierDebtUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Loaded="UserControl_Loaded">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1.2*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Border Background="{StaticResource SurfaceBrush}" CornerRadius="6" Padding="14,8">
+                <StackPanel>
+                    <TextBlock Text="Tổng còn nợ nhà cung cấp" Foreground="Gray" FontSize="13"/>
+                    <TextBlock x:Name="txtTotalDebt" Text="0 đ" FontSize="20" FontWeight="Bold" Foreground="{StaticResource DangerBrush}"/>
+                </StackPanel>
+            </Border>
+            <TextBox Grid.Column="2" x:Name="txtNewSupplier" Width="200" VerticalAlignment="Center" Margin="0,0,8,0"
+                     ToolTip="Tên nhà cung cấp mới"/>
+            <Button Grid.Column="3" Content="Thêm nhà cung cấp" Click="BtnAddSupplier_Click" VerticalAlignment="Center"/>
+            <Button Grid.Column="4" x:Name="btnPay" Content="Trả tiền..." Click="BtnPay_Click"
+                    Style="{StaticResource AccentButton}" VerticalAlignment="Center" Margin="0"/>
+        </Grid>
+
+        <DataGrid Grid.Row="1" x:Name="dgSuppliers" SelectionChanged="DgSuppliers_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Nhà cung cấp" Binding="{Binding Supplier.Name}" Width="*"/>
+                <DataGridTextColumn Header="Tổng tiền hàng" Binding="{Binding TotalPurchased, StringFormat=N0}" Width="130"/>
+                <DataGridTextColumn Header="Đã trả" Binding="{Binding TotalPaid, StringFormat=N0}" Width="130"/>
+                <DataGridTextColumn Header="Còn nợ" Binding="{Binding Balance, StringFormat=N0}" Width="130"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="2" Margin="0,10,0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="txtHistory" Text="LỊCH SỬ CÔNG NỢ" FontWeight="Bold" VerticalAlignment="Center"
+                       Foreground="{StaticResource PrimaryBrush}"/>
+            <Button Grid.Column="1" x:Name="btnCancelPayment" Content="Hủy lần trả đang chọn..." Click="BtnCancelPayment_Click"
+                    Style="{StaticResource DangerButton}" Margin="0"/>
+        </Grid>
+
+        <DataGrid Grid.Row="3" x:Name="dgHistory" SelectionChanged="DgHistory_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Thời gian" Binding="{Binding Date, StringFormat='dd/MM/yyyy HH:mm'}" Width="135"/>
+                <DataGridTextColumn Header="Nội dung" Binding="{Binding Description}" Width="*"/>
+                <DataGridTextColumn Header="Tăng nợ" Binding="{Binding Increase, StringFormat=N0}" Width="110"/>
+                <DataGridTextColumn Header="Đã trả" Binding="{Binding Decrease, StringFormat=N0}" Width="110"/>
+                <DataGridTextColumn Header="Còn nợ" Binding="{Binding BalanceAfter, StringFormat=N0}" Width="110"/>
+                <DataGridTextColumn Header="Người ghi" Binding="{Binding UserName}" Width="130"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

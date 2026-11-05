@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
     public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<SupplierPayment> SupplierPayments => Set<SupplierPayment>();
     public DbSet<PurchaseReceipt> PurchaseReceipts => Set<PurchaseReceipt>();
     public DbSet<PurchaseReceiptLine> PurchaseReceiptLines => Set<PurchaseReceiptLine>();
 
@@ -92,6 +93,13 @@ public class AppDbContext : DbContext
         });
 
         modelBuilder.Entity<Supplier>(e => e.HasIndex(s => s.NameKey).IsUnique());
+
+        modelBuilder.Entity<SupplierPayment>(e =>
+        {
+            e.Property(p => p.Amount).HasColumnType("decimal(18,0)");
+            e.HasOne(p => p.Supplier).WithMany().HasForeignKey(p => p.SupplierId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(p => p.User).WithMany().HasForeignKey(p => p.UserId).OnDelete(DeleteBehavior.Restrict);
+        });
 
         modelBuilder.Entity<PurchaseReceipt>(e =>
         {

@@ -21,6 +21,29 @@ public class Supplier
     public bool IsActive { get; set; } = true;
 }
 
+/// <summary>Một lần trả tiền cho nhà cung cấp. Ghi nhầm thì hủy kèm lý do, không xóa.</summary>
+public class SupplierPayment
+{
+    public int Id { get; set; }
+
+    public int SupplierId { get; set; }
+    public Supplier? Supplier { get; set; }
+
+    public decimal Amount { get; set; }
+    public DateTime PaidAt { get; set; }
+
+    public int UserId { get; set; }
+    public User? User { get; set; }
+
+    [MaxLength(200)]
+    public string? Note { get; set; }
+
+    public bool IsCancelled { get; set; }
+
+    [MaxLength(200)]
+    public string? CancelReason { get; set; }
+}
+
 public enum ReceiptStatus
 {
     /// <summary>Thu ngân đã nhận hàng, chờ Admin đối chiếu và nhập giá. Tồn kho đã cộng.</summary>
