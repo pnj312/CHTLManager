@@ -30,8 +30,8 @@
 
 ### 2b. Kho báo hết nhưng kệ vẫn còn hàng (điểm nhấn nghiệp vụ)
 - Kể tình huống: "Phần mềm báo Dầu gội chỉ còn N chai, nhưng khách cầm lên chai thứ N+1 vì lô nhập hôm qua chưa được ghi."
-- Thêm Dầu gội, bấm `+` đến bằng số tồn, bấm thêm lần nữa → hộp thoại **"Kho báo không đủ hàng... Vẫn bán?"** (mặc định No để tránh bấm nhầm).
-- Chọn **Yes** → dòng hiện "(vượt tồn)", bán được bình thường. Thanh toán → hóa đơn ghi đủ, cuối hóa đơn nhắc "kho đang âm, Admin cần kiểm kê"; cột Tồn hiện **-1** màu đỏ.
+- Thêm Dầu gội, bấm `+` đến bằng số tồn, bấm thêm lần nữa → hộp thoại **"Phần mềm ghi... chỉ còn N, nhưng khách đang cầm sản phẩm này?"** (mặc định Không để tránh bấm nhầm).
+- Chọn **Có** → dòng hiện "(kho chưa ghi)", bán được bình thường. Thanh toán → hóa đơn ghi đủ, cuối hóa đơn nhắc "đã bán 1 cái ngoài sổ, cần kiểm kê"; cột Tồn hiện **`0 (bán ngoài sổ: 1)`** màu đỏ.
 - Đăng xuất.
 
 ### 3. Quản lý kho (admin)
@@ -40,7 +40,9 @@
 - Chọn một sản phẩm, sửa giá → ô Tồn kho bị khóa (giải thích: tồn kho chỉ thay đổi qua nhập kho hoặc bán hàng, tránh ghi đè số liệu).
 - Nhập kho nhanh: nhập `20` → tồn kho tăng 20.
 - Xóa Mì Hảo Hảo (đã có trong hóa đơn) → chuyển sang ngừng kinh doanh, lịch sử vẫn giữ. Thêm lại cùng mã vạch → sản phẩm được kinh doanh lại.
-- Tích **"Chỉ hiện SP cần kiểm kê"** → chỉ còn Dầu gội (tồn -1, màu đỏ). Chọn nó, nhập số đếm thực tế (ví dụ `10`) vào **Kiểm kê** → hộp thoại hiện tồn trên phần mềm, số đếm và chênh lệch → Yes → tồn kho về 10, hết đỏ.
+- Tích **"Chỉ hiện SP cần kiểm kê"** → chỉ còn Dầu gội. Chọn nó, nhập kho `10` → app báo "Nhập 10 cái, trong đó 1 cái bù cho số đã bán ngoài sổ. Tồn kho hiện là 9." Bỏ tích ô lọc.
+- **Tình huống ngược lại (thất thoát):** chọn Coca, bấm **Kiểm kê sản phẩm đang chọn...**, nhập số đếm ít hơn sổ 3 cái → app kết luận "Thực tế ít hơn sổ 3 cái: thất thoát". Bấm Cập nhật khi chưa chọn lý do → bị chặn. Chọn **Mất** → cập nhật.
+- Tab **Nhật ký kho**: thấy đủ cả hai chiều lệch (Bán ngoài sổ kèm mã hóa đơn, Kiểm kê: thất thoát kèm lý do), ai làm, lúc nào. Thẻ đầu trang là **tổng thất thoát** trong kỳ; có sẵn vài dòng mẫu.
 
 ### 4. Hóa đơn và doanh thu (admin)
 - Tab **Hóa đơn & Doanh thu**: mặc định 7 ngày, có sẵn số liệu mẫu.
@@ -64,12 +66,14 @@
 7. **Muốn nhiều nhân viên cùng dùng?** Trên một máy: đăng xuất, đăng nhập tài khoản khác. Nhiều máy: chuyển CSDL sang SQL Server trong mạng LAN (chỉ đổi provider ở tầng DAL), hoặc xây Web API làm trung gian để phân quyền ở server.
 8. **Cài đặt trên máy mới?** Cài .NET 8 Desktop Runtime và chạy file `.exe`, hoặc dùng bản publish self-contained không cần cài .NET. CSDL và dữ liệu mẫu tự tạo.
 9. **Quy trình sử dụng?** Đăng nhập → quét hàng → nhập tiền khách đưa → thanh toán. Admin quản lý sản phẩm, nhập kho và xem doanh thu.
-10. **Admin và Thu ngân có quyền gì?** Thu ngân bán hàng và tự đổi mật khẩu. Admin bán hàng, quản lý kho (nhập kho, kiểm kê), xem hóa đơn và doanh thu, quản lý tài khoản (tạo, khóa/mở khóa, đặt lại mật khẩu). Có chốt chặn: không thể tự khóa mình, không thể khóa Admin cuối cùng, nên hệ thống không bao giờ bị khóa hết quyền quản trị.
-11. **Hạn chế hiện tại?** Chỉ chạy một máy; phân quyền ở giao diện; CSDL không mã hóa; chưa có in hóa đơn, phiếu nhập kho và lịch sử kiểm kê, trả hàng, khuyến mãi.
+10. **Admin và Thu ngân có quyền gì?** Thu ngân bán hàng và tự đổi mật khẩu. Admin bán hàng, quản lý kho (nhập kho, kiểm kê), xem hóa đơn và doanh thu, xem nhật ký kho và thất thoát, quản lý tài khoản (tạo, khóa/mở khóa, đặt lại mật khẩu). Có chốt chặn: không thể tự khóa mình, không thể khóa Admin cuối cùng, nên hệ thống không bao giờ bị khóa hết quyền quản trị.
+11. **Hạn chế hiện tại?** Chỉ chạy một máy; phân quyền ở giao diện; CSDL không mã hóa; chưa có in hóa đơn, phiếu nhập kho (nhà cung cấp, giá nhập), trả hàng, khuyến mãi.
 12. **Triển khai thực tế cần cải tiến gì?** CSDL máy chủ hoặc API cho nhiều quầy, phân quyền ở server, in hóa đơn, phiếu nhập kho và kiểm kê, sao lưu tự động, quản lý ca làm việc.
 
-13. **Kho báo hết nhưng kệ vẫn còn hàng thì có bán được không?** Có. Số trên phần mềm có thể lệch thực tế (nhập hàng chưa ghi, đếm sai). Thu ngân xác nhận "vẫn bán" thì hóa đơn vẫn ghi đầy đủ, không mất doanh thu; tồn kho xuống âm và hiện đỏ để Admin biết số liệu đang lệch. Admin đếm hàng thực tế rồi dùng **Kiểm kê** đặt lại tồn kho. Kiểm kê cũng xử lý chiều ngược lại: hàng mất, hỏng làm số thực tế ít hơn phần mềm.
-14. **Vậy có bị bán nhầm khi hết hàng thật không?** Không tự động: mỗi sản phẩm phải được thu ngân xác nhận riêng, hộp thoại mặc định chọn No, và BLL chỉ cho bán vượt tồn đúng những sản phẩm đã được xác nhận; sản phẩm khác trong cùng hóa đơn mà thiếu hàng thì cả hóa đơn vẫn bị chặn.
+13. **Kho báo hết nhưng khách vẫn cầm được hàng thì sao?** Vẫn bán được. Thu ngân xác nhận thì hóa đơn ghi đầy đủ, không mất doanh thu; sản phẩm hiện "bán ngoài sổ: N" màu đỏ để Admin biết. Bên trong, phần mềm ghi tồn kho là -N: đây là số sổ sách chứ không phải số hàng trên kệ. Giữ số này để khi ghi nhập lô 10 cái, -2 + 10 = 8 mới đúng thực tế; nếu dừng ở 0 thì sẽ ra 10, sai.
+14. **Kho báo còn nhưng không tìm thấy hàng thì sao?** Đó là thất thoát. Admin kiểm kê, nhập số đếm thực tế và bắt buộc chọn lý do (Mất, Hỏng, Hết hạn, Đếm sai trước đó). Mọi lần kiểm kê đều vào **Nhật ký kho** với người làm, thời gian, số trước và sau.
+15. **Thất thoát tháng này bao nhiêu, xem ở đâu?** Tab Nhật ký kho, chọn khoảng ngày. Mất, Hỏng, Hết hạn được cộng vào thất thoát; "Đếm sai trước đó" thì không, vì hàng không thật sự mất. Con số tính **theo giá bán** vì app chưa có giá nhập, nên phản ánh doanh thu bị mất chứ không phải tiền vốn.
+16. **Có bán nhầm khi hết hàng thật không? Nhân viên có che giấu mất hàng được không?** Mỗi sản phẩm phải được xác nhận riêng và hộp thoại mặc định chọn Không; BLL chỉ cho bán ngoài sổ đúng sản phẩm đã xác nhận. Trong app không có chức năng sửa hay xóa nhật ký, nên mọi thay đổi đều có tên người làm. Giới hạn: người mở được trực tiếp file database vẫn sửa được, vì database không mã hóa; và lý do "Đếm sai trước đó" do Admin tự chọn, nên chủ cửa hàng cần xem nhật ký định kỳ.
 
 ### Câu hỏi kỹ thuật có thể gặp
 - **Làm sao trừ kho an toàn?** `OrderService.CreateOrder` kiểm tra tồn kho, trừ kho và lưu hóa đơn trong **một transaction**; lỗi ở bất kỳ bước nào thì hủy toàn bộ, kho không bị trừ.

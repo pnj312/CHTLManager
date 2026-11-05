@@ -1,3 +1,4 @@
+using CHTLManager.BLL.Reports;
 using CHTLManager.DAL.Entities;
 
 namespace CHTLManager.BLL.Interfaces;
@@ -8,15 +9,22 @@ public interface IProductService
     Product? GetById(int id);
     Product? GetByBarcode(string barcode);
     List<Product> Search(string keyword);
-    Product Add(Product product);
+    /// <summary>Thêm sản phẩm; tồn kho ban đầu được ghi nhật ký dưới tên <paramref name="userId"/>.</summary>
+    Product Add(Product product, int userId);
     Product Update(Product product);
 
-    /// <summary>Xóa sản phẩm. Trả về true nếu xóa hẳn, false nếu chỉ ngừng kinh doanh (do đã có trong hóa đơn).</summary>
+    /// <summary>Xóa sản phẩm. Trả về true nếu xóa hẳn, false nếu chỉ ngừng kinh doanh (do đã có hóa đơn hoặc nhật ký kho).</summary>
     bool Delete(int id);
 
-    /// <summary>Cộng (delta &gt; 0) hoặc trừ (delta &lt; 0) tồn kho.</summary>
-    Product UpdateStock(int productId, int delta);
+    /// <summary>Nhập thêm hàng và ghi nhật ký kho.</summary>
+    Product ImportStock(int productId, int quantity, int userId);
 
-    /// <summary>Kiểm kê: đặt tồn kho bằng số lượng đếm thực tế (≥ 0). Trả về sản phẩm sau cập nhật.</summary>
-    Product SetCountedStock(int productId, int countedStock);
+    /// <summary>
+    /// Kiểm kê: đặt tồn kho bằng số đếm thực tế (≥ 0) và ghi nhật ký kho.
+    /// Có chênh lệch thì bắt buộc có lý do đúng chiều; khớp thì lý do là None.
+    /// </summary>
+    Product SetCountedStock(int productId, int countedStock, StockReason reason, int userId);
+
+    /// <summary>Nhật ký kho từ ngày <paramref name="from"/> đến hết ngày <paramref name="to"/>, kèm tổng thất thoát.</summary>
+    StockLogReport GetStockLog(DateTime from, DateTime to);
 }

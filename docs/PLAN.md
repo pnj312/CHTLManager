@@ -110,6 +110,25 @@ Lý do: thực tế cửa hàng tiện lợi, số tồn trên phần mềm thư
 
 ---
 
+## Phần 3c — Nhật ký kho, thất thoát, cách nói dễ hiểu (bổ sung, ≈3 giờ) · commit `feat: stock log and clearer out-of-book wording`
+
+Lý do: kho báo còn mà không thấy hàng là thất thoát thật, nhưng kiểm kê cũ ghi đè số tồn không để lại dấu vết. Số âm và chữ "vượt tồn" cũng khó hiểu.
+
+- Bảng `StockMovements`: nhập kho, kiểm kê, khai báo ban đầu, bán ngoài sổ; không có chức năng sửa/xóa.
+- Cửa sổ Kiểm kê: phần mềm ghi / đếm được, kết luận chênh lệch, bắt buộc lý do đúng chiều.
+- Tab Nhật ký kho: lọc ngày, tổng thất thoát theo giá bán, số lượng bán ngoài sổ.
+- Không còn số âm trên màn hình: `0 (bán ngoài sổ: N)`, "(kho chưa ghi)", lời nhắc mới tại quầy và khi nhập bù.
+- Bổ sung: sản phẩm có nhật ký chỉ ngừng kinh doanh; CSDL cũ tự có bảng mới.
+
+**Checklist Phần 3c**
+- [x] Build sạch
+- [x] Harness 24/24: ghi nhật ký đủ các loại; lý do sai chiều bị chặn; thất thoát không tính "Đếm sai trước đó"; nâng cấp CSDL cũ giữ dữ liệu
+- [x] UI thật: toàn bộ luồng mới + chạy lại luồng cũ (thu ngân, kho, doanh thu, tài khoản)
+- [x] Lỗi phát hiện và đã sửa: lời nhắc ghi Yes/No trong khi Windows tiếng Việt hiện Có/Không; gõ SL vượt tồn rồi chọn Không bị nhảy lên bằng tồn kho
+- [x] Bạn duyệt → commit
+
+---
+
 ## Phần 4 — Bản cài đặt để demo (≈30 phút) · không commit file build
 
 - Publish một file `.exe` self-contained:

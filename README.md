@@ -7,11 +7,13 @@ Phần mềm desktop (WPF, .NET 8) cho một quầy thu ngân của cửa hàng 
 | Vai trò | Chức năng |
 |---|---|
 | Thu ngân | Bán hàng: quét mã vạch hoặc tìm theo tên (không cần dấu), giỏ hàng, tính tiền thừa, thanh toán. Tự đổi mật khẩu |
-| Admin | Mọi chức năng của thu ngân, cộng thêm: quản lý sản phẩm (thêm/sửa/xóa, nhập kho, kiểm kê), xem lịch sử hóa đơn và thống kê doanh thu, quản lý tài khoản (tạo, khóa/mở khóa, đặt lại mật khẩu) |
+| Admin | Mọi chức năng của thu ngân, cộng thêm: quản lý sản phẩm (thêm/sửa/xóa, nhập kho, kiểm kê), xem lịch sử hóa đơn và thống kê doanh thu, xem nhật ký kho và thất thoát, quản lý tài khoản (tạo, khóa/mở khóa, đặt lại mật khẩu) |
 
 Quy tắc chính:
 - Bán hàng trừ tồn kho đúng số lượng bán; thanh toán, trừ kho và lưu hóa đơn nằm trong một giao dịch. Giá luôn lấy từ CSDL khi thanh toán.
-- **Kho báo không đủ nhưng hàng thực tế vẫn còn** (hàng nhập chưa ghi, đếm sai...): thu ngân xác nhận "vẫn bán" thì hóa đơn vẫn lưu đầy đủ, tồn kho được phép âm. Sản phẩm tồn âm hiện màu đỏ; Admin dùng **Kiểm kê** để đặt tồn kho bằng số đếm thực tế (cũng dùng khi hàng mất, hỏng).
+- **Kho báo hết nhưng khách vẫn cầm được hàng** (hàng nhập chưa ghi, đếm sai...): thu ngân xác nhận thì hóa đơn vẫn lưu đầy đủ, và sản phẩm hiện `0 (bán ngoài sổ: N)` màu đỏ. Lần ghi nhập sau sẽ tự bù N cái này cho đúng thực tế.
+- **Kho báo còn nhưng không tìm thấy hàng** (mất, hỏng, hết hạn): Admin dùng **Kiểm kê**, nhập số đếm thực tế và bắt buộc chọn lý do.
+- **Nhật ký kho** ghi lại mọi lần nhập kho, kiểm kê và bán ngoài sổ: ai làm, lúc nào, từ bao nhiêu thành bao nhiêu, lý do hoặc hóa đơn. Màn hình này tính tổng thất thoát trong kỳ **theo giá bán** (app chưa có giá nhập) và không có chức năng sửa hay xóa dòng nhật ký.
 - Sản phẩm đã có trong hóa đơn chỉ bị ngừng kinh doanh chứ không xóa hẳn; thêm lại cùng mã vạch thì kinh doanh lại.
 - Tài khoản: mật khẩu tối thiểu 6 ký tự, lưu dạng băm. Tài khoản bị khóa không đăng nhập được; không thể tự khóa mình hay khóa Admin cuối cùng đang hoạt động.
 
@@ -75,6 +77,6 @@ Khi dùng thật, hãy đổi mật khẩu mặc định ngay (nút **Đổi m�
 
 - Chạy trên **một máy**. SQLite là CSDL dạng file, phù hợp với một quầy, không cần cài máy chủ CSDL. Muốn nhiều máy dùng chung dữ liệu cần đổi sang SQL Server trong mạng LAN hoặc thêm Web API (chỉ thay tầng DAL nhờ kiến trúc phân tầng).
 - Phân quyền thực hiện ở giao diện; CSDL không mã hóa.
-- Chưa có: in hóa đơn, phiếu nhập kho và lịch sử kiểm kê, trả hàng, khuyến mãi.
+- Chưa có: in hóa đơn, phiếu nhập kho (nhà cung cấp, giá nhập), trả hàng, khuyến mãi.
 
 Kịch bản demo và câu hỏi bảo vệ: xem [docs/DEMO.md](docs/DEMO.md).

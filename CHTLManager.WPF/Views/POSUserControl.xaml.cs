@@ -145,10 +145,9 @@ public partial class POSUserControl : UserControl
     private static bool ConfirmOversell(string name, int stock)
     {
         string message =
-            $"Kho đang ghi '{name}' còn {stock}.\n\n" +
-            "Nếu hàng thực tế vẫn còn trên kệ, chọn Yes để vẫn bán. " +
-            "Tồn kho trên phần mềm sẽ bị âm và Admin cần kiểm kê lại.\n\n" +
-            "Vẫn bán sản phẩm này?";
+            $"Phần mềm ghi '{name}' chỉ còn {Math.Max(stock, 0)}, nhưng khách đang cầm sản phẩm này?\n\n" +
+            "Có (Yes): bán bình thường, Admin sẽ được nhắc kiểm kê lại.\n" +
+            "Không (No): không thêm vào giỏ.";
         return MessageBox.Show(message, "Kho báo không đủ hàng", MessageBoxButton.YesNo,
                    MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes;
     }
@@ -176,10 +175,10 @@ public partial class POSUserControl : UserControl
         if (e.EditAction != DataGridEditAction.Commit) return;
         if (e.Row.Item is not CartItem item || e.EditingElement is not TextBox box) return;
 
-        // Vượt tồn kho chưa xác nhận: tạm giữ ở mức tồn kho, rồi hỏi sau khi ô đã commit xong.
+        // Vượt tồn kho chưa xác nhận: giữ nguyên số cũ, rồi hỏi sau khi ô đã commit xong.
         if (int.TryParse(box.Text.Trim(), out int wanted) && wanted > item.Stock && !item.OversellConfirmed)
         {
-            box.Text = Math.Max(item.Stock, 1).ToString();
+            box.Text = item.Quantity.ToString();
             Dispatcher.BeginInvoke(() =>
             {
                 if (!ConfirmOversell(item.Name, item.Stock)) return;
@@ -338,9 +337,9 @@ public partial class POSUserControl : UserControl
         if (negative.Count > 0)
         {
             sb.AppendLine();
-            sb.AppendLine("Lưu ý: kho trên phần mềm đang âm, Admin cần kiểm kê:");
+            sb.AppendLine("Lưu ý:");
             foreach (var p in negative)
-                sb.AppendLine($"  • {p.Name}: tồn {p.Stock}");
+                sb.AppendLine($"  • {p.Name}: đã bán {-p.Stock} cái ngoài sổ, cần kiểm kê");
         }
         return sb.ToString();
     }

@@ -54,7 +54,7 @@
             <Setter Property="AlternatingRowBackground" Value="#F7F8FC"/>
         </Style>
 
-        <!-- Ô tồn kho: tô đỏ khi tồn âm (đã bán vượt tồn, cần kiểm kê). Dùng cho DataGridTextColumn.ElementStyle. -->
+        <!-- Ô tồn kho: tô đỏ khi có hàng bán ngoài sổ (cần kiểm kê). Dùng cho DataGridTextColumn.ElementStyle. -->
         <Style x:Key="StockCellStyle" TargetType="TextBlock">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding NeedsStockCheck}" Value="True">

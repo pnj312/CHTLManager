@@ -44,6 +44,8 @@ public class OrderService : IOrderService
         var products = db.Products.Where(p => ids.Contains(p.Id)).ToDictionary(p => p.Id);
 
         var lines = new List<OrderDetail>();
+        var outOfBook = new List<StockMovement>();
+        DateTime now = DateTime.Now;
         foreach (var group in details.GroupBy(d => d.ProductId))
         {
             if (!products.TryGetValue(group.Key, out var product) || !product.IsActive)
@@ -56,9 +58,24 @@ public class OrderService : IOrderService
             // với sản phẩm thu ngân đã xác nhận là còn hàng thật; khi đó tồn kho có thể âm và cần kiểm kê sau.
             bool oversellAllowed = allowOversellProductIds?.Contains(product.Id) == true;
             if (product.Stock < quantity && !oversellAllowed)
-                throw new BusinessException($"'{product.Name}' chỉ còn {product.Stock} trong kho.");
+                throw new BusinessException($"'{product.Name}' chỉ còn {Math.Max(product.Stock, 0)} trong kho.");
 
+            int before = product.Stock;
             product.Stock -= quantity;
+            if (before < quantity)
+            {
+                outOfBook.Add(new StockMovement
+                {
+                    ProductId = product.Id,
+                    UserId = order.CashierId,
+                    CreatedAt = now,
+                    Type = StockMovementType.OutOfBookSale,
+                    BeforeStock = before,
+                    AfterStock = product.Stock,
+                    Delta = -quantity,
+                    UnitPrice = product.Price
+                });
+            }
             lines.Add(new OrderDetail
             {
                 ProductId = product.Id,
@@ -72,7 +89,6 @@ public class OrderService : IOrderService
         if (order.CustomerPaid < total)
             throw new BusinessException($"Tiền khách đưa chưa đủ (cần {total:N0} đ).");
 
-        DateTime now = DateTime.Now;
         DateTime startOfDay = now.Date;
         int countToday = db.Orders.Count(o => o.CreatedAt >= startOfDay);
 
@@ -88,6 +104,8 @@ public class OrderService : IOrderService
         };
 
         db.Orders.Add(newOrder);
+        foreach (var movement in outOfBook) movement.Order = newOrder;
+        db.StockMovements.AddRange(outOfBook);
         try
         {
             db.SaveChanges();

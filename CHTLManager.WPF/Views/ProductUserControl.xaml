@@ -27,7 +27,7 @@
                 <CheckBox Grid.Column="1" x:Name="chkNeedsCheck" Content="Chỉ hiện SP cần kiểm kê"
                           VerticalAlignment="Center" Margin="0,0,10,0"
                           Checked="ChkNeedsCheck_Changed" Unchecked="ChkNeedsCheck_Changed"
-                          ToolTip="Sản phẩm có tồn kho âm do đã bán vượt tồn"/>
+                          ToolTip="Sản phẩm đã bán ngoài sổ, cần đếm lại hàng thực tế"/>
                 <Button Grid.Column="2" Content="Làm mới" Margin="0" Click="BtnRefresh_Click"/>
             </Grid>
 
@@ -37,7 +37,7 @@
                     <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="*"/>
                     <DataGridTextColumn Header="Nhóm hàng" Binding="{Binding Category}" Width="130"/>
                     <DataGridTextColumn Header="Giá bán" Binding="{Binding Price, StringFormat=N0}" Width="90"/>
-                    <DataGridTextColumn Header="Tồn kho" Binding="{Binding Stock}" Width="70"
+                    <DataGridTextColumn Header="Tồn kho" Binding="{Binding StockDisplay}" SortMemberPath="Stock" Width="Auto" MinWidth="70"
                                         ElementStyle="{StaticResource StockCellStyle}"/>
                 </DataGrid.Columns>
             </DataGrid>
@@ -84,16 +84,9 @@
                     <Button Grid.Column="1" Content="Nhập thêm" Click="BtnImport_Click" Style="{StaticResource AccentButton}" Margin="0"/>
                 </Grid>
 
-                <TextBlock Text="Kiểm kê (số lượng đếm thực tế)" FontWeight="SemiBold" Margin="0,14,0,4"/>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="txtCountedQty" Margin="0,0,8,0" HorizontalContentAlignment="Right"
-                             ToolTip="Đếm hàng thực tế trên kệ và trong kho, nhập tổng số đếm được"/>
-                    <Button Grid.Column="1" Content="Cập nhật kiểm kê" Click="BtnStockCount_Click" Style="{StaticResource PrimaryButton}" Margin="0"/>
-                </Grid>
+                <Button Content="Kiểm kê sản phẩm đang chọn..." Click="BtnStockCount_Click"
+                        Style="{StaticResource PrimaryButton}" Margin="0,14,0,0"
+                        ToolTip="Đếm hàng thực tế trên kệ và trong kho, nhập số đếm được và lý do nếu có chênh lệch"/>
             </StackPanel>
         </Border>
     </Grid>

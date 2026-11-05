@@ -33,7 +33,7 @@
                     <DataGridTextColumn Header="Mã vạch" Binding="{Binding Barcode}" Width="140"/>
                     <DataGridTextColumn Header="Tên sản phẩm" Binding="{Binding Name}" Width="*"/>
                     <DataGridTextColumn Header="Giá bán" Binding="{Binding Price, StringFormat=N0}" Width="90"/>
-                    <DataGridTextColumn Header="Tồn" Binding="{Binding Stock}" Width="60"
+                    <DataGridTextColumn Header="Tồn" Binding="{Binding StockDisplay}" SortMemberPath="Stock" Width="Auto" MinWidth="60"
                                         ElementStyle="{StaticResource StockCellStyle}"/>
                 </DataGrid.Columns>
             </DataGrid>

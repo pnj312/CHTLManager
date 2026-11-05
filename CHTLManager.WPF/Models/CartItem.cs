@@ -31,8 +31,8 @@ public class CartItem : INotifyPropertyChanged
         }
     }
 
-    /// <summary>Tên hiển thị trong giỏ, đánh dấu dòng bán vượt tồn kho.</summary>
-    public string DisplayName => OversellConfirmed ? $"{Name} (vượt tồn)" : Name;
+    /// <summary>Tên hiển thị trong giỏ, đánh dấu dòng bán ngoài sổ.</summary>
+    public string DisplayName => OversellConfirmed ? $"{Name} (kho chưa ghi)" : Name;
 
     public int Quantity
     {

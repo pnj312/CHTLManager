@@ -62,8 +62,8 @@ public partial class ProductUserControl : UserControl
             txtName.Text = p.Name;
             txtCategory.Text = p.Category;
             txtPrice.Text = p.Price.ToString("0");
-            txtStock.Text = p.Stock.ToString();
-            // Đang sửa sản phẩm có sẵn: tồn kho chỉ thay đổi qua "Nhập kho nhanh".
+            txtStock.Text = p.StockDisplay;
+            // Đang sửa sản phẩm có sẵn: tồn kho chỉ thay đổi qua nhập kho hoặc kiểm kê.
             txtStock.IsEnabled = false;
         }
         else
@@ -90,7 +90,6 @@ public partial class ProductUserControl : UserControl
         txtStock.Clear();
         txtStock.IsEnabled = true;
         txtImportQty.Clear();
-        txtCountedQty.Clear();
     }
 
     private void BtnAdd_Click(object sender, RoutedEventArgs e)
@@ -100,7 +99,7 @@ public partial class ProductUserControl : UserControl
 
         try
         {
-            AppServices.Products.Add(product);
+            AppServices.Products.Add(product, AppServices.CurrentUser!.Id);
             MessageBox.Show("Đã thêm sản phẩm.", "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
             Reload();
             BtnNew_Click(sender, e);
@@ -147,7 +146,7 @@ public partial class ProductUserControl : UserControl
         {
             bool removed = AppServices.Products.Delete(selected.Id);
             if (!removed)
-                MessageBox.Show("Sản phẩm đã có trong hóa đơn nên được chuyển sang trạng thái ngừng kinh doanh (lịch sử bán hàng được giữ nguyên).",
+                MessageBox.Show("Sản phẩm đã có hóa đơn hoặc nhật ký kho nên được chuyển sang trạng thái ngừng kinh doanh (lịch sử được giữ nguyên).",
                     "Thông báo", MessageBoxButton.OK, MessageBoxImage.Information);
             Reload();
             BtnNew_Click(sender, e);
@@ -174,11 +173,15 @@ public partial class ProductUserControl : UserControl
 
         try
         {
-            var updated = AppServices.Products.UpdateStock(selected.Id, qty);
+            var updated = AppServices.Products.ImportStock(selected.Id, qty, AppServices.CurrentUser!.Id);
             Reload(selected.Id);
             txtImportQty.Clear();
-            MessageBox.Show($"Tồn kho của '{updated.Name}' hiện là {updated.Stock}.", "Thành công",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+
+            int covered = Math.Min(qty, Math.Max(0, -(updated.Stock - qty)));
+            string message = covered > 0
+                ? $"Nhập {qty} cái, trong đó {covered} cái bù cho số đã bán ngoài sổ. Tồn kho hiện là {updated.StockDisplay}."
+                : $"Tồn kho của '{updated.Name}' hiện là {updated.StockDisplay}.";
+            MessageBox.Show(message, "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (BusinessException ex) { ShowWarning(ex.Message); }
         catch (Exception ex) { ShowError(ex); }
@@ -186,7 +189,6 @@ public partial class ProductUserControl : UserControl
 
     // ---------------- Kiểm kê ----------------
 
-    /// <summary>Đặt tồn kho bằng số đếm thực tế (xử lý kho âm do bán vượt tồn, hoặc hàng mất/hỏng).</summary>
     private void BtnStockCount_Click(object sender, RoutedEventArgs e)
     {
         if (dgProducts.SelectedItem is not Product selected)
@@ -195,31 +197,8 @@ public partial class ProductUserControl : UserControl
             return;
         }
 
-        if (!int.TryParse(txtCountedQty.Text.Trim(), out int counted) || counted < 0)
-        {
-            ShowWarning("Số lượng kiểm kê phải là số nguyên không âm.");
-            return;
-        }
-
-        int diff = counted - selected.Stock;
-        string diffText = diff > 0 ? $"+{diff} (phần mềm đang ghi thiếu)"
-                        : diff < 0 ? $"{diff} (hàng thực tế ít hơn: mất, hỏng hoặc đếm sai)"
-                        : "0 (khớp)";
-        if (MessageBox.Show(
-                $"Sản phẩm: {selected.Name}\nTồn trên phần mềm: {selected.Stock}\nĐếm thực tế: {counted}\nChênh lệch: {diffText}\n\nCập nhật tồn kho theo số đếm thực tế?",
-                "Xác nhận kiểm kê", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
-            return;
-
-        try
-        {
-            var updated = AppServices.Products.SetCountedStock(selected.Id, counted);
-            Reload(selected.Id);
-            txtCountedQty.Clear();
-            MessageBox.Show($"Đã kiểm kê '{updated.Name}': tồn kho hiện là {updated.Stock}.", "Thành công",
-                MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-        catch (BusinessException ex) { ShowWarning(ex.Message); }
-        catch (Exception ex) { ShowError(ex); }
+        var window = new StockCountWindow(selected) { Owner = Window.GetWindow(this) };
+        if (window.ShowDialog() == true) Reload(selected.Id);
     }
 
     // ---------------- Tiện ích ----------------
@@ -239,8 +218,9 @@ public partial class ProductUserControl : UserControl
             return null;
         }
 
-        // Ô tồn kho chỉ nhập khi thêm mới; khi sửa (ô bị khóa) tồn kho có thể âm do bán vượt tồn và không được gửi đi.
-        if (!int.TryParse(txtStock.Text.Trim(), out int stock) || (txtStock.IsEnabled && stock < 0))
+        // Ô tồn kho chỉ nhập khi thêm mới; khi sửa (ô bị khóa) nó chỉ để xem và Update không dùng đến.
+        int stock = 0;
+        if (txtStock.IsEnabled && (!int.TryParse(txtStock.Text.Trim(), out stock) || stock < 0))
         {
             ShowWarning("Tồn kho phải là số nguyên không âm.");
             return null;

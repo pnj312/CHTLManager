@@ -1,6 +1,7 @@
 using CHTLManager.BLL.Security;
 using CHTLManager.DAL;
 using CHTLManager.DAL.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CHTLManager.BLL;
 
@@ -11,6 +12,7 @@ public static class DbInitializer
     {
         using var db = new AppDbContext();
         bool created = db.Database.EnsureCreated();
+        if (!created) EnsureStockMovementsTable(db);
 
         if (!db.Users.Any())
         {
@@ -43,7 +45,68 @@ public static class DbInitializer
         {
             SeedSampleOrders(db, DateTime.Now);
             db.SaveChanges();
+            SeedSampleStockMovements(db, DateTime.Now);
+            db.SaveChanges();
         }
+    }
+
+    /// <summary>
+    /// CSDL tạo từ phiên bản cũ chưa có bảng nhật ký kho, và EnsureCreated không thêm bảng vào CSDL đã có.
+    /// shortcut: viết tay cho riêng bảng này; khi schema đổi tiếp thì chuyển sang EF Migrations.
+    /// </summary>
+    private static void EnsureStockMovementsTable(AppDbContext db)
+    {
+        db.Database.ExecuteSqlRaw("""
+            CREATE TABLE IF NOT EXISTS "StockMovements" (
+                "Id" INTEGER NOT NULL CONSTRAINT "PK_StockMovements" PRIMARY KEY AUTOINCREMENT,
+                "ProductId" INTEGER NOT NULL,
+                "UserId" INTEGER NOT NULL,
+                "OrderId" INTEGER NULL,
+                "CreatedAt" TEXT NOT NULL,
+                "Type" TEXT NOT NULL,
+                "BeforeStock" INTEGER NOT NULL,
+                "AfterStock" INTEGER NOT NULL,
+                "Delta" INTEGER NOT NULL,
+                "Reason" TEXT NOT NULL,
+                "UnitPrice" decimal(18,0) NOT NULL,
+                CONSTRAINT "FK_StockMovements_Orders_OrderId" FOREIGN KEY ("OrderId") REFERENCES "Orders" ("Id") ON DELETE RESTRICT,
+                CONSTRAINT "FK_StockMovements_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT,
+                CONSTRAINT "FK_StockMovements_Users_UserId" FOREIGN KEY ("UserId") REFERENCES "Users" ("Id") ON DELETE RESTRICT
+            )
+            """);
+    }
+
+    /// <summary>Vài dòng nhật ký kho mẫu (nhập hàng, thất thoát, đếm sai) để màn hình Nhật ký kho có số liệu khi demo.</summary>
+    private static void SeedSampleStockMovements(AppDbContext db, DateTime now)
+    {
+        var admin = db.Users.FirstOrDefault(u => u.Role == UserRole.Admin);
+        if (admin == null) return;
+
+        void Add(string barcode, int daysAgo, int delta, StockMovementType type, StockReason reason)
+        {
+            var p = db.Products.FirstOrDefault(x => x.Barcode == barcode);
+            if (p == null) return;
+
+            int before = p.Stock;
+            p.Stock = Math.Max(0, before + delta);
+            db.StockMovements.Add(new StockMovement
+            {
+                ProductId = p.Id,
+                UserId = admin.Id,
+                CreatedAt = now.Date.AddDays(-daysAgo).AddHours(8),
+                Type = type,
+                BeforeStock = before,
+                AfterStock = p.Stock,
+                Delta = p.Stock - before,
+                Reason = reason,
+                UnitPrice = p.Price
+            });
+        }
+
+        Add("8934588012105", 5, 24, StockMovementType.Import, StockReason.None);        // Coca: nhập thùng 24
+        Add("8934804023012", 3, -2, StockMovementType.StockCount, StockReason.Lost);     // Oreo: mất 2
+        Add("8934673101011", 2, -3, StockMovementType.StockCount, StockReason.Expired);  // Sữa: hết hạn 3
+        Add("8935001710015", 1, -1, StockMovementType.StockCount, StockReason.Damaged);  // Snack: hỏng 1
     }
 
     /// <summary>

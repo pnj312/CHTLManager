@@ -31,6 +31,9 @@
             <TabItem x:Name="tabReports" Header="Hóa đơn &amp; Doanh thu">
                 <views:OrderHistoryUserControl x:Name="reportView"/>
             </TabItem>
+            <TabItem x:Name="tabStockLog" Header="Nhật ký kho">
+                <views:StockLogUserControl x:Name="stockLogView"/>
+            </TabItem>
             <TabItem x:Name="tabUsers" Header="Tài khoản">
                 <views:UserUserControl x:Name="userView"/>
             </TabItem>

@@ -14,11 +14,12 @@ public partial class MainWindow : Window
         string role = AppServices.IsAdmin ? "Admin" : "Thu ngân";
         txtUserInfo.Text = $"{user?.FullName} ({role})";
 
-        // Phân quyền: chỉ Admin được vào tab Quản lý Kho, Hóa đơn & Doanh thu, Tài khoản
+        // Phân quyền: chỉ Admin được vào tab Quản lý Kho, Hóa đơn & Doanh thu, Nhật ký kho, Tài khoản
         if (!AppServices.IsAdmin)
         {
             tabInventory.Visibility = Visibility.Collapsed;
             tabReports.Visibility = Visibility.Collapsed;
+            tabStockLog.Visibility = Visibility.Collapsed;
             tabUsers.Visibility = Visibility.Collapsed;
         }
     }

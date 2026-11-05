@@ -28,6 +28,13 @@ public class Product
     [NotMapped]
     public bool NeedsStockCheck => Stock < 0;
 
+    /// <summary>Tồn kho để hiển thị: không cho người dùng thấy số âm.</summary>
+    [NotMapped]
+    public string StockDisplay => FormatStock(Stock);
+
+    public static string FormatStock(int stock)
+        => stock >= 0 ? stock.ToString() : $"0 (bán ngoài sổ: {-stock})";
+
     /// <summary>False = đã ngừng kinh doanh (xóa mềm khi sản phẩm đã có trong hóa đơn).</summary>
     public bool IsActive { get; set; } = true;
 
