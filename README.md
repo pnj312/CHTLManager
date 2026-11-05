@@ -11,7 +11,8 @@ Phần mềm desktop (WPF, .NET 8) cho một quầy thu ngân của cửa hàng 
 
 Quy tắc chính:
 - Bán hàng trừ tồn kho đúng số lượng bán; thanh toán, trừ kho và lưu hóa đơn nằm trong một giao dịch. Giá luôn lấy từ CSDL khi thanh toán.
-- **Kho báo hết nhưng khách vẫn cầm được hàng** (hàng nhập chưa ghi, đếm sai...): thu ngân xác nhận thì hóa đơn vẫn lưu đầy đủ, và sản phẩm hiện `0 (bán ngoài sổ: N)` màu đỏ. Lần ghi nhập sau sẽ tự bù N cái này cho đúng thực tế.
+- **Kho báo hết nhưng khách vẫn cầm được hàng** (hàng nhập chưa ghi, đếm sai...): thu ngân xác nhận thì hóa đơn vẫn lưu đầy đủ, và sản phẩm hiện `0 (bán ngoài sổ: N)` màu đỏ.
+- **Nhà cung cấp giao lô mới:** nhập kho theo từng lô, bắt buộc có nhà cung cấp và số hóa đơn. Nếu sản phẩm còn hàng bán ngoài sổ, app yêu cầu kiểm kê chốt lô cũ trước (đếm trước khi xếp hàng mới lên kệ), để số nhập khớp đúng hóa đơn và hai lô không lẫn nhau.
 - **Kho báo còn nhưng không tìm thấy hàng** (mất, hỏng, hết hạn): Admin dùng **Kiểm kê**, nhập số đếm thực tế và bắt buộc chọn lý do.
 - **Nhật ký kho** ghi lại mọi lần nhập kho, kiểm kê và bán ngoài sổ: ai làm, lúc nào, từ bao nhiêu thành bao nhiêu, lý do hoặc hóa đơn. Màn hình này tính tổng thất thoát trong kỳ **theo giá bán** (app chưa có giá nhập) và không có chức năng sửa hay xóa dòng nhật ký.
 - Sản phẩm đã có trong hóa đơn chỉ bị ngừng kinh doanh chứ không xóa hẳn; thêm lại cùng mã vạch thì kinh doanh lại.
@@ -77,6 +78,6 @@ Khi dùng thật, hãy đổi mật khẩu mặc định ngay (nút **Đổi m�
 
 - Chạy trên **một máy**. SQLite là CSDL dạng file, phù hợp với một quầy, không cần cài máy chủ CSDL. Muốn nhiều máy dùng chung dữ liệu cần đổi sang SQL Server trong mạng LAN hoặc thêm Web API (chỉ thay tầng DAL nhờ kiến trúc phân tầng).
 - Phân quyền thực hiện ở giao diện; CSDL không mã hóa.
-- Chưa có: in hóa đơn, phiếu nhập kho (nhà cung cấp, giá nhập), trả hàng, khuyến mãi.
+- Chưa có: in hóa đơn, phiếu nhập gồm nhiều sản phẩm và giá nhập (hiện nhập từng sản phẩm một), trả hàng, khuyến mãi.
 
 Kịch bản demo và câu hỏi bảo vệ: xem [docs/DEMO.md](docs/DEMO.md).

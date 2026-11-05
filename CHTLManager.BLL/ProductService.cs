@@ -140,21 +140,30 @@ public class ProductService : IProductService
         return true;
     }
 
-    public Product ImportStock(int productId, int quantity, int userId)
+    public Product ImportStock(int productId, int quantity, string supplier, string invoiceNo, int userId)
     {
         if (quantity <= 0)
             throw new BusinessException("Số lượng nhập phải là số nguyên dương.");
+        if (string.IsNullOrWhiteSpace(supplier))
+            throw new BusinessException("Hãy nhập tên nhà cung cấp.");
+        if (string.IsNullOrWhiteSpace(invoiceNo))
+            throw new BusinessException("Hãy nhập số hóa đơn của nhà cung cấp.");
 
         using var db = _factory();
         var entity = db.Products.FirstOrDefault(p => p.Id == productId && p.IsActive)
                      ?? throw new BusinessException("Không tìm thấy sản phẩm.");
 
-        ChangeStock(db, entity, entity.Stock + quantity, StockMovementType.Import, StockReason.None, userId);
+        // Hàng bán ngoài sổ thuộc lô trước: cộng thẳng vào lô mới sẽ làm lẫn hai lô và sai số tồn.
+        if (entity.Stock < 0)
+            throw new BusinessException($"'{entity.Name}' đã bán {-entity.Stock} cái ngoài sổ từ lô trước. Hãy kiểm kê trước khi nhập lô mới.");
+
+        ChangeStock(db, entity, entity.Stock + quantity, StockMovementType.Import, StockReason.None, userId,
+            supplier: supplier.Trim(), invoiceNo: invoiceNo.Trim());
         db.SaveChanges();
         return entity;
     }
 
-    public Product SetCountedStock(int productId, int countedStock, StockReason reason, int userId)
+    public Product SetCountedStock(int productId, int countedStock, StockReason reason, int userId, string? invoiceNo = null)
     {
         if (countedStock < 0)
             throw new BusinessException("Số lượng kiểm kê phải là số nguyên không âm.");
@@ -173,7 +182,9 @@ public class ProductService : IProductService
         if (!reasonFits)
             throw new BusinessException("Hãy chọn lý do chênh lệch phù hợp.");
 
-        ChangeStock(db, entity, countedStock, StockMovementType.StockCount, reason, userId, logUnchanged: true);
+        // Số hóa đơn chỉ có nghĩa khi kiểm kê phát hiện lô hàng chưa ghi.
+        string? invoice = reason == StockReason.UnrecordedImport && !string.IsNullOrWhiteSpace(invoiceNo) ? invoiceNo.Trim() : null;
+        ChangeStock(db, entity, countedStock, StockMovementType.StockCount, reason, userId, logUnchanged: true, invoiceNo: invoice);
         db.SaveChanges();
         return entity;
     }
@@ -207,7 +218,7 @@ public class ProductService : IProductService
 
     /// <summary>Đổi tồn kho và ghi một dòng nhật ký; người gọi lưu cả hai trong cùng một SaveChanges.</summary>
     private static void ChangeStock(AppDbContext db, Product product, int newStock, StockMovementType type,
-        StockReason reason, int userId, bool logUnchanged = false)
+        StockReason reason, int userId, bool logUnchanged = false, string? supplier = null, string? invoiceNo = null)
     {
         int before = product.Stock;
         product.Stock = newStock;
@@ -223,7 +234,9 @@ public class ProductService : IProductService
             AfterStock = newStock,
             Delta = newStock - before,
             Reason = reason,
-            UnitPrice = product.Price
+            UnitPrice = product.Price,
+            Supplier = supplier,
+            InvoiceNo = invoiceNo
         });
     }
 

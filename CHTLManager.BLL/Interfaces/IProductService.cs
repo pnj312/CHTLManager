@@ -16,14 +16,18 @@ public interface IProductService
     /// <summary>Xóa sản phẩm. Trả về true nếu xóa hẳn, false nếu chỉ ngừng kinh doanh (do đã có hóa đơn hoặc nhật ký kho).</summary>
     bool Delete(int id);
 
-    /// <summary>Nhập thêm hàng và ghi nhật ký kho.</summary>
-    Product ImportStock(int productId, int quantity, int userId);
+    /// <summary>
+    /// Nhập một lô hàng và ghi nhật ký kho kèm nhà cung cấp, số hóa đơn.
+    /// Bị từ chối khi sản phẩm đang có hàng bán ngoài sổ: phải kiểm kê lô trước để hai lô không lẫn nhau.
+    /// </summary>
+    Product ImportStock(int productId, int quantity, string supplier, string invoiceNo, int userId);
 
     /// <summary>
     /// Kiểm kê: đặt tồn kho bằng số đếm thực tế (≥ 0) và ghi nhật ký kho.
     /// Có chênh lệch thì bắt buộc có lý do đúng chiều; khớp thì lý do là None.
+    /// <paramref name="invoiceNo"/> chỉ được lưu với lý do "Hàng nhập chưa ghi".
     /// </summary>
-    Product SetCountedStock(int productId, int countedStock, StockReason reason, int userId);
+    Product SetCountedStock(int productId, int countedStock, StockReason reason, int userId, string? invoiceNo = null);
 
     /// <summary>Nhật ký kho từ ngày <paramref name="from"/> đến hết ngày <paramref name="to"/>, kèm tổng thất thoát.</summary>
     StockLogReport GetStockLog(DateTime from, DateTime to);

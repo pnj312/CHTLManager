@@ -63,7 +63,7 @@
 
                 <TextBlock Text="Tồn kho * (chỉ nhập khi thêm mới)" Margin="0,0,0,3"/>
                 <TextBox x:Name="txtStock" Margin="0,0,0,12" HorizontalContentAlignment="Right"
-                         ToolTip="Muốn tăng tồn kho của sản phẩm đã có, dùng mục 'Nhập kho nhanh' bên dưới."/>
+                         ToolTip="Muốn thay đổi tồn kho của sản phẩm đã có, dùng nút Nhập kho hoặc Kiểm kê bên dưới."/>
 
                 <WrapPanel Margin="0,0,0,12">
                     <Button Content="Thêm" Click="BtnAdd_Click" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
@@ -74,18 +74,12 @@
 
                 <Separator Margin="0,0,0,10"/>
 
-                <TextBlock Text="Nhập kho nhanh (số lượng thêm)" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="txtImportQty" Margin="0,0,8,0" HorizontalContentAlignment="Right"/>
-                    <Button Grid.Column="1" Content="Nhập thêm" Click="BtnImport_Click" Style="{StaticResource AccentButton}" Margin="0"/>
-                </Grid>
+                <Button Content="Nhập kho sản phẩm đang chọn..." Click="BtnImport_Click"
+                        Style="{StaticResource AccentButton}" Margin="0"
+                        ToolTip="Nhập một lô hàng theo hóa đơn của nhà cung cấp"/>
 
                 <Button Content="Kiểm kê sản phẩm đang chọn..." Click="BtnStockCount_Click"
-                        Style="{StaticResource PrimaryButton}" Margin="0,14,0,0"
+                        Style="{StaticResource PrimaryButton}" Margin="0,10,0,0"
                         ToolTip="Đếm hàng thực tế trên kệ và trong kho, nhập số đếm được và lý do nếu có chênh lệch"/>
             </StackPanel>
         </Border>

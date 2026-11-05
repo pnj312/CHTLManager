@@ -129,6 +129,24 @@ Lý do: kho báo còn mà không thấy hàng là thất thoát thật, nhưng k
 
 ---
 
+## Phần 3d — Tách lô cũ và lô mới khi nhà cung cấp giao hàng (bổ sung, ≈1,5 giờ) · commit `fix: separate old and new lots on import`
+
+Lý do: nhập kho cũ cộng thẳng vào số âm, gộp hàng bán ngoài sổ của lô trước vào lô mới. Ví dụ lô cũ 3 cái chưa ghi, bán 1, còn 2, nhập lô mới 10: app ra 9, thực tế 12.
+
+- `ImportStock` từ chối khi còn bán ngoài sổ; bắt buộc nhà cung cấp và số hóa đơn.
+- Cửa sổ Nhập kho mới. Bấm Nhập kho khi còn bán ngoài sổ: báo lý do → Kiểm kê → Nhập kho.
+- Kiểm kê với lý do "Hàng nhập chưa ghi" có ô số hóa đơn (tùy chọn). Nhật ký hiện nhà cung cấp và số hóa đơn.
+- Bỏ câu "bù"; sửa câu trả lời bảo vệ 13. CSDL cũ tự thêm 2 cột mới.
+
+**Checklist Phần 3d**
+- [x] Build sạch
+- [x] Harness 14/14: kịch bản ra đúng 12; nhập khi còn ngoài sổ bị chặn và kho không đổi; nâng cấp CSDL cũ thiếu cột và thiếu bảng
+- [x] UI thật: chặn và dẫn sang kiểm kê; hủy kiểm kê thì không nhập; đủ luồng tới tồn 12; hồi quy thu ngân, kho, doanh thu, tài khoản
+- [x] Bạn duyệt → commit
+- [ ] Đóng gói lại `.exe` và push (bản hiện tại trên GitHub và trong `publish/` vẫn là logic cũ)
+
+---
+
 ## Phần 4 — Bản cài đặt để demo (≈30 phút) · không commit file build
 
 - Publish một file `.exe` self-contained:

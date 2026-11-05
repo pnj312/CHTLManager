@@ -89,7 +89,6 @@ public partial class ProductUserControl : UserControl
         txtPrice.Clear();
         txtStock.Clear();
         txtStock.IsEnabled = true;
-        txtImportQty.Clear();
     }
 
     private void BtnAdd_Click(object sender, RoutedEventArgs e)
@@ -155,7 +154,7 @@ public partial class ProductUserControl : UserControl
         catch (Exception ex) { ShowError(ex); }
     }
 
-    // ---------------- Nhập kho nhanh ----------------
+    // ---------------- Nhập kho ----------------
 
     private void BtnImport_Click(object sender, RoutedEventArgs e)
     {
@@ -165,26 +164,28 @@ public partial class ProductUserControl : UserControl
             return;
         }
 
-        if (!int.TryParse(txtImportQty.Text.Trim(), out int qty) || qty <= 0)
+        int id = selected.Id;
+        Product? product = selected;
+
+        // Hàng bán ngoài sổ thuộc lô trước: phải chốt lô đó bằng kiểm kê, rồi mới nhập lô mới.
+        if (selected.NeedsStockCheck)
         {
-            ShowWarning("Số lượng nhập phải là số nguyên dương.");
-            return;
+            MessageBox.Show(
+                $"'{selected.Name}' đã bán {-selected.Stock} cái ngoài sổ từ lô trước.\n\n" +
+                "Hãy kiểm kê hàng đang có trước khi nhập lô mới, để hai lô không bị lẫn. " +
+                "Lưu ý: đếm trước khi xếp hàng mới lên kệ.",
+                "Cần kiểm kê trước", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            if (new StockCountWindow(selected) { Owner = Window.GetWindow(this) }.ShowDialog() != true) return;
+            Reload(id);
+
+            try { product = AppServices.Products.GetById(id); }
+            catch (Exception ex) { ShowError(ex); return; }
+            if (product == null) return;
         }
 
-        try
-        {
-            var updated = AppServices.Products.ImportStock(selected.Id, qty, AppServices.CurrentUser!.Id);
-            Reload(selected.Id);
-            txtImportQty.Clear();
-
-            int covered = Math.Min(qty, Math.Max(0, -(updated.Stock - qty)));
-            string message = covered > 0
-                ? $"Nhập {qty} cái, trong đó {covered} cái bù cho số đã bán ngoài sổ. Tồn kho hiện là {updated.StockDisplay}."
-                : $"Tồn kho của '{updated.Name}' hiện là {updated.StockDisplay}.";
-            MessageBox.Show(message, "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-        catch (BusinessException ex) { ShowWarning(ex.Message); }
-        catch (Exception ex) { ShowError(ex); }
+        if (new ImportStockWindow(product) { Owner = Window.GetWindow(this) }.ShowDialog() == true)
+            Reload(id);
     }
 
     // ---------------- Kiểm kê ----------------

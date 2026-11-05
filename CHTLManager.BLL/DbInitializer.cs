@@ -69,11 +69,23 @@ public static class DbInitializer
                 "Delta" INTEGER NOT NULL,
                 "Reason" TEXT NOT NULL,
                 "UnitPrice" decimal(18,0) NOT NULL,
+                "Supplier" TEXT NULL,
+                "InvoiceNo" TEXT NULL,
                 CONSTRAINT "FK_StockMovements_Orders_OrderId" FOREIGN KEY ("OrderId") REFERENCES "Orders" ("Id") ON DELETE RESTRICT,
                 CONSTRAINT "FK_StockMovements_Products_ProductId" FOREIGN KEY ("ProductId") REFERENCES "Products" ("Id") ON DELETE RESTRICT,
                 CONSTRAINT "FK_StockMovements_Users_UserId" FOREIGN KEY ("UserId") REFERENCES "Users" ("Id") ON DELETE RESTRICT
             )
             """);
+
+        // Bảng tạo từ phiên bản trước chưa có hai cột này (luôn được thêm cùng nhau).
+        bool hasSupplierColumn = db.Database
+            .SqlQueryRaw<int>("SELECT COUNT(*) AS \"Value\" FROM pragma_table_info('StockMovements') WHERE name = 'Supplier'")
+            .ToList()[0] > 0;
+        if (!hasSupplierColumn)
+        {
+            db.Database.ExecuteSqlRaw("ALTER TABLE \"StockMovements\" ADD COLUMN \"Supplier\" TEXT NULL");
+            db.Database.ExecuteSqlRaw("ALTER TABLE \"StockMovements\" ADD COLUMN \"InvoiceNo\" TEXT NULL");
+        }
     }
 
     /// <summary>Vài dòng nhật ký kho mẫu (nhập hàng, thất thoát, đếm sai) để màn hình Nhật ký kho có số liệu khi demo.</summary>
@@ -82,7 +94,8 @@ public static class DbInitializer
         var admin = db.Users.FirstOrDefault(u => u.Role == UserRole.Admin);
         if (admin == null) return;
 
-        void Add(string barcode, int daysAgo, int delta, StockMovementType type, StockReason reason)
+        void Add(string barcode, int daysAgo, int delta, StockMovementType type, StockReason reason,
+            string? supplier = null, string? invoiceNo = null)
         {
             var p = db.Products.FirstOrDefault(x => x.Barcode == barcode);
             if (p == null) return;
@@ -99,11 +112,13 @@ public static class DbInitializer
                 AfterStock = p.Stock,
                 Delta = p.Stock - before,
                 Reason = reason,
-                UnitPrice = p.Price
+                UnitPrice = p.Price,
+                Supplier = supplier,
+                InvoiceNo = invoiceNo
             });
         }
 
-        Add("8934588012105", 5, 24, StockMovementType.Import, StockReason.None);        // Coca: nhập thùng 24
+        Add("8934588012105", 5, 24, StockMovementType.Import, StockReason.None, "NPP Coca-Cola", "0001025"); // Coca: nhập thùng 24
         Add("8934804023012", 3, -2, StockMovementType.StockCount, StockReason.Lost);     // Oreo: mất 2
         Add("8934673101011", 2, -3, StockMovementType.StockCount, StockReason.Expired);  // Sữa: hết hạn 3
         Add("8935001710015", 1, -1, StockMovementType.StockCount, StockReason.Damaged);  // Snack: hỏng 1

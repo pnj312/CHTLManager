@@ -67,7 +67,7 @@
                 <DataGridTextColumn Header="Loại" Binding="{Binding TypeName}" Width="150"/>
                 <DataGridTextColumn Header="Trước → Sau" Binding="{Binding StockChange}" Width="Auto" MinWidth="110"/>
                 <DataGridTextColumn Header="Chênh lệch" Binding="{Binding DeltaText}" Width="85"/>
-                <DataGridTextColumn Header="Lý do / Hóa đơn" Binding="{Binding Detail}" Width="190"/>
+                <DataGridTextColumn Header="Lý do / Hóa đơn" Binding="{Binding Detail}" Width="230"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

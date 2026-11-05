@@ -50,6 +50,15 @@ public partial class StockCountWindow : Window
         cboReason.IsEnabled = true;
     }
 
+    private StockReason SelectedReason
+        => (cboReason.SelectedItem as ComboBoxItem)?.Tag as StockReason? ?? StockReason.None;
+
+    private void CboReason_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        txtInvoice.IsEnabled = SelectedReason == StockReason.UnrecordedImport;
+        if (!txtInvoice.IsEnabled) txtInvoice.Clear();
+    }
+
     private bool TryReadCounted(out int counted)
         => int.TryParse(txtCounted.Text.Trim(), out counted) && counted >= 0;
 
@@ -63,11 +72,10 @@ public partial class StockCountWindow : Window
             return;
         }
 
-        var reason = (cboReason.SelectedItem as ComboBoxItem)?.Tag as StockReason? ?? StockReason.None;
-
         try
         {
-            var updated = AppServices.Products.SetCountedStock(_product.Id, counted, reason, AppServices.CurrentUser!.Id);
+            var updated = AppServices.Products.SetCountedStock(_product.Id, counted, SelectedReason,
+                AppServices.CurrentUser!.Id, txtInvoice.Text);
             MessageBox.Show($"Đã kiểm kê '{updated.Name}': tồn kho hiện là {updated.StockDisplay}.", "Thành công",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             DialogResult = true;

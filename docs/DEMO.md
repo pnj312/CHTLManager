@@ -38,9 +38,9 @@
 - Đăng nhập `admin / admin123` → có đủ 3 tab.
 - Tab **Quản lý Kho**: thêm sản phẩm mới (mã vạch, tên, giá, tồn).
 - Chọn một sản phẩm, sửa giá → ô Tồn kho bị khóa (giải thích: tồn kho chỉ thay đổi qua nhập kho hoặc bán hàng, tránh ghi đè số liệu).
-- Nhập kho nhanh: nhập `20` → tồn kho tăng 20.
+- Chọn một sản phẩm bình thường, bấm **Nhập kho sản phẩm đang chọn...**: nhập số lượng `20`, nhà cung cấp, số hóa đơn → tồn kho tăng đúng 20.
 - Xóa Mì Hảo Hảo (đã có trong hóa đơn) → chuyển sang ngừng kinh doanh, lịch sử vẫn giữ. Thêm lại cùng mã vạch → sản phẩm được kinh doanh lại.
-- Tích **"Chỉ hiện SP cần kiểm kê"** → chỉ còn Dầu gội. Chọn nó, nhập kho `10` → app báo "Nhập 10 cái, trong đó 1 cái bù cho số đã bán ngoài sổ. Tồn kho hiện là 9." Bỏ tích ô lọc.
+- **Nhà cung cấp giao lô mới, lô cũ chưa chốt:** tích **"Chỉ hiện SP cần kiểm kê"** → chỉ còn Dầu gội. Chọn nó, bấm **Nhập kho** → app báo cần kiểm kê trước để hai lô không lẫn, rồi tự mở cửa sổ Kiểm kê. Nhập số đếm được `2`, chọn **Hàng nhập chưa ghi**, số hóa đơn cũ `0099` → tồn về 2. Cửa sổ Nhập kho tự mở: `10`, `NPP Unilever`, `0123` → tồn **12**. Bỏ tích ô lọc.
 - **Tình huống ngược lại (thất thoát):** chọn Coca, bấm **Kiểm kê sản phẩm đang chọn...**, nhập số đếm ít hơn sổ 3 cái → app kết luận "Thực tế ít hơn sổ 3 cái: thất thoát". Bấm Cập nhật khi chưa chọn lý do → bị chặn. Chọn **Mất** → cập nhật.
 - Tab **Nhật ký kho**: thấy đủ cả hai chiều lệch (Bán ngoài sổ kèm mã hóa đơn, Kiểm kê: thất thoát kèm lý do), ai làm, lúc nào. Thẻ đầu trang là **tổng thất thoát** trong kỳ; có sẵn vài dòng mẫu.
 
@@ -67,10 +67,11 @@
 8. **Cài đặt trên máy mới?** Cài .NET 8 Desktop Runtime và chạy file `.exe`, hoặc dùng bản publish self-contained không cần cài .NET. CSDL và dữ liệu mẫu tự tạo.
 9. **Quy trình sử dụng?** Đăng nhập → quét hàng → nhập tiền khách đưa → thanh toán. Admin quản lý sản phẩm, nhập kho và xem doanh thu.
 10. **Admin và Thu ngân có quyền gì?** Thu ngân bán hàng và tự đổi mật khẩu. Admin bán hàng, quản lý kho (nhập kho, kiểm kê), xem hóa đơn và doanh thu, xem nhật ký kho và thất thoát, quản lý tài khoản (tạo, khóa/mở khóa, đặt lại mật khẩu). Có chốt chặn: không thể tự khóa mình, không thể khóa Admin cuối cùng, nên hệ thống không bao giờ bị khóa hết quyền quản trị.
-11. **Hạn chế hiện tại?** Chỉ chạy một máy; phân quyền ở giao diện; CSDL không mã hóa; chưa có in hóa đơn, phiếu nhập kho (nhà cung cấp, giá nhập), trả hàng, khuyến mãi.
+11. **Hạn chế hiện tại?** Chỉ chạy một máy; phân quyền ở giao diện; CSDL không mã hóa; chưa có in hóa đơn, phiếu nhập gồm nhiều sản phẩm và giá nhập, trả hàng, khuyến mãi.
 12. **Triển khai thực tế cần cải tiến gì?** CSDL máy chủ hoặc API cho nhiều quầy, phân quyền ở server, in hóa đơn, phiếu nhập kho và kiểm kê, sao lưu tự động, quản lý ca làm việc.
 
-13. **Kho báo hết nhưng khách vẫn cầm được hàng thì sao?** Vẫn bán được. Thu ngân xác nhận thì hóa đơn ghi đầy đủ, không mất doanh thu; sản phẩm hiện "bán ngoài sổ: N" màu đỏ để Admin biết. Bên trong, phần mềm ghi tồn kho là -N: đây là số sổ sách chứ không phải số hàng trên kệ. Giữ số này để khi ghi nhập lô 10 cái, -2 + 10 = 8 mới đúng thực tế; nếu dừng ở 0 thì sẽ ra 10, sai.
+13. **Kho báo hết nhưng khách vẫn cầm được hàng thì sao?** Vẫn bán được. Thu ngân xác nhận thì hóa đơn ghi đầy đủ, không mất doanh thu; sản phẩm hiện "bán ngoài sổ: N" màu đỏ để Admin biết. Bên trong, phần mềm ghi tồn kho là -N: đây là số sổ sách chứ không phải số hàng trên kệ. Giữ số này để khi kiểm kê tính đúng quy mô lô chưa ghi: đã bán 1 ngoài sổ, đếm được 2 thì lô đó là 3 cái.
+    **Khi nhà cung cấp giao lô mới thì sao?** App không cho nhập ngay nếu còn hàng bán ngoài sổ, vì số đó thuộc lô trước. Phải kiểm kê chốt lô cũ trước (đếm trước khi xếp hàng mới lên kệ), rồi mới nhập lô mới theo hóa đơn. Nhờ vậy số nhập trong nhật ký khớp đúng tờ hóa đơn của nhà cung cấp: lô cũ +3, lô mới +10, tồn 12 đúng thực tế.
 14. **Kho báo còn nhưng không tìm thấy hàng thì sao?** Đó là thất thoát. Admin kiểm kê, nhập số đếm thực tế và bắt buộc chọn lý do (Mất, Hỏng, Hết hạn, Đếm sai trước đó). Mọi lần kiểm kê đều vào **Nhật ký kho** với người làm, thời gian, số trước và sau.
 15. **Thất thoát tháng này bao nhiêu, xem ở đâu?** Tab Nhật ký kho, chọn khoảng ngày. Mất, Hỏng, Hết hạn được cộng vào thất thoát; "Đếm sai trước đó" thì không, vì hàng không thật sự mất. Con số tính **theo giá bán** vì app chưa có giá nhập, nên phản ánh doanh thu bị mất chứ không phải tiền vốn.
 16. **Có bán nhầm khi hết hàng thật không? Nhân viên có che giấu mất hàng được không?** Mỗi sản phẩm phải được xác nhận riêng và hộp thoại mặc định chọn Không; BLL chỉ cho bán ngoài sổ đúng sản phẩm đã xác nhận. Trong app không có chức năng sửa hay xóa nhật ký, nên mọi thay đổi đều có tên người làm. Giới hạn: người mở được trực tiếp file database vẫn sửa được, vì database không mã hóa; và lý do "Đếm sai trước đó" do Admin tự chọn, nên chủ cửa hàng cần xem nhật ký định kỳ.
