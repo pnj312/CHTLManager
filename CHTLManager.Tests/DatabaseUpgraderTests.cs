@@ -116,6 +116,67 @@ public class DatabaseUpgraderTests
     }
 
     [Fact]
+    public void OldBackupLockedByAnotherProgram_UpgradeStillSucceeds()
+    {
+        using var db = new TestDb();
+        db.CreateLegacyFile();
+        string locked = Path.Combine(db.Directory, "test.backup-20200101-000000.db");
+        for (int i = 0; i < 7; i++)
+            File.WriteAllText(Path.Combine(db.Directory, $"test.backup-2020010{i + 1}-000000.db"), "cũ");
+
+        UpgradeResult result;
+        using (new FileStream(locked, FileMode.Open, FileAccess.Read, FileShare.None))
+            result = DatabaseUpgrader.Upgrade();
+
+        Assert.True(File.Exists(locked));
+        Assert.True(File.Exists(result.BackupPath));
+        Assert.False(File.Exists(Path.Combine(db.Directory, "test.backup-20200102-000000.db")));
+        Assert.True(db.Scalar("SELECT COUNT(*) FROM __EFMigrationsHistory") > 1);
+    }
+
+    [Fact]
+    public void OldBackupReadOnly_UpgradeStillSucceeds()
+    {
+        using var db = new TestDb();
+        db.CreateLegacyFile();
+        string readOnly = Path.Combine(db.Directory, "test.backup-20200101-000000.db");
+        for (int i = 0; i < 7; i++)
+            File.WriteAllText(Path.Combine(db.Directory, $"test.backup-2020010{i + 1}-000000.db"), "cũ");
+        File.SetAttributes(readOnly, FileAttributes.ReadOnly);
+
+        try
+        {
+            var result = DatabaseUpgrader.Upgrade();
+
+            Assert.True(File.Exists(readOnly));
+            Assert.True(File.Exists(result.BackupPath));
+        }
+        finally
+        {
+            File.SetAttributes(readOnly, FileAttributes.Normal);
+        }
+    }
+
+    [Fact]
+    public void LockedBackupReleased_CleanedUpOnNextUpgrade()
+    {
+        using var db = new TestDb();
+        db.CreateLegacyFile();
+        string locked = Path.Combine(db.Directory, "test.backup-20200101-000000.db");
+        for (int i = 0; i < 7; i++)
+            File.WriteAllText(Path.Combine(db.Directory, $"test.backup-2020010{i + 1}-000000.db"), "cũ");
+        using (new FileStream(locked, FileMode.Open, FileAccess.Read, FileShare.None))
+            DatabaseUpgrader.Upgrade();
+
+        // Lần có thay đổi cấu trúc tiếp theo sẽ dọn tiếp.
+        db.ExecuteSql("DELETE FROM __EFMigrationsHistory WHERE MigrationId LIKE '%AddLotCostBaseStock'; ALTER TABLE PurchaseReceiptLines DROP COLUMN CostBaseStock;");
+        DatabaseUpgrader.Upgrade();
+
+        Assert.False(File.Exists(locked));
+        Assert.Equal(5, Directory.GetFiles(db.Directory, "test.backup-*.db").Length);
+    }
+
+    [Fact]
     public void Initialize_WithoutDemo_OnlyAdminAccount()
     {
         using var db = new TestDb();

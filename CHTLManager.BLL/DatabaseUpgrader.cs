@@ -71,9 +71,21 @@ public static class DatabaseUpgrader
         var outdated = Directory.GetFiles(directory, $"{name}.backup-*.db")
             .OrderByDescending(f => f, StringComparer.Ordinal)
             .Skip(BackupsToKeep);
-        foreach (string file in outdated) File.Delete(file);
+        foreach (string file in outdated) TryDelete(file);
 
         return target;
+    }
+
+    /// <summary>Bản sao lưu mới đã có; không xóa được bản cũ (đang bị mở, chỉ đọc) không phải lý do để chặn mở ứng dụng. Lần nâng cấp sau sẽ dọn lại.</summary>
+    private static void TryDelete(string file)
+    {
+        try
+        {
+            File.Delete(file);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+        }
     }
 
     /// <summary>CSDL cũ đã có đủ bảng: bù phần còn thiếu, rồi đánh dấu migration đầu tiên là đã chạy.</summary>
