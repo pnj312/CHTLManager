@@ -40,6 +40,7 @@
             <Button Content="Xem" Click="BtnView_Click" Style="{StaticResource PrimaryButton}"/>
             <Button x:Name="btnResolve" Content="Xử lý..." Click="BtnResolve_Click" Style="{StaticResource AccentButton}"/>
             <Button x:Name="btnCollect" Content="Thu bồi thường..." Click="BtnCollect_Click"/>
+            <Button x:Name="btnPayments" Content="Các lần thu..." Click="BtnPayments_Click"/>
         </StackPanel>
 
         <UniformGrid Grid.Row="1" Columns="5" Margin="0,0,-10,10">

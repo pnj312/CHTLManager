@@ -140,6 +140,35 @@ public class StockCountService : IStockCountService
         return payment;
     }
 
+    public void CancelCompensationPayment(int paymentId, string reason, int adminId)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new BusinessException("Hãy nhập lý do hủy lần thu.");
+
+        using var db = _factory();
+        var payment = db.CompensationPayments.FirstOrDefault(p => p.Id == paymentId)
+                      ?? throw new BusinessException("Không tìm thấy lần thu bồi thường.");
+        if (payment.IsCancelled)
+            throw new BusinessException("Lần thu này đã hủy rồi.");
+
+        payment.IsCancelled = true;
+        payment.CancelledAt = DateTime.Now;
+        payment.CancelledByUserId = adminId;
+        payment.CancelReason = reason.Trim();
+        db.SaveChanges();
+    }
+
+    public List<CompensationPayment> GetCompensationPayments(int discrepancyId)
+    {
+        using var db = _factory();
+        return db.CompensationPayments.AsNoTracking()
+            .Include(p => p.User)
+            .Include(p => p.CancelledBy)
+            .Where(p => p.StockDiscrepancyId == discrepancyId)
+            .OrderByDescending(p => p.Id)
+            .ToList();
+    }
+
     public List<StockDiscrepancy> GetDiscrepancies(DateTime from, DateTime to, DiscrepancyStatus? status)
     {
         DateTime start = from.Date, endExclusive = to.Date.AddDays(1);

@@ -26,6 +26,19 @@ namespace CHTLManager.DAL.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,0)");
 
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CancelledByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Note")
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
@@ -40,6 +53,8 @@ namespace CHTLManager.DAL.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CancelledByUserId");
 
                     b.HasIndex("StockDiscrepancyId");
 
@@ -520,6 +535,11 @@ namespace CHTLManager.DAL.Migrations
 
             modelBuilder.Entity("CHTLManager.DAL.Entities.CompensationPayment", b =>
                 {
+                    b.HasOne("CHTLManager.DAL.Entities.User", "CancelledBy")
+                        .WithMany()
+                        .HasForeignKey("CancelledByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("CHTLManager.DAL.Entities.StockDiscrepancy", "StockDiscrepancy")
                         .WithMany("Payments")
                         .HasForeignKey("StockDiscrepancyId")
@@ -531,6 +551,8 @@ namespace CHTLManager.DAL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("CancelledBy");
 
                     b.Navigation("StockDiscrepancy");
 

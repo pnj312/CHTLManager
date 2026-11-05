@@ -17,6 +17,12 @@ public interface IStockCountService
 
     CompensationPayment CollectCompensation(int id, decimal amount, string? note, int adminId);
 
+    /// <summary>Hủy lần thu ghi nhầm, bắt buộc có lý do: số còn phải thu tăng lại, dòng vẫn được giữ để đối chiếu.</summary>
+    void CancelCompensationPayment(int paymentId, string reason, int adminId);
+
+    /// <summary>Mọi lần thu của một phiếu chênh lệch, kể cả lần đã hủy, mới nhất trước.</summary>
+    List<CompensationPayment> GetCompensationPayments(int discrepancyId);
+
     List<StockDiscrepancy> GetDiscrepancies(DateTime from, DateTime to, DiscrepancyStatus? status);
 
     int CountPending();

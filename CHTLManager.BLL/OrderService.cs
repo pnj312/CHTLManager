@@ -198,7 +198,7 @@ public class OrderService : IOrderService
             .Where(d => d.Status == DiscrepancyStatus.Resolved && d.ResolvedAt >= start && d.ResolvedAt < endExclusive)
             .ToList();
         var collected = db.CompensationPayments.AsNoTracking()
-            .Where(p => p.PaidAt >= start && p.PaidAt < endExclusive)
+            .Where(p => !p.IsCancelled && p.PaidAt >= start && p.PaidAt < endExclusive)
             .ToList();
 
         return new ProfitReport

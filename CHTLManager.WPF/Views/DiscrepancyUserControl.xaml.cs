@@ -72,6 +72,7 @@ public partial class DiscrepancyUserControl : UserControl
         var d = dgDiscrepancies.SelectedItem as StockDiscrepancy;
         btnResolve.IsEnabled = d?.Status == DiscrepancyStatus.Pending;
         btnCollect.IsEnabled = d is { CompensationRemaining: > 0 };
+        btnPayments.IsEnabled = d is { Payments.Count: > 0 };
     }
 
     private void BtnResolve_Click(object sender, RoutedEventArgs e)
@@ -104,6 +105,14 @@ public partial class DiscrepancyUserControl : UserControl
         {
             MessageBox.Show("Đã xảy ra lỗi: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    private void BtnPayments_Click(object sender, RoutedEventArgs e)
+    {
+        if (dgDiscrepancies.SelectedItem is not StockDiscrepancy d) return;
+
+        new CompensationPaymentsWindow(d) { Owner = Window.GetWindow(this) }.ShowDialog();
+        Reload();
     }
 
     private static void ShowWarning(string message)

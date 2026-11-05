@@ -77,7 +77,7 @@ public class StockDiscrepancy
     public bool IsSelfResolved => ResolvedByUserId == CountedByUserId;
 
     [NotMapped]
-    public decimal CompensationCollected => Payments.Sum(p => p.Amount);
+    public decimal CompensationCollected => Payments.Where(p => !p.IsCancelled).Sum(p => p.Amount);
 
     [NotMapped]
     public decimal CompensationRemaining => (CompensationAmount ?? 0) - CompensationCollected;
@@ -109,7 +109,7 @@ public class StockDiscrepancy
     public string SelfResolvedText => Status == DiscrepancyStatus.Resolved && IsSelfResolved ? "Tự xử lý" : string.Empty;
 }
 
-/// <summary>Một lần thu tiền bồi thường.</summary>
+/// <summary>Một lần thu tiền bồi thường. Ghi nhầm thì hủy kèm lý do, không xóa.</summary>
 public class CompensationPayment
 {
     public int Id { get; set; }
@@ -125,4 +125,15 @@ public class CompensationPayment
 
     [MaxLength(200)]
     public string? Note { get; set; }
+
+    public bool IsCancelled { get; set; }
+    public DateTime? CancelledAt { get; set; }
+    public int? CancelledByUserId { get; set; }
+    public User? CancelledBy { get; set; }
+
+    [MaxLength(200)]
+    public string? CancelReason { get; set; }
+
+    [NotMapped]
+    public string StatusText => IsCancelled ? $"Đã hủy bởi {CancelledBy?.FullName}: {CancelReason}" : string.Empty;
 }

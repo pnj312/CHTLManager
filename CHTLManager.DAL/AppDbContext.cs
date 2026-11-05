@@ -115,6 +115,7 @@ public class AppDbContext : DbContext
             e.Property(p => p.Amount).HasColumnType("decimal(18,0)");
             e.HasOne(p => p.StockDiscrepancy).WithMany(d => d.Payments).HasForeignKey(p => p.StockDiscrepancyId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(p => p.User).WithMany().HasForeignKey(p => p.UserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(p => p.CancelledBy).WithMany().HasForeignKey(p => p.CancelledByUserId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Supplier>(e => e.HasIndex(s => s.NameKey).IsUnique());
