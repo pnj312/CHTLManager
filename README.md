@@ -12,6 +12,7 @@ Phần mềm desktop (WPF, .NET 8) cho một quầy thu ngân của cửa hàng 
 Quy tắc chính:
 - Thanh toán, trừ kho và lưu hóa đơn nằm trong một giao dịch. Giá bán và giá vốn luôn đọc lại từ CSDL.
 - **Giá vốn** bình quân gia quyền, tính lại sau mỗi phiếu nhập có giá, lưu vào từng dòng hóa đơn lúc bán. Hủy hoặc sửa giá một lô thì giá vốn được tính lại theo các lô còn lại.
+- **Nhập hàng:** quét mã hoặc gõ mã, tên không dấu rồi chọn trong danh sách; giá điền sẵn theo lần nhập gần nhất, tổng tiền hiện ngay; tên nhà cung cấp gần giống tên đã có thì app hỏi lại. Trong các bảng sản phẩm, `Ctrl + C` hoặc chuột phải để chép mã vạch.
 - **Phiếu nhập:** một nhà cung cấp + một số hóa đơn, nhiều dòng; công nợ theo số **thực nhận** × giá nhập; không nhập trùng hóa đơn. Thu ngân nhận hàng thì kho tăng ngay, Admin đối chiếu và nhập giá sau; hàng chờ giá chưa vào giá vốn, bán vào phần đó thì dòng hóa đơn được đánh dấu giá vốn tạm tính.
 - **Kho báo hết nhưng khách vẫn cầm được hàng:** thu ngân xác nhận thì bán được (tối đa 10 cái vượt tồn mỗi dòng), hóa đơn đầy đủ, sản phẩm hiện `0 (bán ngoài sổ: N)` màu đỏ. Trước khi nhập lô mới phải kiểm kê chốt lô cũ, đếm trước khi xếp hàng mới lên kệ.
 - **Kiểm kê hai bước:** đếm làm tồn kho đúng ngay, Admin xử lý phần lệch sau. Thiếu: thất thoát, người chịu trách nhiệm bồi thường, hoặc đếm sai (bắt buộc ghi chú). Thừa: lô chưa ghi (sinh phiếu và công nợ), thu nhập khác, hoặc đếm sai. Sản phẩm chưa có giá vốn thì phải khai báo giá vốn trước khi ghi thất thoát, bồi thường hoặc thu nhập khác.
@@ -76,7 +77,7 @@ Khi dùng thật, hãy đổi mật khẩu mặc định ngay (nút **Đổi m�
 
 ## Cơ sở dữ liệu
 
-- Lần chạy đầu, ứng dụng tự tạo file `%LocalAppData%\CHTLManager\chtlmanager.db` với tài khoản Admin, không có dữ liệu giả. Chạy với tham số `--demo` để có 12 sản phẩm và khoảng 20 hóa đơn mẫu.
+- Lần chạy đầu, ứng dụng tự tạo file `%LocalAppData%\CHTLManager\chtlmanager.db` với tài khoản Admin, không có dữ liệu giả. Chạy với tham số `--demo` để có dữ liệu mẫu cố định: 12 sản phẩm, 6 phiếu nhập của 4 nhà cung cấp và 25 hóa đơn (chi tiết trong `docs/DEMO.md`).
 - **Nâng cấp phiên bản:** dữ liệu được giữ nguyên. Trước khi đổi cấu trúc, ứng dụng tự sao lưu thành `chtlmanager.backup-*.db` cùng thư mục, giữ 5 bản gần nhất.
 - CSDL nằm trong thư mục của tài khoản Windows đang dùng: mỗi máy, mỗi tài khoản Windows có một CSDL riêng.
 - **Sao lưu:** đóng ứng dụng bằng nút đóng cửa sổ, rồi copy file `chtlmanager.db` ra nơi khác. Nếu cạnh đó còn file `chtlmanager.db-wal` (ứng dụng từng bị tắt đột ngột), dữ liệu mới nhất đang nằm trong file này: hãy mở ứng dụng rồi đóng lại bình thường, đến khi file đó biến mất mới copy.

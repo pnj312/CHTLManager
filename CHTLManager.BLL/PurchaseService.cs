@@ -1,4 +1,5 @@
 using CHTLManager.BLL.Interfaces;
+using CHTLManager.BLL.Security;
 using CHTLManager.DAL;
 using CHTLManager.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,42 @@ public class PurchaseService : IPurchaseService
     {
         using var db = _factory();
         return db.Suppliers.AsNoTracking().Where(s => s.IsActive).OrderBy(s => s.Name).ToList();
+    }
+
+    public Supplier? FindSimilarSupplier(string name)
+    {
+        string typed = name?.Trim() ?? string.Empty;
+        if (typed.Length == 0) return null;
+
+        var suppliers = GetSuppliers();
+        if (suppliers.Any(s => s.NameKey == typed.ToLowerInvariant())) return null;
+
+        string normalized = NormalizeName(typed);
+        return suppliers.FirstOrDefault(s => NormalizeName(s.Name) == normalized)
+               ?? (normalized.Length < MinLengthForTypoCheck
+                   ? null
+                   : suppliers.FirstOrDefault(s => DiffersByAtMostOneEdit(NormalizeName(s.Name), normalized)));
+    }
+
+    // Tên quá ngắn thì khác một ký tự thường là nhà cung cấp khác thật.
+    private const int MinLengthForTypoCheck = 6;
+
+    private static string NormalizeName(string name)
+        => string.Concat(TextHelper.RemoveDiacritics(name).Where(char.IsLetterOrDigit)).ToLowerInvariant();
+
+    private static bool DiffersByAtMostOneEdit(string a, string b)
+    {
+        if (Math.Abs(a.Length - b.Length) > 1) return false;
+        int i = 0, j = 0, edits = 0;
+        while (i < a.Length && j < b.Length)
+        {
+            if (a[i] == b[j]) { i++; j++; continue; }
+            if (++edits > 1) return false;
+            if (a.Length == b.Length) { i++; j++; }
+            else if (a.Length > b.Length) i++;
+            else j++;
+        }
+        return edits + (a.Length - i) + (b.Length - j) <= 1;
     }
 
     public PurchaseReceipt CreateReceipt(int supplierId, string invoiceNo, IReadOnlyList<ReceiptLineInput> lines, int userId, bool asAdmin)

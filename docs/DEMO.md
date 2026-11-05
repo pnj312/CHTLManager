@@ -4,15 +4,43 @@
 
 1. Tắt ứng dụng nếu đang mở.
 2. Xóa file `%LocalAppData%\CHTLManager\chtlmanager.db` để có dữ liệu mẫu sạch. Mở thư mục nhanh: nhấn `Win + R`, gõ `%LocalAppData%\CHTLManager`.
-3. Mở ứng dụng với tham số `--demo` **trong khoảng 7:00–21:00**, bằng file `CHTL Manager (demo).bat` đi kèm hoặc lệnh `CHTLManager.WPF.exe --demo`. Không có tham số này, app chỉ có tài khoản Admin như một cửa hàng thật.
-4. Để sẵn danh sách mã vạch dưới đây (copy/dán thay cho máy quét).
+3. Mở ứng dụng với tham số `--demo`, bằng file `CHTL Manager (demo).bat` đi kèm hoặc lệnh `CHTLManager.WPF.exe --demo`. Không có tham số này, app chỉ có tài khoản Admin như một cửa hàng thật.
+4. Để sẵn danh sách mã vạch dưới đây (copy/dán thay cho máy quét). Trong app, chọn một sản phẩm rồi nhấn `Ctrl + C` hoặc chuột phải để chép mã vạch.
 
 | Sản phẩm | Mã vạch | Ghi chú |
 |---|---|---|
 | Mì Hảo Hảo tôm chua cay | `8934563138165` | Giá 4.500 |
 | Coca-Cola lon 330ml | `8934588012105` | Giá 10.000 |
-| Dầu gội Clear 330g | `8934868150012` | Tồn thấp (xem cột Tồn, thường là 5): dùng cho tình huống kho báo hết |
+| Dầu gội Clear 330g | `8934868150012` | Tồn 5: dùng cho tình huống kho báo hết |
 | Mã không tồn tại | `123` | Demo cảnh báo |
+
+### Dữ liệu mẫu
+
+Mọi con số đều cố định, mở app giờ nào cũng giống nhau. Cửa hàng mở với kệ trống cách đây 7 ngày; toàn bộ tồn kho đều từ 6 phiếu nhập của 4 nhà cung cấp, không có số tồn nào thiếu chứng từ. Có 25 hóa đơn trong 7 ngày, doanh thu `1.300.000 đ`, hôm nay có 2 hóa đơn.
+
+| Sản phẩm | Giá bán | Giá vốn | Tồn |
+|---|---:|---:|---:|
+| Mì Hảo Hảo tôm chua cay | 4.500 | 3.435 | 130 |
+| Mì Omachi sườn hầm | 8.000 | 5.600 | 54 |
+| Nước suối Aquafina 500ml | 6.000 | 3.800 | 107 |
+| Coca-Cola lon 330ml | 10.000 | 7.068 | 130 |
+| Trà xanh 0 độ 455ml | 10.000 | 6.800 | 66 |
+| Sữa tươi Vinamilk 180ml | 8.500 | 6.500 | 77 |
+| Bánh Oreo vani 133g | 16.000 | 11.500 | 34 |
+| Snack Oishi tôm cay 40g | 7.000 | 5.056 | 68 |
+| Cà phê G7 3in1 (hộp 18 gói) | 52.000 | 40.000 | 22 |
+| Dầu gội Clear 330g | 98.000 | 72.000 | 5 |
+| Khăn giấy Pulppy 2 lớp | 12.000 | 8.500 | 45 |
+| Bút bi Thiên Long TL-027 | 4.000 | 2.500 | 195 |
+
+| Nhà cung cấp | Tiền hàng | Đã trả | Còn nợ |
+|---|---:|---:|---:|
+| NPP Đồ uống | 1.963.200 | 1.000.000 | 963.200 |
+| NPP Thực phẩm | 3.268.000 | 500.000 | 2.768.000 |
+| NPP Tạp hóa | 925.000 | 0 | 925.000 |
+| NPP Unilever | 720.000 | 720.000 | 0 |
+
+Có sẵn các tình huống: hóa đơn `TP-2002` ghi 50 gói mì nhưng chỉ nhận 48 (chỉ nợ theo số thực nhận), giá Coca và mì tăng ở lô sau (giá vốn bình quân thay đổi), ba khoản thất thoát, và một khoản bồi thường `17.000 đ` đã thu `10.000 đ`.
 
 ## Kịch bản (khoảng 10–12 phút)
 
@@ -31,7 +59,7 @@
 - Chọn **Có** → dòng hiện "(kho chưa ghi)". Thanh toán → hóa đơn nhắc "đã bán 1 cái ngoài sổ, cần kiểm kê"; cột Tồn hiện `0 (bán ngoài sổ: 1)` màu đỏ. Bán ngoài sổ tối đa 10 cái mỗi dòng.
 
 ### 4. Chỉ có thu ngân ở quán, nhà cung cấp giao hàng
-- Bấm **Nhận hàng...**: nhà cung cấp `NPP Unilever`, số hóa đơn `MOI-1`, thêm Dầu gội.
+- Bấm **Nhận hàng...**: nhà cung cấp `NPP Unilever`, số hóa đơn `MOI-1`. Ở ô thêm sản phẩm, gõ `dau goi` rồi chọn trong danh sách hiện ra; thử gõ tên nhà cung cấp hơi khác đi, ví dụ `NPP Unilevr`, để thấy app hỏi lại khi lưu.
 - App báo còn hàng bán ngoài sổ từ lô trước, mở cửa sổ **Kiểm kê**. Thu ngân đếm hàng cũ **trước khi xếp hàng mới lên kệ**: nhập `2` → tồn 2, chênh lệch +3 chờ Admin.
 - Quay lại phiếu: SL hóa đơn `10`, thực nhận `10`, không có giá → lưu. Tồn **12**, bán tiếp được. Đăng xuất.
 
@@ -39,7 +67,7 @@
 - Đăng nhập `admin / admin123`. Nút đỏ trên thanh tiêu đề: **1 phiếu chờ xác nhận, 1 chênh lệch chờ xử lý**.
 - Bấm nút → tab **Nhập hàng**: đối chiếu với tờ hóa đơn, **Xác nhận phiếu**, nhập giá `75.000`.
 - Bấm nút lần nữa → tab **Chênh lệch kho**: chọn dòng Dầu gội → **Xử lý...** → **Lô hàng chưa ghi**: `NPP Unilever`, hóa đơn `CU-9`, giá `70.000`.
-- Tab **Công nợ NCC**: NPP Unilever nợ `960.000 đ` (3×70.000 + 10×75.000). Bấm **Trả tiền...**, trả `500.000`; thử trả quá số nợ → bị chặn.
+- Tab **Công nợ NCC**: NPP Unilever trước đó hết nợ, giờ nợ `960.000 đ` (3×70.000 + 10×75.000). Bấm **Trả tiền...**, trả `500.000`; thử trả quá số nợ → bị chặn.
 
 ### 6. Kho báo còn nhưng không tìm thấy hàng (thất thoát)
 - Tab **Quản lý Kho**: chọn Coca, **Kiểm kê...**, nhập ít hơn sổ 3 cái → tồn giảm ngay, chênh lệch chờ xử lý.
@@ -106,6 +134,7 @@
 - **Có bị SQL Injection không?** Dữ liệu người dùng luôn qua Entity Framework có tham số hóa. SQL viết tay chỉ dùng cho nâng cấp cấu trúc và không chứa dữ liệu người dùng.
 - **Hàng thu ngân nhận mà chưa có giá thì tính giá vốn thế nào?** Hàng đó vào tồn kho ngay nhưng chưa vào giá vốn bình quân; giá chỉ được tính lúc Admin xác nhận. Nếu bán vào phần hàng chưa có giá, dòng đó được đánh dấu giá vốn tạm tính và báo cáo hiện rõ số dòng tạm tính.
 - **Sản phẩm chưa có giá vốn mà bị thiếu hàng thì sao?** App không cho ghi thất thoát 0 đ: phải khai báo giá vốn trước, để báo cáo không che mất khoản mất thật.
+- **Nhập hàng có tránh gõ sai được không?** Gõ mã hoặc tên không dấu là hiện danh sách để chọn, giá điền sẵn theo lần nhập gần nhất và tổng tiền hiện ngay để đối chiếu với hóa đơn. Tên nhà cung cấp gần giống tên đã có thì app hỏi lại, vì tạo trùng sẽ làm công nợ bị tách đôi. Đóng phiếu chưa lưu cũng được hỏi lại.
 - **Nhập nhầm giá thì sửa thế nào?** Admin bấm **Sửa giá nhập** trên phiếu đã xác nhận và phải ghi lý do: công nợ và giá vốn đổi theo, tồn kho giữ nguyên, nhật ký kho ghi giá cũ, giá mới và người sửa. Không hủy rồi nhập lại, vì nếu hàng đã bán thì việc đó tạo ra tồn kho không có thật. Lãi của hóa đơn đã bán giữ nguyên vì giá vốn được chốt lúc bán; khoản lệch nếu có nằm ở các lần bán sau.
 - **Ghi nhầm tiền bồi thường thì sao?** Admin mở **Các lần thu**, chọn lần sai và hủy kèm lý do. Lần đó vẫn nằm trong danh sách, ghi rõ ai hủy và vì sao, nhưng không còn tính vào số đã thu và báo cáo. Ghi nhầm người hoặc số tiền phải bồi thường thì dùng **Sửa khoản bồi thường**: phải có lý do và nhật ký kho ghi lại giá trị cũ, giá trị mới. Không đổi được người khi còn lần thu có hiệu lực, vì số tiền đó do người cũ trả. Giới hạn đã biết: cách xử lý chênh lệch đã chọn, ví dụ đã chọn Thất thoát nhưng đúng ra là Đếm sai, hiện chưa đảo lại được, nên Admin cần kiểm tra trước khi xác nhận.
 - **Có kiểm thử không?** Có project xUnit cho tầng nghiệp vụ, chạy trên database tạm, gồm cả nâng cấp từ database cũ và đối chiếu dữ liệu mẫu với chứng từ. Giao diện được chạy thử bằng UI Automation, không nằm trong bộ test.

@@ -25,6 +25,7 @@ public partial class PurchaseConfirmWindow : Window
     public PurchaseConfirmWindow(PurchaseReceipt receipt, bool correcting = false)
     {
         InitializeComponent();
+        DataGridHelper.EnableSingleClickEdit(dgLines);
         _receipt = receipt;
         _correcting = correcting;
         txtHeader.Text = $"Phiếu {receipt.Code} – {receipt.Supplier?.Name}, hóa đơn {receipt.InvoiceNo}. Người nhận: {receipt.CreatedBy?.FullName}.";

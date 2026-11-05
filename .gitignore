@@ -3,3 +3,5 @@ obj/
 .vs/
 *.db
 publish/
+# Thiết lập chạy riêng của từng máy (ví dụ --demo)
+**/Properties/launchSettings.json

@@ -16,6 +16,7 @@ public class ReceiptLineRow : INotifyPropertyChanged
 
     public required Product Product { get; init; }
     public string ProductName => Product.Name;
+    public string Barcode => Product.Barcode;
 
     public string InvoicedText
     {

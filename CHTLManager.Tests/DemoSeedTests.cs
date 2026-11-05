@@ -40,7 +40,7 @@ public class DemoSeedTests
         foreach (var group in db.StockMovements.AsNoTracking().ToList().GroupBy(m => m.ProductId))
         {
             var ordered = group.OrderBy(m => m.CreatedAt).ThenBy(m => m.Id).ToList();
-            Assert.Equal(StockMovementType.Initial, ordered[0].Type);
+            Assert.Equal(StockMovementType.ReceiptIn, ordered[0].Type);
             for (int i = 1; i < ordered.Count; i++)
                 Assert.True(ordered[i].BeforeStock <= ordered[i - 1].AfterStock, $"{group.Key}: dòng {i}");
         }

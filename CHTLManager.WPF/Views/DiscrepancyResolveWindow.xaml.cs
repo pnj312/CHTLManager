@@ -119,7 +119,9 @@ public partial class DiscrepancyResolveWindow : Window
             }
             cost = parsed;
             invoice = txtInvoice.Text;
-            supplierId = AppServices.Purchases.SaveSupplier(new Supplier { Name = cboSupplier.Text }).Id;
+            string? supplierName = SupplierPrompt.Resolve(this, cboSupplier.Text);
+            if (supplierName == null) return false;
+            supplierId = AppServices.Purchases.SaveSupplier(new Supplier { Name = supplierName }).Id;
         }
         AppServices.StockCounts.ResolveSurplus(_discrepancy.Id, option.Resolution, note, supplierId, invoice, cost, adminId);
         return true;

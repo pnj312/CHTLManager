@@ -19,6 +19,7 @@ public partial class POSUserControl : UserControl
     public POSUserControl()
     {
         InitializeComponent();
+        DataGridHelper.EnableBarcodeCopy(dgProducts);
         dgCart.ItemsSource = _cart;
     }
 

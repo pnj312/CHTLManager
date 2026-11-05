@@ -1,14 +1,16 @@
 <Window x:Class="CHTLManager.WPF.Views.PurchaseReceiptWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Nhận hàng" Width="760" Height="560" MinWidth="640" MinHeight="460"
+        Title="Nhận hàng" Width="820" Height="620" MinWidth="680" MinHeight="500"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded" Closing="Window_Closing">
     <Grid Margin="20,16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -29,33 +31,58 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="0,0,0,8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox x:Name="txtProduct" KeyDown="TxtProduct_KeyDown" Margin="0,0,8,0"
-                     ToolTip="Quét mã vạch hoặc gõ tên sản phẩm rồi nhấn Enter"/>
-            <Button Grid.Column="1" x:Name="btnAdd" Content="Thêm dòng" Click="BtnAdd_Click"/>
-            <Button Grid.Column="2" x:Name="btnRemove" Content="Xóa dòng" Click="BtnRemove_Click" Margin="0"/>
-        </Grid>
+        <StackPanel Grid.Row="1" Margin="0,0,0,4">
+            <TextBlock Text="Thêm sản phẩm: quét mã vạch, hoặc gõ mã hoặc tên (không cần dấu) rồi chọn trong danh sách" Margin="0,0,0,4"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="txtProduct" PreviewKeyDown="TxtProduct_PreviewKeyDown" TextChanged="TxtProduct_TextChanged" Margin="0,0,8,0"/>
+                <Button Grid.Column="1" x:Name="btnAdd" Content="Thêm dòng" Click="BtnAdd_Click"/>
+                <Button Grid.Column="2" x:Name="btnRemove" Content="Xóa dòng" Click="BtnRemove_Click" Margin="0"/>
+            </Grid>
+        </StackPanel>
 
-        <DataGrid Grid.Row="2" x:Name="dgLines" IsReadOnly="False" CanUserSortColumns="False">
+        <ListBox Grid.Row="2" x:Name="lstSuggestions" Visibility="Collapsed" MaxHeight="150" Margin="0,0,0,8"
+                 HorizontalContentAlignment="Stretch" FontSize="14"
+                 MouseLeftButtonUp="LstSuggestions_MouseLeftButtonUp" AutomationProperties.Name="Sản phẩm khớp">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding Barcode}" Foreground="Gray"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Grid.Column="2" Text="{Binding StockDisplay, StringFormat='Tồn: {0}'}" Foreground="Gray" Margin="12,0,0,0"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <DataGrid Grid.Row="3" x:Name="dgLines" IsReadOnly="False" CanUserSortColumns="False" Margin="0,4,0,0">
             <DataGrid.Columns>
+                <DataGridTextColumn Header="Mã vạch" Binding="{Binding Barcode}" Width="125" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Sản phẩm" Binding="{Binding ProductName}" Width="*" IsReadOnly="True"/>
                 <DataGridTextColumn Header="SL theo hóa đơn" Binding="{Binding InvoicedText, UpdateSourceTrigger=PropertyChanged}" Width="120"/>
-                <DataGridTextColumn Header="SL thực nhận" Binding="{Binding ReceivedText, UpdateSourceTrigger=PropertyChanged}" Width="110"/>
-                <DataGridTextColumn x:Name="colCost" Header="Giá nhập (đ)" Binding="{Binding CostText, UpdateSourceTrigger=PropertyChanged}" Width="110"/>
+                <DataGridTextColumn Header="SL thực nhận" Binding="{Binding ReceivedText, UpdateSourceTrigger=PropertyChanged}" Width="105"/>
+                <DataGridTextColumn x:Name="colCost" Header="Giá nhập (đ)" Binding="{Binding CostText, UpdateSourceTrigger=PropertyChanged}" Width="105"/>
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBlock Grid.Row="3" x:Name="txtError" Foreground="{StaticResource DangerBrush}" TextWrapping="Wrap"
+        <TextBlock Grid.Row="4" x:Name="txtTotal" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,8,0,0"
+                   Foreground="{StaticResource PrimaryBrush}"/>
+
+        <TextBlock Grid.Row="5" x:Name="txtError" Foreground="{StaticResource DangerBrush}" TextWrapping="Wrap"
                    MinHeight="20" Margin="0,8,0,8"/>
 
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button x:Name="btnSave" Content="Lưu phiếu" Click="BtnSave_Click" Style="{StaticResource AccentButton}"/>
-            <Button Content="Hủy" IsCancel="True" Margin="0"/>
+            <Button x:Name="btnClose" Content="Hủy" IsCancel="True" Margin="0"/>
         </StackPanel>
     </Grid>
 </Window>

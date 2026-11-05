@@ -33,6 +33,9 @@ public interface IPurchaseService
 
     List<Supplier> GetSuppliers();
 
+    /// <summary>Nhà cung cấp có tên gần giống nhưng không trùng hẳn, để hỏi lại trước khi tạo mới và làm công nợ bị tách đôi.</summary>
+    Supplier? FindSimilarSupplier(string name);
+
     /// <summary>
     /// Tạo phiếu nhập và cộng tồn kho ngay theo số thực nhận. Admin (<paramref name="asAdmin"/>) phải có giá
     /// và phiếu được xác nhận luôn; thu ngân không nhập giá, phiếu chờ Admin xác nhận.

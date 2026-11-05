@@ -12,6 +12,7 @@ public partial class ProductUserControl : UserControl
     public ProductUserControl()
     {
         InitializeComponent();
+        DataGridHelper.EnableBarcodeCopy(dgProducts);
     }
 
     private void UserControl_Loaded(object sender, RoutedEventArgs e) => Reload();
