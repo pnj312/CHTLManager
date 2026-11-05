@@ -7,13 +7,13 @@ CHTLManager is a single-machine WPF point-of-sale and inventory app for a small 
 ## Commands
 
 ```bash
-dotnet build CHTLManager.slnx                      # build all 3 projects
+dotnet build CHTLManager.slnx                      # build all 4 projects (3 layers + tests)
 dotnet test CHTLManager.Tests                      # BLL tests (xUnit, temp SQLite files)
 dotnet test CHTLManager.Tests --filter "FullyQualifiedName~DatabaseUpgraderTests"   # one class
 dotnet run --project CHTLManager.WPF               # run the app (real store: only an Admin account)
 dotnet run --project CHTLManager.WPF -- --demo     # with sample data, when the store has no data yet
 dotnet tool restore                                # then: dotnet ef migrations add <Name> --project CHTLManager.DAL
-dotnet publish CHTLManager.WPF -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
+dotnet publish CHTLManager.WPF -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=none -o publish
 ```
 
 - Solution file is `.slnx` (needs VS 2022 17.13+ or a recent .NET SDK).
