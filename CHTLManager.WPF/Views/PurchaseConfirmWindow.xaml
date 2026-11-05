@@ -1,0 +1,28 @@
+<Window x:Class="CHTLManager.WPF.Views.PurchaseConfirmWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Xác nhận phiếu nhập" Width="640" Height="440"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Grid Margin="20,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" x:Name="txtHeader" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,10"/>
+        <DataGrid Grid.Row="1" x:Name="dgLines" IsReadOnly="False" CanUserSortColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Sản phẩm" Binding="{Binding Name}" Width="*" IsReadOnly="True"/>
+                <DataGridTextColumn Header="SL hóa đơn" Binding="{Binding Invoiced}" Width="90" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Thực nhận" Binding="{Binding Received}" Width="85" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Giá nhập (đ)" Binding="{Binding CostText, UpdateSourceTrigger=PropertyChanged}" Width="110"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <TextBlock Grid.Row="2" x:Name="txtError" Foreground="{StaticResource DangerBrush}" TextWrapping="Wrap" MinHeight="20" Margin="0,8,0,8"/>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="btnSave" Content="Xác nhận phiếu" Click="BtnSave_Click" Style="{StaticResource AccentButton}"/>
+            <Button Content="Để sau" IsCancel="True" Margin="0"/>
+        </StackPanel>
+    </Grid>
+</Window>

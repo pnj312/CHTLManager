@@ -15,6 +15,7 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
                 <TextBlock x:Name="txtUserInfo" Foreground="White" FontSize="14"
                            VerticalAlignment="Center" Margin="0,0,16,0"/>
+                <Button x:Name="btnReminder" Click="BtnReminder_Click" Visibility="Collapsed" Style="{StaticResource DangerButton}"/>
                 <Button Content="Đổi mật khẩu" Click="BtnChangePassword_Click"/>
                 <Button Content="Đăng xuất" Click="BtnLogout_Click" Margin="0" Style="{StaticResource AccentButton}"/>
             </StackPanel>
@@ -26,6 +27,9 @@
             </TabItem>
             <TabItem x:Name="tabInventory" Header="Quản lý Kho">
                 <views:ProductUserControl x:Name="productView"/>
+            </TabItem>
+            <TabItem x:Name="tabPurchases" Header="Nhập hàng">
+                <views:PurchaseUserControl x:Name="purchaseView"/>
             </TabItem>
             <!-- Màn hình tự tải lại số liệu qua sự kiện Loaded mỗi lần tab được mở. -->
             <TabItem x:Name="tabReports" Header="Hóa đơn &amp; Doanh thu">

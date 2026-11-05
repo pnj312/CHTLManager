@@ -75,6 +75,11 @@ public partial class POSUserControl : UserControl
         if (dgProducts.SelectedItem is Product p) AddToCart(p);
     }
 
+    private void BtnReceive_Click(object sender, RoutedEventArgs e)
+    {
+        if (new PurchaseReceiptWindow { Owner = Window.GetWindow(this) }.ShowDialog() == true) Reload();
+    }
+
     private void BtnAddSelected_Click(object sender, RoutedEventArgs e)
     {
         if (dgProducts.SelectedItem is Product p) AddToCart(p);

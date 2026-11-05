@@ -91,7 +91,7 @@ public class ProductService : IProductService
             IsActive = true
         };
         db.Products.Add(entity);
-        ChangeStock(db, entity, product.Stock, StockMovementType.Initial, StockReason.None, userId);
+        StockLedger.Apply(db, entity, product.Stock, StockMovementType.Initial, userId);
         db.SaveChanges();
         return entity;
     }
@@ -115,7 +115,7 @@ public class ProductService : IProductService
         entity.Name = product.Name.Trim();
         entity.Category = (product.Category ?? string.Empty).Trim();
         entity.Price = product.Price;
-        // Không sửa tồn kho ở đây (tránh ghi đè số đã bán); tồn kho chỉ thay đổi qua UpdateStock hoặc bán hàng.
+        // Không sửa tồn kho ở đây (tránh ghi đè số đã bán); tồn kho chỉ thay đổi qua phiếu nhập, kiểm kê hoặc bán hàng.
         db.SaveChanges();
         return entity;
     }
@@ -143,29 +143,6 @@ public class ProductService : IProductService
         return true;
     }
 
-    public Product ImportStock(int productId, int quantity, string supplier, string invoiceNo, int userId)
-    {
-        if (quantity <= 0)
-            throw new BusinessException("Số lượng nhập phải là số nguyên dương.");
-        if (string.IsNullOrWhiteSpace(supplier))
-            throw new BusinessException("Hãy nhập tên nhà cung cấp.");
-        if (string.IsNullOrWhiteSpace(invoiceNo))
-            throw new BusinessException("Hãy nhập số hóa đơn của nhà cung cấp.");
-
-        using var db = _factory();
-        var entity = db.Products.FirstOrDefault(p => p.Id == productId && p.IsActive)
-                     ?? throw new BusinessException("Không tìm thấy sản phẩm.");
-
-        // Hàng bán ngoài sổ thuộc lô trước: cộng thẳng vào lô mới sẽ làm lẫn hai lô và sai số tồn.
-        if (entity.Stock < 0)
-            throw new BusinessException($"'{entity.Name}' đã bán {-entity.Stock} cái ngoài sổ từ lô trước. Hãy kiểm kê trước khi nhập lô mới.");
-
-        ChangeStock(db, entity, entity.Stock + quantity, StockMovementType.Import, StockReason.None, userId,
-            supplier: supplier.Trim(), invoiceNo: invoiceNo.Trim());
-        db.SaveChanges();
-        return entity;
-    }
-
     public Product SetCountedStock(int productId, int countedStock, StockReason reason, int userId, string? invoiceNo = null)
     {
         if (countedStock < 0)
@@ -187,7 +164,7 @@ public class ProductService : IProductService
 
         // Số hóa đơn chỉ có nghĩa khi kiểm kê phát hiện lô hàng chưa ghi.
         string? invoice = reason == StockReason.UnrecordedImport && !string.IsNullOrWhiteSpace(invoiceNo) ? invoiceNo.Trim() : null;
-        ChangeStock(db, entity, countedStock, StockMovementType.StockCount, reason, userId, logUnchanged: true, invoiceNo: invoice);
+        StockLedger.Apply(db, entity, countedStock, StockMovementType.StockCount, userId, reason, logUnchanged: true, invoiceNo: invoice);
         db.SaveChanges();
         return entity;
     }
@@ -217,30 +194,6 @@ public class ProductService : IProductService
             LossQuantity = movements.Where(m => m.IsLoss).Sum(m => -m.Delta),
             OutOfBookQuantity = movements.Sum(m => m.OutOfBookQuantity)
         };
-    }
-
-    /// <summary>Đổi tồn kho và ghi một dòng nhật ký; người gọi lưu cả hai trong cùng một SaveChanges.</summary>
-    private static void ChangeStock(AppDbContext db, Product product, int newStock, StockMovementType type,
-        StockReason reason, int userId, bool logUnchanged = false, string? supplier = null, string? invoiceNo = null)
-    {
-        int before = product.Stock;
-        product.Stock = newStock;
-        if (before == newStock && !logUnchanged) return;
-
-        db.StockMovements.Add(new StockMovement
-        {
-            Product = product,
-            UserId = userId,
-            CreatedAt = DateTime.Now,
-            Type = type,
-            BeforeStock = before,
-            AfterStock = newStock,
-            Delta = newStock - before,
-            Reason = reason,
-            UnitPrice = product.Price,
-            Supplier = supplier,
-            InvoiceNo = invoiceNo
-        });
     }
 
     private static void Validate(Product p)

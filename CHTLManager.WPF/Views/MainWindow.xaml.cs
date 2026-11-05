@@ -14,14 +14,34 @@ public partial class MainWindow : Window
         string role = AppServices.IsAdmin ? "Admin" : "Thu ngân";
         txtUserInfo.Text = $"{user?.FullName} ({role})";
 
-        // Phân quyền: chỉ Admin được vào tab Quản lý Kho, Hóa đơn & Doanh thu, Nhật ký kho, Tài khoản
+        // Phân quyền: chỉ Admin được vào các tab quản lý
         if (!AppServices.IsAdmin)
         {
             tabInventory.Visibility = Visibility.Collapsed;
+            tabPurchases.Visibility = Visibility.Collapsed;
             tabReports.Visibility = Visibility.Collapsed;
             tabStockLog.Visibility = Visibility.Collapsed;
             tabUsers.Visibility = Visibility.Collapsed;
         }
+
+        purchaseView.ReceiptsChanged += RefreshReminder;
+        RefreshReminder();
+    }
+
+    /// <summary>Nhắc Admin các việc đang chờ; cập nhật khi đăng nhập và khi chuyển tab.</summary>
+    private void RefreshReminder()
+    {
+        if (!AppServices.IsAdmin) return;
+
+        int pending = AppServices.Purchases.CountPendingReceipts();
+        btnReminder.Content = $"{pending} phiếu chờ xác nhận";
+        btnReminder.Visibility = pending > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void BtnReminder_Click(object sender, RoutedEventArgs e)
+    {
+        tabMain.SelectedItem = tabPurchases;
+        purchaseView.ShowPending();
     }
 
     private void BtnChangePassword_Click(object sender, RoutedEventArgs e)
@@ -34,6 +54,7 @@ public partial class MainWindow : Window
 
         if (tabMain.SelectedItem == tabSales) posView.Reload();
         else if (tabMain.SelectedItem == tabInventory) productView.Reload();
+        RefreshReminder();
     }
 
     private void BtnLogout_Click(object sender, RoutedEventArgs e)

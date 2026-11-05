@@ -11,7 +11,11 @@ public enum StockMovementType
     Import = 2,
     StockCount = 3,
     /// <summary>Bán khi phần mềm báo không đủ hàng (thu ngân đã xác nhận).</summary>
-    OutOfBookSale = 4
+    OutOfBookSale = 4,
+    /// <summary>Nhập hàng theo phiếu nhập.</summary>
+    ReceiptIn = 5,
+    /// <summary>Hủy phiếu nhập, trừ lại phần đã cộng.</summary>
+    ReceiptCancelled = 6
 }
 
 /// <summary>Lý do chênh lệch khi kiểm kê.</summary>
@@ -39,6 +43,10 @@ public class StockMovement
     /// <summary>Hóa đơn liên quan (chỉ có với bán ngoài sổ).</summary>
     public int? OrderId { get; set; }
     public Order? Order { get; set; }
+
+    /// <summary>Phiếu nhập liên quan (nhập hoặc hủy phiếu).</summary>
+    public int? PurchaseReceiptId { get; set; }
+    public PurchaseReceipt? PurchaseReceipt { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public StockMovementType Type { get; set; }
@@ -79,6 +87,8 @@ public class StockMovement
         StockMovementType.Import => "Nhập kho",
         StockMovementType.StockCount => Delta < 0 && IsLoss ? "Kiểm kê: thất thoát" : "Kiểm kê",
         StockMovementType.OutOfBookSale => "Bán ngoài sổ",
+        StockMovementType.ReceiptIn => "Nhập theo phiếu",
+        StockMovementType.ReceiptCancelled => "Hủy phiếu nhập",
         _ => string.Empty
     };
 

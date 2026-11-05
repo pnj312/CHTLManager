@@ -167,28 +167,8 @@ public partial class ProductUserControl : UserControl
             return;
         }
 
-        int id = selected.Id;
-        Product? product = selected;
-
-        // Hàng bán ngoài sổ thuộc lô trước: phải chốt lô đó bằng kiểm kê, rồi mới nhập lô mới.
-        if (selected.NeedsStockCheck)
-        {
-            MessageBox.Show(
-                $"'{selected.Name}' đã bán {-selected.Stock} cái ngoài sổ từ lô trước.\n\n" +
-                "Hãy kiểm kê hàng đang có trước khi nhập lô mới, để hai lô không bị lẫn. " +
-                "Lưu ý: đếm trước khi xếp hàng mới lên kệ.",
-                "Cần kiểm kê trước", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            if (new StockCountWindow(selected) { Owner = Window.GetWindow(this) }.ShowDialog() != true) return;
-            Reload(id);
-
-            try { product = AppServices.Products.GetById(id); }
-            catch (Exception ex) { ShowError(ex); return; }
-            if (product == null) return;
-        }
-
-        if (new ImportStockWindow(product) { Owner = Window.GetWindow(this) }.ShowDialog() == true)
-            Reload(id);
+        new PurchaseReceiptWindow(selected) { Owner = Window.GetWindow(this) }.ShowDialog();
+        Reload(selected.Id);
     }
 
     // ---------------- Kiểm kê ----------------

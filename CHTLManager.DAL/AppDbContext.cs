@@ -24,6 +24,9 @@ public class AppDbContext : DbContext
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<PurchaseReceipt> PurchaseReceipts => Set<PurchaseReceipt>();
+    public DbSet<PurchaseReceiptLine> PurchaseReceiptLines => Set<PurchaseReceiptLine>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -81,6 +84,27 @@ public class AppDbContext : DbContext
             e.HasOne(m => m.Product).WithMany().HasForeignKey(m => m.ProductId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(m => m.User).WithMany().HasForeignKey(m => m.UserId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(m => m.Order).WithMany().HasForeignKey(m => m.OrderId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(m => m.PurchaseReceipt).WithMany().HasForeignKey(m => m.PurchaseReceiptId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Supplier>(e => e.HasIndex(s => s.NameKey).IsUnique());
+
+        modelBuilder.Entity<PurchaseReceipt>(e =>
+        {
+            e.HasIndex(r => r.Code).IsUnique();
+            // Phiếu đã hủy không giữ chỗ số hóa đơn, để nhập lại được khi hủy nhầm.
+            e.HasIndex(r => new { r.SupplierId, r.InvoiceKey }).IsUnique().HasFilter("\"Status\" <> 'Cancelled'");
+            e.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
+            e.HasOne(r => r.Supplier).WithMany().HasForeignKey(r => r.SupplierId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(r => r.CreatedBy).WithMany().HasForeignKey(r => r.CreatedByUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(r => r.ConfirmedBy).WithMany().HasForeignKey(r => r.ConfirmedByUserId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PurchaseReceiptLine>(e =>
+        {
+            e.Property(l => l.UnitCost).HasColumnType("decimal(18,2)");
+            e.HasOne(l => l.PurchaseReceipt).WithMany(r => r.Lines).HasForeignKey(l => l.PurchaseReceiptId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(l => l.Product).WithMany().HasForeignKey(l => l.ProductId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

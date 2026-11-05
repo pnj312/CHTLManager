@@ -118,6 +118,97 @@ namespace CHTLManager.DAL.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("CHTLManager.DAL.Entities.PurchaseReceipt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ConfirmedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ConfirmedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("InvoiceKey")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("InvoiceNo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("ConfirmedByUserId");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("SupplierId", "InvoiceKey")
+                        .IsUnique()
+                        .HasFilter("\"Status\" <> 'Cancelled'");
+
+                    b.ToTable("PurchaseReceipts");
+                });
+
+            modelBuilder.Entity("CHTLManager.DAL.Entities.PurchaseReceiptLine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("InvoicedQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PurchaseReceiptId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ReceivedQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("UnitCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("PurchaseReceiptId");
+
+                    b.ToTable("PurchaseReceiptLines");
+                });
+
             modelBuilder.Entity("CHTLManager.DAL.Entities.StockMovement", b =>
                 {
                     b.Property<int>("Id")
@@ -146,6 +237,9 @@ namespace CHTLManager.DAL.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("PurchaseReceiptId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Reason")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -172,9 +266,42 @@ namespace CHTLManager.DAL.Migrations
 
                     b.HasIndex("ProductId");
 
+                    b.HasIndex("PurchaseReceiptId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("StockMovements");
+                });
+
+            modelBuilder.Entity("CHTLManager.DAL.Entities.Supplier", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NameKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NameKey")
+                        .IsUnique();
+
+                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("CHTLManager.DAL.Entities.User", b =>
@@ -244,6 +371,51 @@ namespace CHTLManager.DAL.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("CHTLManager.DAL.Entities.PurchaseReceipt", b =>
+                {
+                    b.HasOne("CHTLManager.DAL.Entities.User", "ConfirmedBy")
+                        .WithMany()
+                        .HasForeignKey("ConfirmedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CHTLManager.DAL.Entities.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CHTLManager.DAL.Entities.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ConfirmedBy");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("CHTLManager.DAL.Entities.PurchaseReceiptLine", b =>
+                {
+                    b.HasOne("CHTLManager.DAL.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CHTLManager.DAL.Entities.PurchaseReceipt", "PurchaseReceipt")
+                        .WithMany("Lines")
+                        .HasForeignKey("PurchaseReceiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("PurchaseReceipt");
+                });
+
             modelBuilder.Entity("CHTLManager.DAL.Entities.StockMovement", b =>
                 {
                     b.HasOne("CHTLManager.DAL.Entities.Order", "Order")
@@ -257,6 +429,11 @@ namespace CHTLManager.DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("CHTLManager.DAL.Entities.PurchaseReceipt", "PurchaseReceipt")
+                        .WithMany()
+                        .HasForeignKey("PurchaseReceiptId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("CHTLManager.DAL.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -266,6 +443,8 @@ namespace CHTLManager.DAL.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("Product");
+
+                    b.Navigation("PurchaseReceipt");
 
                     b.Navigation("User");
                 });
@@ -278,6 +457,11 @@ namespace CHTLManager.DAL.Migrations
             modelBuilder.Entity("CHTLManager.DAL.Entities.Product", b =>
                 {
                     b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("CHTLManager.DAL.Entities.PurchaseReceipt", b =>
+                {
+                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("CHTLManager.DAL.Entities.User", b =>
