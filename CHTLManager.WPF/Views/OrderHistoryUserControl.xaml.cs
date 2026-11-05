@@ -69,6 +69,8 @@ public partial class OrderHistoryUserControl : UserControl
 
     private void ShowDetail(Order? order)
     {
+        btnCancelOrder.IsEnabled = order is { IsCancelled: false };
+
         if (order == null)
         {
             txtDetailTitle.Text = "CHI TIẾT HÓA ĐƠN";
@@ -77,11 +79,33 @@ public partial class OrderHistoryUserControl : UserControl
             return;
         }
 
-        txtDetailTitle.Text = $"CHI TIẾT {order.Code}";
+        txtDetailTitle.Text = order.IsCancelled
+            ? $"{order.Code} ĐÃ HỦY bởi {order.CancelledBy?.FullName}: {order.CancelReason}"
+            : $"CHI TIẾT {order.Code}";
         dgDetails.ItemsSource = order.Details;
         txtDetailTotal.Text = MoneyParser.Format(order.Total);
         txtDetailPaid.Text = MoneyParser.Format(order.CustomerPaid);
         txtDetailChange.Text = MoneyParser.Format(order.Change);
+    }
+
+    private void BtnCancelOrder_Click(object sender, RoutedEventArgs e)
+    {
+        if (dgOrders.SelectedItem is not Order order) return;
+
+        string? reason = ReasonWindow.Ask(Window.GetWindow(this), "Hủy hóa đơn",
+            $"Hủy hóa đơn {order.Code} ({MoneyParser.Format(order.Total)})? Hàng được hoàn lại kho, doanh thu không tính hóa đơn này. Lý do hủy:");
+        if (reason == null) return;
+
+        try
+        {
+            AppServices.Orders.CancelOrder(order.Id, reason, AppServices.CurrentUser!.Id);
+            Reload();
+        }
+        catch (BusinessException ex) { ShowWarning(ex.Message); }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Đã xảy ra lỗi: " + ex.Message, "Lỗi", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     // ---------------- Chọn nhanh khoảng ngày ----------------

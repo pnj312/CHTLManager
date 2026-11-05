@@ -66,6 +66,10 @@ public class AppDbContext : DbContext
              .WithMany(u => u.Orders)
              .HasForeignKey(o => o.CashierId)
              .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(o => o.CancelledBy)
+             .WithMany()
+             .HasForeignKey(o => o.CancelledByUserId)
+             .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<OrderDetail>(e =>

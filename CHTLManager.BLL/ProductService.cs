@@ -196,7 +196,7 @@ public class ProductService : IProductService
         return new StockLogReport
         {
             Movements = movements,
-            OutOfBookQuantity = movements.Sum(m => m.OutOfBookQuantity)
+            OutOfBookQuantity = movements.Where(m => m.Order?.IsCancelled != true).Sum(m => m.OutOfBookQuantity)
         };
     }
 

@@ -106,14 +106,31 @@
                         <DataGridTextColumn Header="Mã hóa đơn" Binding="{Binding Code}" Width="150"/>
                         <DataGridTextColumn Header="Thời gian" Binding="{Binding CreatedAt, StringFormat='dd/MM/yyyy HH:mm'}" Width="140"/>
                         <DataGridTextColumn Header="Thu ngân" Binding="{Binding Cashier.FullName}" Width="*"/>
-                        <DataGridTextColumn Header="Tổng tiền" Binding="{Binding Total, StringFormat=N0}" Width="100"/>
+                        <DataGridTextColumn Header="Tổng tiền" Binding="{Binding Total, StringFormat=N0}" Width="90"/>
+                        <DataGridTextColumn Header="" Binding="{Binding StatusName}" Width="55">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </DockPanel>
 
             <Border Grid.Column="2" Background="{StaticResource SurfaceBrush}" Padding="10" CornerRadius="6">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" x:Name="txtDetailTitle" Text="CHI TIẾT HÓA ĐƠN" Style="{StaticResource SectionTitle}"/>
+                    <Grid DockPanel.Dock="Top">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="txtDetailTitle" Text="CHI TIẾT HÓA ĐƠN" Style="{StaticResource SectionTitle}"
+                                   TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" x:Name="btnCancelOrder" Content="Hủy hóa đơn..." Click="BtnCancelOrder_Click"
+                                Style="{StaticResource DangerButton}" Margin="8,0,0,4" Padding="8,3" IsEnabled="False"/>
+                    </Grid>
                     <Grid DockPanel.Dock="Bottom" Margin="0,8,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>

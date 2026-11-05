@@ -25,5 +25,17 @@ public class Order
     /// <summary>Tiền thừa trả khách = CustomerPaid - Total.</summary>
     public decimal Change { get; set; }
 
+    /// <summary>Đã hủy: giữ lại để đối chiếu nhưng không tính doanh thu, lợi nhuận.</summary>
+    public bool IsCancelled { get; set; }
+    public DateTime? CancelledAt { get; set; }
+    public int? CancelledByUserId { get; set; }
+    public User? CancelledBy { get; set; }
+
+    [MaxLength(200)]
+    public string? CancelReason { get; set; }
+
     public List<OrderDetail> Details { get; set; } = new();
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public string StatusName => IsCancelled ? "Đã hủy" : string.Empty;
 }

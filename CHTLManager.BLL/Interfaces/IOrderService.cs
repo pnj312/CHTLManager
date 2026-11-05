@@ -12,6 +12,9 @@ public interface IOrderService
     /// </summary>
     Order CreateOrder(Order order, List<OrderDetail> details, ISet<int>? allowOversellProductIds = null);
 
+    /// <summary>Hủy cả hóa đơn: hoàn kho theo giá vốn đã lưu, ghi nhật ký; hóa đơn vẫn còn để đối chiếu.</summary>
+    void CancelOrder(int orderId, string reason, int adminId);
+
     List<Order> GetHistory(DateTime? from = null, DateTime? to = null);
     Order? GetById(int id);
 

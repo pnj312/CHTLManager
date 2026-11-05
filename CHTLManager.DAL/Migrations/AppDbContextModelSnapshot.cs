@@ -54,6 +54,16 @@ namespace CHTLManager.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CancelledByUserId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("CashierId")
                         .HasColumnType("INTEGER");
 
@@ -71,10 +81,15 @@ namespace CHTLManager.DAL.Migrations
                     b.Property<decimal>("CustomerPaid")
                         .HasColumnType("decimal(18,0)");
 
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,0)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CancelledByUserId");
 
                     b.HasIndex("CashierId");
 
@@ -520,11 +535,18 @@ namespace CHTLManager.DAL.Migrations
 
             modelBuilder.Entity("CHTLManager.DAL.Entities.Order", b =>
                 {
+                    b.HasOne("CHTLManager.DAL.Entities.User", "CancelledBy")
+                        .WithMany()
+                        .HasForeignKey("CancelledByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("CHTLManager.DAL.Entities.User", "Cashier")
                         .WithMany("Orders")
                         .HasForeignKey("CashierId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("CancelledBy");
 
                     b.Navigation("Cashier");
                 });

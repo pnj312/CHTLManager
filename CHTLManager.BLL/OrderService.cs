@@ -128,12 +128,44 @@ public class OrderService : IOrderService
         return newOrder;
     }
 
+    public void CancelOrder(int orderId, string reason, int adminId)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new BusinessException("Hãy nhập lý do hủy hóa đơn.");
+
+        using var db = _factory();
+        using var tx = db.Database.BeginTransaction();
+
+        var order = db.Orders.Include(o => o.Details).ThenInclude(d => d.Product).FirstOrDefault(o => o.Id == orderId)
+                    ?? throw new BusinessException("Không tìm thấy hóa đơn.");
+        if (order.IsCancelled)
+            throw new BusinessException($"Hóa đơn {order.Code} đã hủy rồi.");
+
+        order.IsCancelled = true;
+        order.CancelledAt = DateTime.Now;
+        order.CancelledByUserId = adminId;
+        order.CancelReason = reason.Trim();
+
+        foreach (var line in order.Details)
+        {
+            var product = line.Product!;
+            // Dòng chưa có giá vốn thì không kéo bình quân về 0.
+            if (line.UnitCost > 0)
+                product.AverageCost = CostCalculator.AddToAverage(product.Stock, product.AverageCost, line.Quantity, line.UnitCost);
+            StockLedger.Apply(db, product, product.Stock + line.Quantity, StockMovementType.SaleCancelled, adminId, order: order);
+        }
+
+        db.SaveChanges();
+        tx.Commit();
+    }
+
     public List<Order> GetHistory(DateTime? from = null, DateTime? to = null)
     {
         using var db = _factory();
         IQueryable<Order> query = db.Orders
             .AsNoTracking()
             .Include(o => o.Cashier)
+            .Include(o => o.CancelledBy)
             .Include(o => o.Details).ThenInclude(d => d.Product);
 
         if (from.HasValue) query = query.Where(o => o.CreatedAt >= from.Value.Date);
@@ -158,7 +190,7 @@ public class OrderService : IOrderService
             throw new BusinessException("Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.");
 
         // SQLite không cộng được kiểu decimal trong câu SQL, nên tổng hợp trong bộ nhớ.
-        var details = GetHistory(from, to).SelectMany(o => o.Details).ToList();
+        var details = GetHistory(from, to).Where(o => !o.IsCancelled).SelectMany(o => o.Details).ToList();
 
         DateTime start = from.Date, endExclusive = to.Date.AddDays(1);
         using var db = _factory();
@@ -200,12 +232,13 @@ public class OrderService : IOrderService
             throw new BusinessException("Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.");
 
         var orders = GetHistory(start, end);
+        var valid = orders.Where(o => !o.IsCancelled).ToList();
 
         // SQLite không cộng/sắp xếp được kiểu decimal trong câu SQL, nên tổng hợp trong bộ nhớ.
-        decimal revenue = orders.Sum(o => o.Total);
-        var details = orders.SelectMany(o => o.Details).ToList();
+        decimal revenue = valid.Sum(o => o.Total);
+        var details = valid.SelectMany(o => o.Details).ToList();
 
-        var byDay = orders
+        var byDay = valid
             .GroupBy(o => o.CreatedAt.Date)
             .ToDictionary(g => g.Key, g => (Count: g.Count(), Revenue: g.Sum(o => o.Total)));
 
@@ -225,8 +258,8 @@ public class OrderService : IOrderService
             To = end,
             Orders = orders,
             TotalRevenue = revenue,
-            OrderCount = orders.Count,
-            AverageOrderValue = orders.Count == 0 ? 0 : Math.Round(revenue / orders.Count, 0),
+            OrderCount = valid.Count,
+            AverageOrderValue = valid.Count == 0 ? 0 : Math.Round(revenue / valid.Count, 0),
             ItemsSold = details.Sum(d => d.Quantity),
             Daily = daily
         };

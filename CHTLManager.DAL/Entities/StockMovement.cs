@@ -17,7 +17,9 @@ public enum StockMovementType
     /// <summary>Hủy phiếu nhập, trừ lại phần đã cộng.</summary>
     ReceiptCancelled = 6,
     /// <summary>Khai báo giá vốn cho sản phẩm chưa có giá; không đổi tồn kho.</summary>
-    CostDeclared = 7
+    CostDeclared = 7,
+    /// <summary>Hủy hóa đơn bán, hoàn lại số đã trừ.</summary>
+    SaleCancelled = 8
 }
 
 /// <summary>Lý do chênh lệch khi kiểm kê.</summary>
@@ -87,6 +89,7 @@ public class StockMovement
         StockMovementType.ReceiptIn => "Nhập theo phiếu",
         StockMovementType.ReceiptCancelled => "Hủy phiếu nhập",
         StockMovementType.CostDeclared => "Khai báo giá vốn",
+        StockMovementType.SaleCancelled => "Hủy hóa đơn bán",
         _ => string.Empty
     };
 
