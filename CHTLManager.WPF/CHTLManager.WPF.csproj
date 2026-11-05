@@ -15,4 +15,9 @@
     <ProjectReference Include="..\CHTLManager.BLL\CHTLManager.BLL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\deploy\CHTL Manager (demo).bat" Link="CHTL Manager (demo).bat"
+          CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+
 </Project>
