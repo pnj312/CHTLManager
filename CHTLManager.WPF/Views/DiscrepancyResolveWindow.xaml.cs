@@ -26,6 +26,11 @@ public partial class DiscrepancyResolveWindow : Window
             ? $"{name}: thiếu {-discrepancy.Delta} cái so với sổ, giá trị {MoneyParser.Format(discrepancy.Value)} theo giá vốn."
             : $"{name}: thừa {discrepancy.Delta} cái so với sổ.";
 
+        if (discrepancy.UnitCost <= 0 && discrepancy.Product is { AverageCost: <= 0, LastCost: <= 0 })
+            txtHeader.Text = discrepancy.IsShortage
+                ? $"{name}: thiếu {-discrepancy.Delta} cái so với sổ. Sản phẩm chưa có giá vốn nên chưa tính được giá trị: hãy khai báo giá vốn ở tab Quản lý Kho trước, trừ khi đây là đếm sai."
+                : $"{name}: thừa {discrepancy.Delta} cái so với sổ. Sản phẩm chưa có giá vốn: muốn ghi thu nhập khác thì khai báo giá vốn ở tab Quản lý Kho trước.";
+
         cboResolution.ItemsSource = discrepancy.IsShortage
             ? new[]
             {

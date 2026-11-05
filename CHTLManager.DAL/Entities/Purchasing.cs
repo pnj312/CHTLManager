@@ -125,6 +125,12 @@ public class PurchaseReceiptLine
     /// <summary>Giá nhập một đơn vị; null khi thu ngân nhận hàng và Admin chưa xác nhận.</summary>
     public decimal? UnitCost { get; set; }
 
+    /// <summary>
+    /// Số hàng có giá đã có lúc giá của dòng này vào bình quân, để sau này hủy hoặc sửa giá tính lại được.
+    /// Null ở dữ liệu cũ; 0 khi trước đó chưa biết giá.
+    /// </summary>
+    public int? CostBaseStock { get; set; }
+
     [NotMapped]
     public decimal LineTotal => (UnitCost ?? 0) * ReceivedQuantity;
 

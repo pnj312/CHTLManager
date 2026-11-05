@@ -68,6 +68,8 @@ public class OrderService : IOrderService
                     $"'{product.Name}' chỉ được bán ngoài sổ tối đa {MaxOutOfBookPerLine} cái. Hãy nhận hàng hoặc kiểm kê trước khi bán thêm.");
 
             int before = product.Stock;
+            // Hàng của phiếu chờ xác nhận chưa có giá, nên giá vốn của phần bán vào đó chỉ là tạm tính.
+            int pricedStock = before - PurchaseService.PendingQuantity(db, product.Id);
             product.Stock -= quantity;
             if (before < quantity)
             {
@@ -90,7 +92,7 @@ public class OrderService : IOrderService
                 Quantity = quantity,
                 UnitPrice = product.Price, // luôn lấy giá từ CSDL, không tin giá do giao diện gửi lên
                 UnitCost = product.AverageCost > 0 ? product.AverageCost : product.LastCost,
-                CostIsEstimated = before < quantity || product.AverageCost <= 0
+                CostIsEstimated = quantity > pricedStock || product.AverageCost <= 0
             });
         }
 

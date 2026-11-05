@@ -19,18 +19,6 @@ public class CostCalculatorTests
         => Assert.Equal(103.33m, CostCalculator.AddToAverage(2, 100, 1, 110));
 
     [Fact]
-    public void RemoveFromAverage_RestoresOriginal()
-        => Assert.Equal(100m, CostCalculator.RemoveFromAverage(20, 110, 10, 120));
-
-    [Fact]
-    public void RemoveFromAverage_AllStockRemoved_KeepsAverage()
-        => Assert.Equal(110m, CostCalculator.RemoveFromAverage(10, 110, 10, 120));
-
-    [Fact]
-    public void RemoveFromAverage_MoreThanStock_KeepsAverage()
-        => Assert.Equal(110m, CostCalculator.RemoveFromAverage(3, 110, 10, 120));
-
-    [Fact]
     public void ReplaceInAverage_ChangesOnlyTheReplacedUnits()
         => Assert.Equal(13500m, CostCalculator.ReplaceInAverage(8, 12000, 3, 12000, 16000));
 
@@ -55,6 +43,14 @@ public class CostCalculatorTests
         => Assert.Equal(0m, CostCalculator.ReplaceInAverage(2, 10, 2, 1000, 0));
 
     [Fact]
-    public void RemoveFromAverage_NeverNegative()
-        => Assert.Equal(0m, CostCalculator.RemoveFromAverage(10, 10, 5, 1000));
+    public void RecalculateLot_EmptyLot_KeepsAverage()
+        => Assert.Equal(150m, CostCalculator.RecalculateLot(150, new CostLot(10, 0, 999), Array.Empty<CostLot>(), null));
+
+    [Fact]
+    public void RecalculateLot_LaterEmptyLineIsIgnored()
+        => Assert.Equal(100m, CostCalculator.RecalculateLot(150, new CostLot(10, 10, 200), new[] { new CostLot(0, 0, 999) }, null));
+
+    [Fact]
+    public void RecalculateLot_NeverNegative()
+        => Assert.Equal(0m, CostCalculator.RecalculateLot(10, new CostLot(10, 10, 1000), Array.Empty<CostLot>(), null));
 }

@@ -64,8 +64,10 @@ public class StockCountService : IStockCountService
         switch (resolution)
         {
             case DiscrepancyResolution.NormalLoss:
+                RequireKnownCost(db, d);
                 break;
             case DiscrepancyResolution.Compensation:
+                RequireKnownCost(db, d);
                 if (responsibleUserId == null && string.IsNullOrWhiteSpace(responsibleName))
                     throw new BusinessException("Hãy chọn hoặc nhập người chịu trách nhiệm.");
                 if (compensationAmount is not > 0)
@@ -103,6 +105,7 @@ public class StockCountService : IStockCountService
                 PurchaseService.AddReceiptForCountedStock(db, supplierId.Value, invoiceNo ?? string.Empty, d, unitCost.Value, adminId);
                 break;
             case DiscrepancyResolution.OtherIncome:
+                RequireKnownCost(db, d);
                 break;
             case DiscrepancyResolution.Miscount:
                 RequireNote(note);
@@ -253,6 +256,17 @@ public class StockCountService : IStockCountService
         if (d.Status != DiscrepancyStatus.Pending)
             throw new BusinessException("Phiếu chênh lệch này đã được xử lý rồi.");
         return d;
+    }
+
+    /// <summary>Lúc đếm có thể chưa có giá vốn; giá trị chênh lệch phải có số thật trước khi vào báo cáo, không được âm thầm là 0.</summary>
+    private static void RequireKnownCost(AppDbContext db, StockDiscrepancy d)
+    {
+        if (d.UnitCost > 0) return;
+
+        var product = db.Products.First(p => p.Id == d.ProductId);
+        d.UnitCost = product.AverageCost > 0 ? product.AverageCost : product.LastCost;
+        if (d.UnitCost <= 0)
+            throw new BusinessException($"'{product.Name}' chưa có giá vốn nên chưa tính được giá trị chênh lệch. Hãy khai báo giá vốn ở tab Quản lý Kho rồi xử lý lại.");
     }
 
     private static void RequireNote(string? note)

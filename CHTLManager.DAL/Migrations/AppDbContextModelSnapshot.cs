@@ -263,6 +263,9 @@ namespace CHTLManager.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("CostBaseStock")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("InvoicedQuantity")
                         .HasColumnType("INTEGER");
 
