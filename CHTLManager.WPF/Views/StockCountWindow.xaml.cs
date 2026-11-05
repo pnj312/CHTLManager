@@ -5,14 +5,9 @@ using CHTLManager.DAL.Entities;
 
 namespace CHTLManager.WPF.Views;
 
-/// <summary>Kiểm kê một sản phẩm: so số trên phần mềm với số đếm thực tế, lệch thì bắt buộc chọn lý do.</summary>
+/// <summary>Bước đếm của kiểm kê: tồn kho đúng ngay; phần chênh lệch để Admin xử lý ở tab Chênh lệch kho.</summary>
 public partial class StockCountWindow : Window
 {
-    private static readonly StockReason[] LessReasons =
-        { StockReason.Lost, StockReason.Damaged, StockReason.Expired, StockReason.MiscountBefore };
-    private static readonly StockReason[] MoreReasons =
-        { StockReason.UnrecordedImport, StockReason.MiscountBefore };
-
     private readonly Product _product;
 
     public StockCountWindow(Product product)
@@ -28,35 +23,16 @@ public partial class StockCountWindow : Window
     private void TxtCounted_TextChanged(object sender, TextChangedEventArgs e)
     {
         txtError.Text = string.Empty;
-        cboReason.Items.Clear();
-        cboReason.IsEnabled = false;
         txtConclusion.Text = string.Empty;
-
         if (!TryReadCounted(out int counted)) return;
 
         int diff = counted - _product.Stock;
-        if (diff == 0)
+        txtConclusion.Text = diff switch
         {
-            txtConclusion.Text = "Khớp với phần mềm, không có chênh lệch.";
-            return;
-        }
-
-        txtConclusion.Text = diff < 0
-            ? $"Thực tế ít hơn sổ {-diff} cái: thất thoát. Hãy chọn lý do."
-            : $"Thực tế nhiều hơn sổ {diff} cái: hàng nhập chưa ghi hoặc đếm sai trước đó.";
-
-        foreach (var reason in diff < 0 ? LessReasons : MoreReasons)
-            cboReason.Items.Add(new ComboBoxItem { Content = StockMovement.ReasonName(reason), Tag = reason });
-        cboReason.IsEnabled = true;
-    }
-
-    private StockReason SelectedReason
-        => (cboReason.SelectedItem as ComboBoxItem)?.Tag as StockReason? ?? StockReason.None;
-
-    private void CboReason_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        txtInvoice.IsEnabled = SelectedReason == StockReason.UnrecordedImport;
-        if (!txtInvoice.IsEnabled) txtInvoice.Clear();
+            0 => "Khớp với phần mềm, không có chênh lệch.",
+            < 0 => $"Thực tế ít hơn sổ {-diff} cái. Admin sẽ xử lý: mất, hỏng, hết hạn, bồi thường hay đếm sai.",
+            _ => $"Thực tế nhiều hơn sổ {diff} cái. Admin sẽ xử lý: lô hàng chưa ghi hay đếm sai."
+        };
     }
 
     private bool TryReadCounted(out int counted)
@@ -74,10 +50,11 @@ public partial class StockCountWindow : Window
 
         try
         {
-            var updated = AppServices.Products.SetCountedStock(_product.Id, counted, SelectedReason,
-                AppServices.CurrentUser!.Id, txtInvoice.Text);
-            MessageBox.Show($"Đã kiểm kê '{updated.Name}': tồn kho hiện là {updated.StockDisplay}.", "Thành công",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            var discrepancy = AppServices.StockCounts.Count(_product.Id, counted, AppServices.CurrentUser!.Id);
+            string message = $"Đã kiểm kê '{_product.Name}': tồn kho hiện là {counted}.";
+            if (discrepancy != null) message += "\nPhần chênh lệch đang chờ Admin xử lý.";
+            MessageBox.Show(message, "Thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            AppServices.NotifyChanged();
             DialogResult = true;
         }
         catch (BusinessException ex) { txtError.Text = ex.Message; }

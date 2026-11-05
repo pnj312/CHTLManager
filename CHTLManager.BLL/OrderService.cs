@@ -159,8 +159,23 @@ public class OrderService : IOrderService
 
         // SQLite không cộng được kiểu decimal trong câu SQL, nên tổng hợp trong bộ nhớ.
         var details = GetHistory(from, to).SelectMany(o => o.Details).ToList();
+
+        DateTime start = from.Date, endExclusive = to.Date.AddDays(1);
+        using var db = _factory();
+        var resolved = db.StockDiscrepancies.AsNoTracking()
+            .Where(d => d.Status == DiscrepancyStatus.Resolved && d.ResolvedAt >= start && d.ResolvedAt < endExclusive)
+            .ToList();
+        var collected = db.CompensationPayments.AsNoTracking()
+            .Where(p => p.PaidAt >= start && p.PaidAt < endExclusive)
+            .ToList();
+
         return new ProfitReport
         {
+            LossExpense = resolved.Where(d => d.Resolution is DiscrepancyResolution.NormalLoss or DiscrepancyResolution.Compensation).Sum(d => d.Value),
+            OtherIncome = resolved.Where(d => d.Resolution == DiscrepancyResolution.OtherIncome).Sum(d => d.Value),
+            MiscountShortValue = resolved.Where(d => d.Resolution == DiscrepancyResolution.Miscount && d.IsShortage).Sum(d => d.Value),
+            MiscountSurplusValue = resolved.Where(d => d.Resolution == DiscrepancyResolution.Miscount && !d.IsShortage).Sum(d => d.Value),
+            CompensationCollected = collected.Sum(p => p.Amount),
             Revenue = details.Sum(d => d.LineTotal),
             CostOfGoods = details.Sum(d => d.LineCost),
             EstimatedLineCount = details.Count(d => d.CostIsEstimated),

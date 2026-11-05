@@ -94,13 +94,6 @@ public partial class PurchaseReceiptWindow : Window
     private Product? SettleOutOfBook(Product product)
     {
         string note = $"'{product.Name}' đã bán {-product.Stock} cái ngoài sổ từ lô trước.\n\n";
-        if (!AppServices.IsAdmin)
-        {
-            MessageBox.Show(note + "Cần Admin kiểm kê trước khi nhận lô mới, để hai lô không bị lẫn. Hãy để riêng hàng mới, chưa xếp lên kệ.",
-                "Cần kiểm kê trước", MessageBoxButton.OK, MessageBoxImage.Information);
-            return null;
-        }
-
         MessageBox.Show(note + "Hãy kiểm kê hàng đang có trước khi nhập lô mới, để hai lô không bị lẫn. Lưu ý: đếm trước khi xếp hàng mới lên kệ.",
             "Cần kiểm kê trước", MessageBoxButton.OK, MessageBoxImage.Information);
         if (new StockCountWindow(product) { Owner = this }.ShowDialog() != true) return null;

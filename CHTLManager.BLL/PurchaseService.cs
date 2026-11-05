@@ -156,6 +156,9 @@ public class PurchaseService : IPurchaseService
         if (receipt.Status == ReceiptStatus.Cancelled)
             throw new BusinessException($"Phiếu {receipt.Code} đã hủy rồi.");
 
+        if (receipt.StockDiscrepancyId != null)
+            throw new BusinessException($"Phiếu {receipt.Code} sinh ra từ kiểm kê, hàng đã nằm trong tồn kho nên không hủy được.");
+
         bool costWasApplied = receipt.Status == ReceiptStatus.Confirmed;
         if (costWasApplied)
         {
@@ -203,6 +206,59 @@ public class PurchaseService : IPurchaseService
     {
         using var db = _factory();
         return db.PurchaseReceipts.Count(r => r.Status == ReceiptStatus.Pending);
+    }
+
+    /// <summary>
+    /// Lô chưa ghi phát hiện khi kiểm kê: sinh phiếu đã xác nhận và công nợ, không cộng kho vì hàng đã vào tồn kho lúc đếm.
+    /// Người gọi lưu trong cùng SaveChanges với việc xử lý chênh lệch.
+    /// </summary>
+    internal static PurchaseReceipt AddReceiptForCountedStock(AppDbContext db, int supplierId, string invoiceNo,
+        StockDiscrepancy discrepancy, decimal unitCost, int adminId)
+    {
+        string invoice = invoiceNo.Trim();
+        if (invoice.Length == 0)
+            throw new BusinessException("Hãy nhập số hóa đơn của lô chưa ghi.");
+        string key = invoice.ToUpperInvariant();
+
+        var supplier = db.Suppliers.FirstOrDefault(s => s.Id == supplierId)
+                       ?? throw new BusinessException("Không tìm thấy nhà cung cấp.");
+        if (db.PurchaseReceipts.Any(r => r.SupplierId == supplierId && r.InvoiceKey == key && r.Status != ReceiptStatus.Cancelled))
+            throw new BusinessException($"Hóa đơn '{invoice}' của {supplier.Name} đã được nhập rồi.");
+
+        var product = db.Products.First(p => p.Id == discrepancy.ProductId);
+        DateTime now = DateTime.Now;
+        DateTime startOfDay = now.Date;
+        int countToday = db.PurchaseReceipts.Count(r => r.ReceivedAt >= startOfDay);
+
+        var line = new PurchaseReceiptLine
+        {
+            ProductId = product.Id,
+            InvoicedQuantity = discrepancy.Delta,
+            ReceivedQuantity = discrepancy.Delta,
+            UnitCost = unitCost
+        };
+        var receipt = new PurchaseReceipt
+        {
+            Code = $"PN{now:yyyyMMdd}-{countToday + 1:D4}",
+            SupplierId = supplierId,
+            InvoiceNo = invoice,
+            InvoiceKey = key,
+            ReceivedAt = now,
+            CreatedByUserId = adminId,
+            ConfirmedByUserId = adminId,
+            ConfirmedAt = now,
+            Status = ReceiptStatus.Confirmed,
+            StockDiscrepancy = discrepancy,
+            Lines = { line }
+        };
+        db.PurchaseReceipts.Add(receipt);
+
+        // Phần đã bán ngoài sổ không còn trên kệ nên chỉ đổi giá phần thực sự tăng lên; lúc đếm nó đã vào bình quân theo giá cũ.
+        int onHandIncrease = discrepancy.CountedStock - Math.Max(discrepancy.BookStock, 0);
+        product.AverageCost = CostCalculator.ReplaceInAverage(product.Stock, product.AverageCost, onHandIncrease, Math.Min(discrepancy.UnitCost, product.AverageCost), unitCost);
+        if (unitCost > 0) product.LastCost = unitCost;
+
+        return receipt;
     }
 
     public List<SupplierBalance> GetSupplierBalances()

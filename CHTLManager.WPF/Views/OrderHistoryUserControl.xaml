@@ -48,7 +48,8 @@
         </StackPanel>
 
         <!-- ===== Thẻ tổng quan ===== -->
-        <UniformGrid Grid.Row="1" Columns="6" Margin="0,0,-10,10">
+        <StackPanel Grid.Row="1">
+        <UniformGrid Columns="6" Margin="0,0,-10,6">
             <Border Style="{StaticResource CardBorder}">
                 <StackPanel>
                     <TextBlock Text="Doanh thu" Style="{StaticResource CardTitle}"/>
@@ -86,6 +87,9 @@
                 </StackPanel>
             </Border>
         </UniformGrid>
+        <TextBlock x:Name="txtStockEffect" Margin="0,0,0,10" TextWrapping="Wrap" FontWeight="SemiBold"
+                   ToolTip="Lãi sau chênh lệch kho = Lãi gộp − Thất thoát + Thu nhập khác + Bồi thường đã thu. Chưa trừ lương, mặt bằng."/>
+        </StackPanel>
 
         <!-- ===== Danh sách hóa đơn + chi tiết ===== -->
         <Grid Grid.Row="2" Margin="0,0,0,10">

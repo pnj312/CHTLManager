@@ -20,5 +20,15 @@ public static class CostCalculator
         return Round(Math.Max(0, (stockBefore * averageBefore - quantity * unitCost) / remaining));
     }
 
+    /// <summary>
+    /// Đổi giá của <paramref name="quantity"/> đơn vị đã nằm trong bình quân từ giá cũ sang giá thật, số lượng tồn không đổi.
+    /// Dùng cho lô chưa ghi: lúc đếm hàng vào kho theo giá vốn đang có, lúc xử lý mới biết giá nhập.
+    /// </summary>
+    public static decimal ReplaceInAverage(int stock, decimal average, int quantity, decimal oldCost, decimal newCost)
+    {
+        if (stock <= 0) return average;
+        return Round(Math.Max(0, (stock * average - quantity * oldCost + quantity * newCost) / stock));
+    }
+
     private static decimal Round(decimal value) => Math.Round(value, 2, MidpointRounding.AwayFromZero);
 }

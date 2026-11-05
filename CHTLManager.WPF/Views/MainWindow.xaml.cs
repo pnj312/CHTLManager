@@ -19,6 +19,7 @@ public partial class MainWindow : Window
         {
             tabInventory.Visibility = Visibility.Collapsed;
             tabPurchases.Visibility = Visibility.Collapsed;
+            tabDiscrepancies.Visibility = Visibility.Collapsed;
             tabDebts.Visibility = Visibility.Collapsed;
             tabReports.Visibility = Visibility.Collapsed;
             tabStockLog.Visibility = Visibility.Collapsed;
@@ -26,7 +27,7 @@ public partial class MainWindow : Window
             btnReceive.Visibility = Visibility.Visible; // Admin nhập hàng ở tab Nhập hàng và tab Kho
         }
 
-        purchaseView.ReceiptsChanged += RefreshReminder;
+        AppServices.Changed += RefreshReminder;
         RefreshReminder();
     }
 
@@ -35,15 +36,28 @@ public partial class MainWindow : Window
     {
         if (!AppServices.IsAdmin) return;
 
-        int pending = AppServices.Purchases.CountPendingReceipts();
-        btnReminder.Content = $"{pending} phiếu chờ xác nhận";
-        btnReminder.Visibility = pending > 0 ? Visibility.Visible : Visibility.Collapsed;
+        int receipts = AppServices.Purchases.CountPendingReceipts();
+        int discrepancies = AppServices.StockCounts.CountPending();
+
+        var parts = new List<string>();
+        if (receipts > 0) parts.Add($"{receipts} phiếu chờ xác nhận");
+        if (discrepancies > 0) parts.Add($"{discrepancies} chênh lệch chờ xử lý");
+        btnReminder.Content = string.Join(", ", parts);
+        btnReminder.Visibility = parts.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void BtnReminder_Click(object sender, RoutedEventArgs e)
     {
-        tabMain.SelectedItem = tabPurchases;
-        purchaseView.ShowPending();
+        if (AppServices.Purchases.CountPendingReceipts() > 0)
+        {
+            tabMain.SelectedItem = tabPurchases;
+            purchaseView.ShowPending();
+        }
+        else
+        {
+            tabMain.SelectedItem = tabDiscrepancies;
+            discrepancyView.ShowPending();
+        }
     }
 
     private void BtnReceive_Click(object sender, RoutedEventArgs e)

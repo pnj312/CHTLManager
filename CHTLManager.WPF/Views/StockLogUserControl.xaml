@@ -38,17 +38,11 @@
             <Button Content="Tháng này" Click="BtnMonth_Click"/>
         </StackPanel>
 
-        <UniformGrid Grid.Row="1" Columns="3" Margin="0,0,-10,10">
+        <UniformGrid Grid.Row="1" Columns="2" Margin="0,0,-10,10">
             <Border Style="{StaticResource CardBorder}">
                 <StackPanel>
-                    <TextBlock Text="Thất thoát (theo giá bán)" Style="{StaticResource CardTitle}"/>
-                    <TextBlock x:Name="txtLossValue" Text="0 đ" Style="{StaticResource CardValue}" Foreground="{StaticResource DangerBrush}"/>
-                </StackPanel>
-            </Border>
-            <Border Style="{StaticResource CardBorder}">
-                <StackPanel>
-                    <TextBlock Text="Số lượng thất thoát (mất, hỏng, hết hạn)" Style="{StaticResource CardTitle}"/>
-                    <TextBlock x:Name="txtLossQuantity" Text="0" Style="{StaticResource CardValue}"/>
+                    <TextBlock Text="Số dòng nhật ký" Style="{StaticResource CardTitle}"/>
+                    <TextBlock x:Name="txtRows" Text="0" Style="{StaticResource CardValue}"/>
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource CardBorder}">

@@ -71,14 +71,6 @@ public class StockMovement
     [MaxLength(50)]
     public string? InvoiceNo { get; set; }
 
-    /// <summary>Thất thoát thật: kiểm kê giảm do mất, hỏng, hết hạn (không tính đếm sai).</summary>
-    [NotMapped]
-    public bool IsLoss => Type == StockMovementType.StockCount && Delta < 0 &&
-                          Reason is StockReason.Lost or StockReason.Damaged or StockReason.Expired;
-
-    [NotMapped]
-    public decimal LossValue => IsLoss ? -Delta * UnitPrice : 0;
-
     /// <summary>Số cái bán vượt số đã ghi trong sổ ở lần này.</summary>
     [NotMapped]
     public int OutOfBookQuantity => Type == StockMovementType.OutOfBookSale
@@ -90,7 +82,7 @@ public class StockMovement
     {
         StockMovementType.Initial => "Khai báo ban đầu",
         StockMovementType.Import => "Nhập kho",
-        StockMovementType.StockCount => Delta < 0 && IsLoss ? "Kiểm kê: thất thoát" : "Kiểm kê",
+        StockMovementType.StockCount => "Kiểm kê",
         StockMovementType.OutOfBookSale => "Bán ngoài sổ",
         StockMovementType.ReceiptIn => "Nhập theo phiếu",
         StockMovementType.ReceiptCancelled => "Hủy phiếu nhập",

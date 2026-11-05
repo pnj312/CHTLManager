@@ -14,14 +14,7 @@
         <TextBlock Text="Đếm được thực tế (trên kệ + trong kho)" Margin="0,0,0,4"/>
         <TextBox x:Name="txtCounted" TextChanged="TxtCounted_TextChanged" Margin="0,0,0,10"/>
 
-        <TextBlock x:Name="txtConclusion" TextWrapping="Wrap" FontWeight="SemiBold" MinHeight="20" Margin="0,0,0,10"/>
-
-        <TextBlock Text="Lý do chênh lệch" Margin="0,0,0,4"/>
-        <ComboBox x:Name="cboReason" FontSize="14" IsEnabled="False" Margin="0,0,0,12"
-                  SelectionChanged="CboReason_SelectionChanged"/>
-
-        <TextBlock Text="Số hóa đơn của lô chưa ghi (nếu tìm được)" Margin="0,0,0,4"/>
-        <TextBox x:Name="txtInvoice" IsEnabled="False" Margin="0,0,0,8"/>
+        <TextBlock x:Name="txtConclusion" TextWrapping="Wrap" FontWeight="SemiBold" MinHeight="40" Margin="0,0,0,8"/>
 
         <TextBlock x:Name="txtError" Foreground="{StaticResource DangerBrush}" TextWrapping="Wrap"
                    MinHeight="20" Margin="0,0,0,8"/>

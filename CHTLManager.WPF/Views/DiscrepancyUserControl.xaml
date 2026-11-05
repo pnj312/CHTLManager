@@ -1,0 +1,95 @@
+<UserControl x:Class="CHTLManager.WPF.Views.DiscrepancyUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Loaded="UserControl_Loaded">
+    <UserControl.Resources>
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+        <Style x:Key="CardTitle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style x:Key="CardValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Từ ngày" VerticalAlignment="Center" Margin="0,0,6,0"/>
+            <DatePicker x:Name="dpFrom" Width="130" VerticalContentAlignment="Center" Margin="0,0,10,0"/>
+            <TextBlock Text="Đến ngày" VerticalAlignment="Center" Margin="0,0,6,0"/>
+            <DatePicker x:Name="dpTo" Width="130" VerticalContentAlignment="Center" Margin="0,0,10,0"/>
+            <ComboBox x:Name="cboStatus" Width="120" Margin="0,0,10,0" SelectedIndex="0" VerticalContentAlignment="Center">
+                <ComboBoxItem Content="Tất cả"/>
+                <ComboBoxItem Content="Chờ xử lý"/>
+                <ComboBoxItem Content="Đã xử lý"/>
+            </ComboBox>
+            <Button Content="Xem" Click="BtnView_Click" Style="{StaticResource PrimaryButton}"/>
+            <Button x:Name="btnResolve" Content="Xử lý..." Click="BtnResolve_Click" Style="{StaticResource AccentButton}"/>
+            <Button x:Name="btnCollect" Content="Thu bồi thường..." Click="BtnCollect_Click"/>
+        </StackPanel>
+
+        <UniformGrid Grid.Row="1" Columns="5" Margin="0,0,-10,10">
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <TextBlock Text="Chờ xử lý" Style="{StaticResource CardTitle}"/>
+                    <TextBlock x:Name="txtPending" Text="0" Style="{StaticResource CardValue}" Foreground="{StaticResource DangerBrush}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <TextBlock Text="Thất thoát (theo giá vốn)" Style="{StaticResource CardTitle}"/>
+                    <TextBlock x:Name="txtLoss" Text="0 đ" Style="{StaticResource CardValue}" Foreground="{StaticResource DangerBrush}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <TextBlock Text="Bồi thường còn phải thu" Style="{StaticResource CardTitle}"/>
+                    <TextBlock x:Name="txtCompensation" Text="0 đ" Style="{StaticResource CardValue}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardBorder}">
+                <StackPanel>
+                    <TextBlock Text="Thu nhập khác" Style="{StaticResource CardTitle}"/>
+                    <TextBlock x:Name="txtIncome" Text="0 đ" Style="{StaticResource CardValue}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource CardBorder}" ToolTip="Không tính vào lãi, nhưng cần xem lại nếu con số lớn: có thể đang che thất thoát.">
+                <StackPanel>
+                    <TextBlock Text="Ghi là đếm sai" Style="{StaticResource CardTitle}"/>
+                    <TextBlock x:Name="txtMiscount" Text="0 đ" Style="{StaticResource CardValue}"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <DataGrid Grid.Row="2" x:Name="dgDiscrepancies" SelectionChanged="DgDiscrepancies_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Ngày đếm" Binding="{Binding CountedAt, StringFormat='dd/MM HH:mm'}" Width="90"/>
+                <DataGridTextColumn Header="Sản phẩm" Binding="{Binding Product.Name}" Width="*"/>
+                <DataGridTextColumn Header="Người đếm" Binding="{Binding CountedBy.FullName}" Width="95"/>
+                <DataGridTextColumn Header="Sổ → Đếm" Binding="{Binding StockChange}" Width="Auto" MinWidth="70"/>
+                <DataGridTextColumn Header="Lệch" Binding="{Binding DeltaText}" Width="42"/>
+                <DataGridTextColumn Header="Giá trị" Binding="{Binding Value, StringFormat=N0}" Width="70"/>
+                <DataGridTextColumn Header="Trạng thái" Binding="{Binding StatusName}" Width="72"/>
+                <DataGridTextColumn Header="Xử lý" Binding="{Binding ResolutionName}" Width="85"/>
+                <DataGridTextColumn Header="Ghi chú" Binding="{Binding Note}" Width="90"/>
+                <DataGridTextColumn Header="Trách nhiệm" Binding="{Binding ResponsibleDisplay}" Width="90"/>
+                <DataGridTextColumn Header="Phải thu" Binding="{Binding CompensationRemaining, StringFormat=N0}" Width="65"/>
+                <DataGridTextColumn Header="" Binding="{Binding SelfResolvedText}" Width="58"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

@@ -8,9 +8,6 @@ namespace CHTLManager.WPF.Views;
 /// <summary>Tab Nhập hàng (chỉ Admin): danh sách phiếu nhập, xác nhận và hủy phiếu.</summary>
 public partial class PurchaseUserControl : UserControl
 {
-    /// <summary>Phiếu vừa thay đổi; cửa sổ chính dùng để cập nhật nhắc việc ngay.</summary>
-    public event Action? ReceiptsChanged;
-
     public PurchaseUserControl()
     {
         InitializeComponent();
@@ -109,7 +106,7 @@ public partial class PurchaseUserControl : UserControl
     private void ReloadAfterChange()
     {
         Reload();
-        ReceiptsChanged?.Invoke();
+        AppServices.NotifyChanged();
     }
 
     private static void ShowWarning(string message)

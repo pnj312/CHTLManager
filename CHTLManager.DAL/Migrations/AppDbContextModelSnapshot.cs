@@ -17,6 +17,37 @@ namespace CHTLManager.DAL.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
 
+            modelBuilder.Entity("CHTLManager.DAL.Entities.CompensationPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,0)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("StockDiscrepancyId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StockDiscrepancyId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CompensationPayments");
+                });
+
             modelBuilder.Entity("CHTLManager.DAL.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -172,6 +203,9 @@ namespace CHTLManager.DAL.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("StockDiscrepancyId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("SupplierId")
                         .HasColumnType("INTEGER");
 
@@ -183,6 +217,8 @@ namespace CHTLManager.DAL.Migrations
                     b.HasIndex("ConfirmedByUserId");
 
                     b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("StockDiscrepancyId");
 
                     b.HasIndex("SupplierId", "InvoiceKey")
                         .IsUnique()
@@ -219,6 +255,75 @@ namespace CHTLManager.DAL.Migrations
                     b.HasIndex("PurchaseReceiptId");
 
                     b.ToTable("PurchaseReceiptLines");
+                });
+
+            modelBuilder.Entity("CHTLManager.DAL.Entities.StockDiscrepancy", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BookStock")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("CompensationAmount")
+                        .HasColumnType("decimal(18,0)");
+
+                    b.Property<DateTime>("CountedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CountedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CountedStock")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Delta")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Resolution")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ResolvedByUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ResponsibleName")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CountedByUserId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ResolvedByUserId");
+
+                    b.HasIndex("ResponsibleUserId");
+
+                    b.ToTable("StockDiscrepancies");
                 });
 
             modelBuilder.Entity("CHTLManager.DAL.Entities.StockMovement", b =>
@@ -394,6 +499,25 @@ namespace CHTLManager.DAL.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("CHTLManager.DAL.Entities.CompensationPayment", b =>
+                {
+                    b.HasOne("CHTLManager.DAL.Entities.StockDiscrepancy", "StockDiscrepancy")
+                        .WithMany("Payments")
+                        .HasForeignKey("StockDiscrepancyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CHTLManager.DAL.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("StockDiscrepancy");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CHTLManager.DAL.Entities.Order", b =>
                 {
                     b.HasOne("CHTLManager.DAL.Entities.User", "Cashier")
@@ -437,6 +561,11 @@ namespace CHTLManager.DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("CHTLManager.DAL.Entities.StockDiscrepancy", "StockDiscrepancy")
+                        .WithMany()
+                        .HasForeignKey("StockDiscrepancyId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("CHTLManager.DAL.Entities.Supplier", "Supplier")
                         .WithMany()
                         .HasForeignKey("SupplierId")
@@ -446,6 +575,8 @@ namespace CHTLManager.DAL.Migrations
                     b.Navigation("ConfirmedBy");
 
                     b.Navigation("CreatedBy");
+
+                    b.Navigation("StockDiscrepancy");
 
                     b.Navigation("Supplier");
                 });
@@ -467,6 +598,39 @@ namespace CHTLManager.DAL.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("PurchaseReceipt");
+                });
+
+            modelBuilder.Entity("CHTLManager.DAL.Entities.StockDiscrepancy", b =>
+                {
+                    b.HasOne("CHTLManager.DAL.Entities.User", "CountedBy")
+                        .WithMany()
+                        .HasForeignKey("CountedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CHTLManager.DAL.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CHTLManager.DAL.Entities.User", "ResolvedBy")
+                        .WithMany()
+                        .HasForeignKey("ResolvedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CHTLManager.DAL.Entities.User", "ResponsibleUser")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CountedBy");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ResolvedBy");
+
+                    b.Navigation("ResponsibleUser");
                 });
 
             modelBuilder.Entity("CHTLManager.DAL.Entities.StockMovement", b =>
@@ -534,6 +698,11 @@ namespace CHTLManager.DAL.Migrations
             modelBuilder.Entity("CHTLManager.DAL.Entities.PurchaseReceipt", b =>
                 {
                     b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("CHTLManager.DAL.Entities.StockDiscrepancy", b =>
+                {
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("CHTLManager.DAL.Entities.User", b =>

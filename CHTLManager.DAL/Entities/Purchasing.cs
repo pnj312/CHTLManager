@@ -86,6 +86,10 @@ public class PurchaseReceipt
     [MaxLength(200)]
     public string? CancelReason { get; set; }
 
+    /// <summary>Phiếu sinh ra từ kiểm kê (lô chưa ghi): hàng đã nằm trong tồn kho từ lúc đếm.</summary>
+    public int? StockDiscrepancyId { get; set; }
+    public StockDiscrepancy? StockDiscrepancy { get; set; }
+
     public List<PurchaseReceiptLine> Lines { get; set; } = new();
 
     /// <summary>Tiền hàng theo số thực nhận; chỉ đủ khi mọi dòng đã có giá.</summary>

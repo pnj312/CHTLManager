@@ -11,6 +11,12 @@ public static class AppServices
     public static IProductService Products { get; } = new ProductService();
     public static IOrderService Orders { get; } = new OrderService();
     public static IPurchaseService Purchases { get; } = new PurchaseService();
+    public static IStockCountService StockCounts { get; } = new StockCountService();
+
+    /// <summary>Có việc vừa thay đổi số phiếu đang chờ; cửa sổ chính dùng để cập nhật nhắc việc ngay.</summary>
+    public static event Action? Changed;
+
+    public static void NotifyChanged() => Changed?.Invoke();
 
     /// <summary>Người dùng đang đăng nhập.</summary>
     public static User? CurrentUser { get; set; }

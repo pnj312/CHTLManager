@@ -19,13 +19,6 @@ public interface IProductService
     /// <summary>Khai báo giá vốn cho sản phẩm chưa có giá (thường là hàng tồn từ trước khi có giá vốn). Có ghi nhật ký.</summary>
     void SetOpeningCost(int productId, decimal cost, int adminId);
 
-    /// <summary>
-    /// Kiểm kê: đặt tồn kho bằng số đếm thực tế (≥ 0) và ghi nhật ký kho.
-    /// Có chênh lệch thì bắt buộc có lý do đúng chiều; khớp thì lý do là None.
-    /// <paramref name="invoiceNo"/> chỉ được lưu với lý do "Hàng nhập chưa ghi".
-    /// </summary>
-    Product SetCountedStock(int productId, int countedStock, StockReason reason, int userId, string? invoiceNo = null);
-
-    /// <summary>Nhật ký kho từ ngày <paramref name="from"/> đến hết ngày <paramref name="to"/>, kèm tổng thất thoát.</summary>
+    /// <summary>Nhật ký kho từ ngày <paramref name="from"/> đến hết ngày <paramref name="to"/>.</summary>
     StockLogReport GetStockLog(DateTime from, DateTime to);
 }

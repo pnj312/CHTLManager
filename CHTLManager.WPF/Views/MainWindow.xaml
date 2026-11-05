@@ -30,6 +30,9 @@
             <TabItem x:Name="tabInventory" Header="Quản lý Kho">
                 <views:ProductUserControl x:Name="productView"/>
             </TabItem>
+            <TabItem x:Name="tabDiscrepancies" Header="Chênh lệch kho">
+                <views:DiscrepancyUserControl x:Name="discrepancyView"/>
+            </TabItem>
             <TabItem x:Name="tabPurchases" Header="Nhập hàng">
                 <views:PurchaseUserControl x:Name="purchaseView"/>
             </TabItem>

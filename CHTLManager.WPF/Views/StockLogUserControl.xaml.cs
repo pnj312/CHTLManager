@@ -1,11 +1,10 @@
 using System.Windows;
 using System.Windows.Controls;
 using CHTLManager.BLL;
-using CHTLManager.WPF.Helpers;
 
 namespace CHTLManager.WPF.Views;
 
-/// <summary>Nhật ký kho (chỉ Admin, chỉ xem): mọi lần tồn kho đổi ngoài bán hàng thường, kèm tổng thất thoát.</summary>
+/// <summary>Nhật ký kho (chỉ Admin, chỉ xem): mọi lần tồn kho đổi ngoài bán hàng thường, thất thoát xem ở tab Chênh lệch kho.</summary>
 public partial class StockLogUserControl : UserControl
 {
     public StockLogUserControl()
@@ -28,8 +27,7 @@ public partial class StockLogUserControl : UserControl
         try
         {
             var report = AppServices.Products.GetStockLog(from, to);
-            txtLossValue.Text = MoneyParser.Format(report.LossValue);
-            txtLossQuantity.Text = report.LossQuantity.ToString("N0");
+            txtRows.Text = report.Movements.Count.ToString("N0");
             txtOutOfBook.Text = report.OutOfBookQuantity.ToString("N0");
             dgLog.ItemsSource = report.Movements;
         }

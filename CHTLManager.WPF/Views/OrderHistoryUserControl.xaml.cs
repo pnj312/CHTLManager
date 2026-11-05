@@ -46,6 +46,10 @@ public partial class OrderHistoryUserControl : UserControl
             txtGrossProfit.Text = (profit.GrossProfit < 0 ? "-" : string.Empty) + MoneyParser.Format(Math.Abs(profit.GrossProfit));
             txtCostWarning.Text = profit.EstimatedLineCount > 0 ? $"{profit.EstimatedLineCount} dòng giá vốn tạm tính" : string.Empty;
             dgTop.ItemsSource = profit.Products;
+            txtStockEffect.Text =
+                $"Thất thoát: {MoneyParser.Format(profit.LossExpense)}   |   Thu nhập khác: {MoneyParser.Format(profit.OtherIncome)}   |   " +
+                $"Bồi thường đã thu: {MoneyParser.Format(profit.CompensationCollected)}   |   " +
+                $"Lãi sau chênh lệch kho: {(profit.NetAfterStockDifferences < 0 ? "-" : string.Empty)}{MoneyParser.Format(Math.Abs(profit.NetAfterStockDifferences))}";
 
             if (report.Orders.Count > 0) dgOrders.SelectedIndex = 0;
             else ShowDetail(null);

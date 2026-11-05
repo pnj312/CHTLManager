@@ -175,32 +175,6 @@ public class ProductService : IProductService
         db.SaveChanges();
     }
 
-    public Product SetCountedStock(int productId, int countedStock, StockReason reason, int userId, string? invoiceNo = null)
-    {
-        if (countedStock < 0)
-            throw new BusinessException("Số lượng kiểm kê phải là số nguyên không âm.");
-
-        using var db = _factory();
-        var entity = db.Products.FirstOrDefault(p => p.Id == productId && p.IsActive)
-                     ?? throw new BusinessException("Không tìm thấy sản phẩm.");
-
-        int diff = countedStock - entity.Stock;
-        bool reasonFits = diff switch
-        {
-            < 0 => reason is StockReason.Lost or StockReason.Damaged or StockReason.Expired or StockReason.MiscountBefore,
-            > 0 => reason is StockReason.UnrecordedImport or StockReason.MiscountBefore,
-            _ => reason == StockReason.None
-        };
-        if (!reasonFits)
-            throw new BusinessException("Hãy chọn lý do chênh lệch phù hợp.");
-
-        // Số hóa đơn chỉ có nghĩa khi kiểm kê phát hiện lô hàng chưa ghi.
-        string? invoice = reason == StockReason.UnrecordedImport && !string.IsNullOrWhiteSpace(invoiceNo) ? invoiceNo.Trim() : null;
-        StockLedger.Apply(db, entity, countedStock, StockMovementType.StockCount, userId, reason, logUnchanged: true, invoiceNo: invoice);
-        db.SaveChanges();
-        return entity;
-    }
-
     public StockLogReport GetStockLog(DateTime from, DateTime to)
     {
         DateTime start = from.Date, end = to.Date;
@@ -222,8 +196,6 @@ public class ProductService : IProductService
         return new StockLogReport
         {
             Movements = movements,
-            LossValue = movements.Sum(m => m.LossValue),
-            LossQuantity = movements.Where(m => m.IsLoss).Sum(m => -m.Delta),
             OutOfBookQuantity = movements.Sum(m => m.OutOfBookQuantity)
         };
     }

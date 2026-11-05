@@ -46,7 +46,7 @@ public class ProductLifecycleTests
         var (db, adminId, _, p) = Setup(5);
         using (db)
         {
-            db.Products.SetCountedStock(p.Id, 0, StockReason.Lost, adminId);
+            new StockCountService().Count(p.Id, 0, adminId);
 
             Assert.False(db.Products.Delete(p.Id));
             Assert.Null(db.Products.GetById(p.Id));
@@ -59,7 +59,7 @@ public class ProductLifecycleTests
         var (db, adminId, _, p) = Setup(5);
         using (db)
         {
-            db.Products.SetCountedStock(p.Id, 0, StockReason.Lost, adminId);
+            new StockCountService().Count(p.Id, 0, adminId);
             db.Products.Delete(p.Id);
             int movements = db.Products.GetStockLog(DateTime.Today, DateTime.Today).Movements.Count;
 

@@ -24,6 +24,8 @@ public class AppDbContext : DbContext
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
+    public DbSet<StockDiscrepancy> StockDiscrepancies => Set<StockDiscrepancy>();
+    public DbSet<CompensationPayment> CompensationPayments => Set<CompensationPayment>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<SupplierPayment> SupplierPayments => Set<SupplierPayment>();
     public DbSet<PurchaseReceipt> PurchaseReceipts => Set<PurchaseReceipt>();
@@ -92,6 +94,25 @@ public class AppDbContext : DbContext
             e.HasOne(m => m.PurchaseReceipt).WithMany().HasForeignKey(m => m.PurchaseReceiptId).OnDelete(DeleteBehavior.Restrict);
         });
 
+        modelBuilder.Entity<StockDiscrepancy>(e =>
+        {
+            e.Property(d => d.Status).HasConversion<string>().HasMaxLength(20);
+            e.Property(d => d.Resolution).HasConversion<string>().HasMaxLength(20);
+            e.Property(d => d.UnitCost).HasColumnType("decimal(18,2)");
+            e.Property(d => d.CompensationAmount).HasColumnType("decimal(18,0)");
+            e.HasOne(d => d.Product).WithMany().HasForeignKey(d => d.ProductId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(d => d.CountedBy).WithMany().HasForeignKey(d => d.CountedByUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(d => d.ResolvedBy).WithMany().HasForeignKey(d => d.ResolvedByUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(d => d.ResponsibleUser).WithMany().HasForeignKey(d => d.ResponsibleUserId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CompensationPayment>(e =>
+        {
+            e.Property(p => p.Amount).HasColumnType("decimal(18,0)");
+            e.HasOne(p => p.StockDiscrepancy).WithMany(d => d.Payments).HasForeignKey(p => p.StockDiscrepancyId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(p => p.User).WithMany().HasForeignKey(p => p.UserId).OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<Supplier>(e => e.HasIndex(s => s.NameKey).IsUnique());
 
         modelBuilder.Entity<SupplierPayment>(e =>
@@ -110,6 +131,7 @@ public class AppDbContext : DbContext
             e.HasOne(r => r.Supplier).WithMany().HasForeignKey(r => r.SupplierId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(r => r.CreatedBy).WithMany().HasForeignKey(r => r.CreatedByUserId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(r => r.ConfirmedBy).WithMany().HasForeignKey(r => r.ConfirmedByUserId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(r => r.StockDiscrepancy).WithMany().HasForeignKey(r => r.StockDiscrepancyId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<PurchaseReceiptLine>(e =>

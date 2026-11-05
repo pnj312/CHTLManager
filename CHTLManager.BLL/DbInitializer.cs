@@ -65,11 +65,32 @@ public static class DbInitializer
 
             int before = p.Stock;
             p.Stock = Math.Max(0, before + delta);
+            DateTime at = now.Date.AddDays(-daysAgo).AddHours(8);
+            if (type == StockMovementType.StockCount)
+            {
+                db.StockDiscrepancies.Add(new StockDiscrepancy
+                {
+                    ProductId = p.Id,
+                    CountedByUserId = admin.Id,
+                    CountedAt = at,
+                    BookStock = before,
+                    CountedStock = p.Stock,
+                    Delta = p.Stock - before,
+                    UnitCost = p.AverageCost,
+                    Status = DiscrepancyStatus.Resolved,
+                    Resolution = DiscrepancyResolution.NormalLoss,
+                    ResolvedByUserId = admin.Id,
+                    ResolvedAt = at,
+                    Note = invoiceNo
+                });
+                invoiceNo = null;
+            }
+
             db.StockMovements.Add(new StockMovement
             {
                 ProductId = p.Id,
                 UserId = admin.Id,
-                CreatedAt = now.Date.AddDays(-daysAgo).AddHours(8),
+                CreatedAt = at,
                 Type = type,
                 BeforeStock = before,
                 AfterStock = p.Stock,
@@ -82,9 +103,9 @@ public static class DbInitializer
         }
 
         Add("8934588012105", 5, 24, StockMovementType.Import, StockReason.None, "NPP Coca-Cola", "0001025"); // Coca: nhập thùng 24
-        Add("8934804023012", 3, -2, StockMovementType.StockCount, StockReason.Lost);     // Oreo: mất 2
-        Add("8934673101011", 2, -3, StockMovementType.StockCount, StockReason.Expired);  // Sữa: hết hạn 3
-        Add("8935001710015", 1, -1, StockMovementType.StockCount, StockReason.Damaged);  // Snack: hỏng 1
+        Add("8934804023012", 3, -2, StockMovementType.StockCount, StockReason.None, invoiceNo: "Mất");     // Oreo: mất 2
+        Add("8934673101011", 2, -3, StockMovementType.StockCount, StockReason.None, invoiceNo: "Hết hạn");  // Sữa: hết hạn 3
+        Add("8935001710015", 1, -1, StockMovementType.StockCount, StockReason.None, invoiceNo: "Hỏng");     // Snack: hỏng 1
     }
 
     /// <summary>
